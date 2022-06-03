@@ -612,7 +612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chakra-ui/react@npm:^2.1.2":
+"@chakra-ui/react@npm:^2.1.0":
   version: 2.1.2
   resolution: "@chakra-ui/react@npm:2.1.2"
   dependencies:
@@ -1194,7 +1194,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/react@npm:^11.9.0":
+"@emotion/react@npm:^11":
   version: 11.9.0
   resolution: "@emotion/react@npm:11.9.0"
   dependencies:
@@ -1237,7 +1237,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:^11.8.1":
+"@emotion/styled@npm:^11":
   version: 11.8.1
   resolution: "@emotion/styled@npm:11.8.1"
   dependencies:
@@ -1698,6 +1698,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/inter@npm:^4.5.10":
+  version: 4.5.10
+  resolution: "@fontsource/inter@npm:4.5.10"
+  checksum: c947c5184f9ce7959fcccd716d0dde8156b5ed9c14b4ba27ee181fb2b05a136a49d99ed00c382551b64ecae010320ef7c062b1944b70260280ca0fcde93bd4f2
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.9.2":
   version: 0.9.5
   resolution: "@humanwhocodes/config-array@npm:0.9.5"
@@ -1716,7 +1723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@merlionzone/merlionjs@npm:^0.1.1":
+"@merlionzone/merlionjs@npm:^0.1.0":
   version: 0.1.1
   resolution: "@merlionzone/merlionjs@npm:0.1.1"
   dependencies:
@@ -3288,12 +3295,13 @@ __metadata:
   resolution: "garden@workspace:."
   dependencies:
     "@chakra-ui/pro-theme": ^0.0.53
-    "@chakra-ui/react": ^2.1.2
+    "@chakra-ui/react": ^2.1.0
     "@cosmjs/stargate": ^0.28.4
     "@cosmjs/tendermint-rpc": ^0.28.4
-    "@emotion/react": ^11.9.0
-    "@emotion/styled": ^11.8.1
-    "@merlionzone/merlionjs": ^0.1.1
+    "@emotion/react": ^11
+    "@emotion/styled": ^11
+    "@fontsource/inter": ^4.5.10
+    "@merlionzone/merlionjs": ^0.1.0
     "@tanstack/react-table": beta
     "@types/node": 17.0.35
     "@types/numeral": ^2.0.2

@@ -21,7 +21,6 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { FiSearch } from 'react-icons/fi'
-import { Layout } from '@/components'
 import { BondStatusString } from './hooks'
 import { ValidatorTable } from './table'
 
@@ -42,7 +41,7 @@ export function Validators() {
   }
 
   return (
-    <Layout title="Merlion | Validators">
+    <>
       <Container
         as="section"
         maxW="5xl"
@@ -116,6 +115,6 @@ export function Validators() {
           </Stack>
         </Box>
       </Container>
-    </Layout>
+    </>
   )
 }
