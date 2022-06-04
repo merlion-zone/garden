@@ -7,12 +7,19 @@ import {
   IconButton,
   useColorMode,
   useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react'
-import { MdLanguage, MdOutlinePalette } from 'react-icons/md'
+import { MdLanguage } from 'react-icons/md'
 import { FaMoon, FaSun } from 'react-icons/fa'
+import { ConnectWalletModal } from '@/components/ConnectWalletModal'
 
 export const Toolbar = () => {
   const { colorMode, toggleColorMode } = useColorMode()
+  const {
+    isOpen: isConnectWalletOpen,
+    onOpen: onConnectWalletOpen,
+    onClose: onConnectWalletClose,
+  } = useDisclosure()
 
   return (
     <Box
@@ -44,12 +51,21 @@ export const Toolbar = () => {
             )}
           </ButtonGroup>
           <ButtonGroup variant="ghost">
-            <Button colorScheme="brand" variant="solid">
+            <Button
+              colorScheme="brand"
+              variant="solid"
+              onClick={onConnectWalletOpen}
+            >
               Connect
             </Button>
           </ButtonGroup>
         </HStack>
       </Flex>
+
+      <ConnectWalletModal
+        isOpen={isConnectWalletOpen}
+        onClose={onConnectWalletClose}
+      ></ConnectWalletModal>
     </Box>
   )
 }

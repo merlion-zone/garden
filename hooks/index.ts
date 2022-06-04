@@ -1,2 +1,2 @@
-export * from './use-query-client'
-export * from './use-merlion-client'
+export * from './useConnectWallet'
+export * from './useMerlionClient'

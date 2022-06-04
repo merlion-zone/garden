@@ -3,7 +3,7 @@ import { useQueries, useQuery } from 'react-query'
 import BigNumber from 'bignumber.js'
 
 import { LION } from '@/constants'
-import { useQueryClient } from '@/hooks'
+import { useMerlionQueryClient } from '@/hooks'
 
 export type BondStatusString =
   | 'BOND_STATUS_UNBONDED'
@@ -30,7 +30,7 @@ export interface Validator {
 }
 
 export function useValidatorsData(status: BondStatusString) {
-  const queryClient = useQueryClient()
+  const queryClient = useMerlionQueryClient()
 
   const { data: poolData, isLoading: isPoolLoading } = useQuery(
     ['pool'],
