@@ -19,7 +19,7 @@ import { useConnectWallet, WalletType } from '@/hooks/useConnectWallet'
 export function useMerlionClient(walletType: WalletType): MerlionClient | null {
   const [merlionClient, setMerlionClient] = useState<MerlionClient | null>(null)
 
-  const { signer } = useConnectWallet(walletType)
+  const { signer } = useConnectWallet()
 
   useEffect(() => {
     if (!signer) {
