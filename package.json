@@ -32,7 +32,8 @@
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-icons": "^4.4.0",
-    "react-query": "beta"
+    "react-query": "beta",
+    "react-use": "^17.4.0"
   },
   "devDependencies": {
     "@keplr-wallet/types": "^0.10.5",

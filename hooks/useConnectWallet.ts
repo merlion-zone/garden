@@ -1,17 +1,32 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { ethers } from 'ethers'
 import { Web3Provider } from '@ethersproject/providers'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { ChainInfo } from '@keplr-wallet/types'
 import { ChainId, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
-import { useLocalStorageState } from 'ahooks'
 import { useCallbackRef } from '@chakra-ui/hooks'
+import { atom, useAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 
 export type WalletType = 'metamask' | 'keplr'
 
+const walletTypeAtom = atomWithStorage<WalletType | false>(
+  'connect-wallet-type',
+  false
+)
+const web3ProviderAtom = atom<Web3Provider | null>(null)
+const chainIDAtom = atom<number | null>(null)
+const signerAtom = atom<OfflineSigner | EIP712Signer | null>(null)
+const accountAtom = atom<string | null>(null)
+
+let connSignal = 0
+const incConnSignal = () => {
+  ++connSignal
+}
+
 export function useConnectWallet(): {
-  walletType: WalletType | null | false
+  walletType: WalletType | false
   web3Provider: Web3Provider | null
   chainID: number | null
   signer: OfflineSigner | EIP712Signer | null
@@ -19,41 +34,46 @@ export function useConnectWallet(): {
   onConnect: (walletType: WalletType | null) => void
   onDisconnect: () => void
 } {
-  const [walletType, setWalletType] = useLocalStorageState<WalletType | false>(
-    'connect-wallet-type',
-    { defaultValue: false }
-  )
-  const [web3Provider, setWeb3Provider] = useState<Web3Provider | null>(null)
-  const [chainID, setChainID] = useState<number | null>(null)
-  const [signer, setSigner] = useState<OfflineSigner | EIP712Signer | null>(
-    null
-  )
-  const [account, setAccount] = useState<string | null>(null)
-
-  const [connSig, setConnSig] = useState<number>(0)
+  const [walletType, setWalletType] = useAtom(walletTypeAtom)
+  const [web3Provider, setWeb3Provider] = useAtom(web3ProviderAtom)
+  const [chainID, setChainID] = useAtom(chainIDAtom)
+  const [signer, setSigner] = useAtom(signerAtom)
+  const [account, setAccount] = useAtom(accountAtom)
 
   const handleEthereumChainChanged = useCallbackRef(() => {
+    if (walletType !== 'metamask') {
+      return
+    }
     // Reload page since chain has been changed
     window.location.reload()
-  })
+  }, [walletType])
 
-  const handleEthereumAccountsChanged = useCallbackRef((accounts: string[]) => {
-    if (!accounts.length) {
-      console.warn('Please connect to MetaMask')
-    } else {
-      setAccount(accounts[0])
-    }
-  })
+  const handleEthereumAccountsChanged = useCallbackRef(
+    (accounts: string[]) => {
+      if (walletType !== 'metamask') {
+        return
+      }
+      if (!accounts.length) {
+        console.warn('Please connect to MetaMask')
+        disconnect(true)
+      } else {
+        setAccount(accounts[0])
+      }
+    },
+    [walletType]
+  )
 
   const handleKeplrAccountsChanged = useCallbackRef(() => {
-    if (walletType === 'keplr') {
-      onConnect(walletType)
+    if (walletType !== 'keplr') {
+      return
     }
+    disconnect(true)
+    onConnect(walletType)
   }, [walletType])
 
   const addOrRemoveListeners = useCallback(
     (on: boolean) => {
-      if (!window.ethereum) {
+      if (window.ethereum) {
         const action = (event: any, handler: any) => {
           on
             ? window.ethereum.on(event, handler)
@@ -77,22 +97,54 @@ export function useConnectWallet(): {
     ]
   )
 
-  const onDisconnect = useCallback(() => {
-    addOrRemoveListeners(false)
-    setConnSig(connSig + 1)
-    setWalletType(false)
-    setWeb3Provider(null)
-    setChainID(null)
-    setSigner(null)
-    setAccount(null)
-  }, [setWalletType, connSig, addOrRemoveListeners])
+  const disconnect = useCallback(
+    (willConnect: boolean) => {
+      incConnSignal()
+      if (!willConnect) {
+        addOrRemoveListeners(false)
+        setWalletType(false)
+      }
+      setWeb3Provider(null)
+      setChainID(null)
+      setSigner(null)
+      setAccount(null)
+    },
+    [
+      addOrRemoveListeners,
+      setWalletType,
+      setWeb3Provider,
+      setChainID,
+      setSigner,
+      setAccount,
+    ]
+  )
 
-  const onConnect = useCallback(
+  const onDisconnect = useCallbackRef(() => {
+    disconnect(false)
+  })
+
+  const connect = useCallback(
     (newWalletType: WalletType | null) => {
+      if (typeof window === 'undefined') {
+        return
+      }
+
       addOrRemoveListeners(false)
-      const cn = connSig + 1
-      setConnSig(cn)
-      const cancelled = () => connSig + 1 !== cn
+      incConnSignal()
+      const thisConnSignal = connSignal
+      const cancelled = () => {
+        return connSignal !== thisConnSignal
+      }
+
+      if (!newWalletType && walletType) {
+        newWalletType = walletType
+      }
+      if (!newWalletType) {
+        return
+      }
+      if (newWalletType !== walletType) {
+        setWalletType(newWalletType)
+      }
 
       const setupMetaMask = async () => {
         const ethProvider = await detectEthereumProvider()
@@ -153,8 +205,10 @@ export function useConnectWallet(): {
           return
         }
 
+        if (cancelled()) return
         // https://docs.keplr.app/api/suggest-chain.html
         await window.keplr.experimentalSuggestChain(chainInfo)
+        if (cancelled()) return
         // https://docs.keplr.app/api/cosmjs.html
         await window.keplr.enable(chainInfo.chainId)
 
@@ -170,14 +224,6 @@ export function useConnectWallet(): {
         }
       }
 
-      if (!newWalletType && walletType) {
-        newWalletType = walletType
-      }
-      if (!newWalletType) {
-        return
-      }
-      setWalletType(newWalletType)
-
       switch (newWalletType) {
         case 'metamask':
           setupMetaMask().catch(console.error)
@@ -192,11 +238,16 @@ export function useConnectWallet(): {
     [
       walletType,
       setWalletType,
-      connSig,
+      setWeb3Provider,
+      setChainID,
+      setSigner,
+      setAccount,
       handleEthereumAccountsChanged,
       addOrRemoveListeners,
     ]
   )
+
+  const onConnect = useCallbackRef(connect)
 
   return {
     walletType,
