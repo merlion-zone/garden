@@ -3,11 +3,12 @@ import { ethers } from 'ethers'
 import { Web3Provider } from '@ethersproject/providers'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ChainInfo } from '@keplr-wallet/types'
 import { ChainId, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
 import { useCallbackRef } from '@chakra-ui/hooks'
 import { atom, useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
+import { chainInfo } from '@/config/chainInfo'
+import config from '@/config'
 
 export type WalletType = 'metamask' | 'keplr'
 
@@ -210,14 +211,14 @@ export function useConnectWallet(): {
         await window.keplr.experimentalSuggestChain(chainInfo)
         if (cancelled()) return
         // https://docs.keplr.app/api/cosmjs.html
-        await window.keplr.enable(chainInfo.chainId)
+        await window.keplr.enable(config.chainID)
 
-        const signer = window.getOfflineSigner!(chainInfo.chainId)
+        const signer = window.getOfflineSigner!(config.chainID)
         const accounts = await signer.getAccounts()
 
         if (cancelled()) return
         addOrRemoveListeners(true)
-        setChainID(new ChainId(chainInfo.chainId).eip155)
+        setChainID(new ChainId(config.chainID).eip155)
         setSigner(signer)
         if (accounts.length) {
           setAccount(accounts[0].address)
@@ -258,50 +259,4 @@ export function useConnectWallet(): {
     onConnect,
     onDisconnect,
   }
-}
-
-const chainInfo: ChainInfo = {
-  chainId: 'merlion_5000-101',
-  chainName: 'Merlion Localnet',
-  rpc: 'http://172.20.243.86:26657',
-  rest: 'http://172.20.243.86:1317',
-  bip44: {
-    coinType: 60,
-  },
-  bech32Config: {
-    bech32PrefixAccAddr: 'mer',
-    bech32PrefixAccPub: 'mer' + 'pub',
-    bech32PrefixValAddr: 'mer' + 'valoper',
-    bech32PrefixValPub: 'mer' + 'valoperpub',
-    bech32PrefixConsAddr: 'mer' + 'valcons',
-    bech32PrefixConsPub: 'mer' + 'valconspub',
-  },
-  currencies: [
-    {
-      coinDenom: 'LION',
-      coinMinimalDenom: 'alion',
-      coinDecimals: 18,
-      coinGeckoId: 'LION',
-    },
-  ],
-  feeCurrencies: [
-    {
-      coinDenom: 'LION',
-      coinMinimalDenom: 'alion',
-      coinDecimals: 18,
-      coinGeckoId: 'LION',
-    },
-  ],
-  stakeCurrency: {
-    coinDenom: 'LION',
-    coinMinimalDenom: 'alion',
-    coinDecimals: 18,
-    coinGeckoId: 'LION',
-  },
-  coinType: 60,
-  gasPriceStep: {
-    low: 0.01,
-    average: 0.025,
-    high: 0.03,
-  },
 }

@@ -13,10 +13,10 @@ import {
   OracleExtension,
   setupOracleExtension,
 } from '@merlionzone/merlionjs'
-import { ENDPOINT } from '@/constants'
-import { useConnectWallet, WalletType } from '@/hooks/useConnectWallet'
+import config from '@/config'
+import { useConnectWallet } from '@/hooks/useConnectWallet'
 
-export function useMerlionClient(walletType: WalletType): MerlionClient | null {
+export function useMerlionClient(): MerlionClient | null {
   const [merlionClient, setMerlionClient] = useState<MerlionClient | null>(null)
 
   const { signer } = useConnectWallet()
@@ -26,7 +26,7 @@ export function useMerlionClient(walletType: WalletType): MerlionClient | null {
       return
     }
 
-    MerlionClient.connectWithSigner(ENDPOINT, signer, {
+    MerlionClient.connectWithSigner(config.rpcEndpoint, signer, {
       gasPrice: GasPrice.fromString('1alion'), // TODO
     })
       .then((client) => setMerlionClient(client))
@@ -48,7 +48,7 @@ export function useMerlionQueryClient(): MerlionQueryClient | null {
   )
 
   useEffect(() => {
-    Tendermint34Client.connect(ENDPOINT)
+    Tendermint34Client.connect(config.rpcEndpoint)
       .then((tmClient) => setTmClient(tmClient))
       .catch((error) => console.log(error))
   }, [])

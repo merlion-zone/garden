@@ -22,6 +22,7 @@
     "@tanstack/react-table": "beta",
     "ahooks": "^3.4.1",
     "bignumber.js": "^9.0.2",
+    "constant-case": "^3.0.4",
     "ethers": "^5.6.8",
     "framer-motion": "^6.3.5",
     "fuse.js": "^6.6.2",
