@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write --loglevel warn \"./{pages,features,components,theme,hooks,constants,utils,config}/**\""
+    "format": "prettier --write --loglevel warn \"./{pages,features,components,theme,hooks,constants,utils,config}/**\"",
+    "localtunnel": "lt --port 8545"
   },
   "dependencies": {
     "@chakra-ui/pro-theme": "^0.0.53",
@@ -45,6 +46,7 @@
     "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
+    "localtunnel": "^2.0.2",
     "prettier": "^2.6.2",
     "typescript": "4.6.4"
   },

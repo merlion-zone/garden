@@ -49,17 +49,29 @@ export const Sidebar = () => {
               />
             </InputGroup>
             <Stack spacing="1">
-              <NavButton label="Portfolio" icon={GiWallet} />
+              <NavButton href="/porfolio" label="Portfolio" icon={GiWallet} />
             </Stack>
             <Stack>
               <Text fontSize="sm" color={textColor} fontWeight="medium">
                 Stablecoin
               </Text>
               <Stack spacing="1">
-                <NavButton label="Swap Mint" icon={IoMdSwap} />
-                <NavButton label="Collateral Mint" icon={BsCurrencyExchange} />
-                <NavButton label="Backing" icon={GiStrong} />
-                <NavButton label="Collateral" icon={FaCoins} />
+                <NavButton
+                  href="/swap-mint"
+                  label="Swap Mint"
+                  icon={IoMdSwap}
+                />
+                <NavButton
+                  href="/collateral-mint"
+                  label="Collateral Mint"
+                  icon={BsCurrencyExchange}
+                />
+                <NavButton href="/backing" label="Backing" icon={GiStrong} />
+                <NavButton
+                  href="/collateral"
+                  label="Collateral"
+                  icon={FaCoins}
+                />
               </Stack>
             </Stack>
             <Stack>
@@ -67,8 +79,8 @@ export const Sidebar = () => {
                 Voting Escrow
               </Text>
               <Stack spacing="1">
-                <NavButton label="veNFT" icon={GiVote} />
-                <NavButton label="Gauge" icon={TbGauge} />
+                <NavButton href="/ve-nft" label="veNFT" icon={GiVote} />
+                <NavButton href="/gauge" label="Gauge" icon={TbGauge} />
               </Stack>
             </Stack>
             <Stack>
@@ -76,8 +88,12 @@ export const Sidebar = () => {
                 Staking
               </Text>
               <Stack spacing="1">
-                <NavButton label="Stake" icon={FiFilm} />
-                <NavButton label="Validators" icon={FiCamera} />
+                <NavButton href="/stake" label="Stake" icon={FiFilm} />
+                <NavButton
+                  href="/validators"
+                  label="Validators"
+                  icon={FiCamera}
+                />
               </Stack>
             </Stack>
             <Stack spacing="1">
@@ -85,7 +101,11 @@ export const Sidebar = () => {
                 Governance
               </Text>
               <Stack spacing="1">
-                <NavButton label="Governance" icon={RiGovernmentLine} />
+                <NavButton
+                  href="/governance"
+                  label="Governance"
+                  icon={RiGovernmentLine}
+                />
               </Stack>
             </Stack>
             <Stack spacing="1">
@@ -93,7 +113,11 @@ export const Sidebar = () => {
                 Activity
               </Text>
               <Stack spacing="1">
-                <NavButton label="Activity" icon={FiActivity} />
+                <NavButton
+                  href="/activity"
+                  label="Activity"
+                  icon={FiActivity}
+                />
               </Stack>
             </Stack>
             <Stack>
@@ -101,9 +125,24 @@ export const Sidebar = () => {
                 Social
               </Text>
               <Stack spacing="1">
-                <NavButton label="Twitter" icon={SiTwitter} />
-                <NavButton label="Discord" icon={SiDiscord} />
-                <NavButton label="Telegram" icon={SiTelegram} />
+                <NavButton
+                  href="/twitter"
+                  isExternal
+                  label="Twitter"
+                  icon={SiTwitter}
+                />
+                <NavButton
+                  href="/discord"
+                  isExternal
+                  label="Discord"
+                  icon={SiDiscord}
+                />
+                <NavButton
+                  href="/telegram"
+                  isExternal
+                  label="Telegram"
+                  icon={SiTelegram}
+                />
               </Stack>
             </Stack>
           </Stack>
