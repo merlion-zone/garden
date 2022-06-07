@@ -28,8 +28,9 @@ import NextLink from 'next/link'
 import numeral from 'numeral'
 import Fuse from 'fuse.js'
 import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
-import { BondStatusString, useValidatorsData, Validator } from './hooks'
 import { useMemo } from 'react'
+import { BondStatusString } from '@/hooks'
+import { useValidatorsData, Validator } from './hooks'
 
 export interface ValidatorTableProps {
   status: BondStatusString
@@ -185,9 +186,7 @@ export function ValidatorTable({ status, keyword }: ValidatorTableProps) {
             {headers.map(({ id, column, renderHeader }) => (
               <Th key={id} isNumeric={id !== 'description'}>
                 <Button
-                  // w="full"
                   h="unset"
-                  // px="unset"
                   variant="unstyled"
                   onClick={column.getToggleSortingHandler()}
                 >

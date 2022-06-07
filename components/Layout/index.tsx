@@ -1,17 +1,5 @@
 import { ReactNode } from 'react'
-import {
-  Box,
-  Container,
-  Flex,
-  Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Show,
-  Stack,
-  Text,
-  useBreakpointValue,
-} from '@chakra-ui/react'
+import { Box, Flex, useBreakpointValue } from '@chakra-ui/react'
 import { Sidebar } from '@/components/Sidebar'
 import { Navbar } from '@/components/Navbar'
 import { Toolbar } from '@/components/Toolbar'
@@ -34,9 +22,9 @@ export const Layout = ({ children }: LayoutProps) => {
 
       <Flex direction="column" maxW="100%" px="0" flex="1">
         <Toolbar></Toolbar>
-        <Stack spacing={{ base: '8', lg: '6' }} flex="1">
+        <Box flex="1">
           {children}
-        </Stack>
+        </Box>
       </Flex>
     </Flex>
   )
