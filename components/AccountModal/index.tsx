@@ -60,12 +60,7 @@ export const AccountModal = ({
               <Text fontSize="sm" fontWeight="500" color="subtle">
                 Connected with {walletType}
               </Text>
-              <Button
-                colorScheme="brand"
-                variant="outline"
-                size="sm"
-                onClick={onChange}
-              >
+              <Button variant="outline" size="sm" onClick={onChange}>
                 Change
               </Button>
             </HStack>

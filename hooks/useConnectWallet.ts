@@ -3,11 +3,15 @@ import { ethers } from 'ethers'
 import { Web3Provider } from '@ethersproject/providers'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ChainId, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
+import { EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
 import { useCallbackRef } from '@chakra-ui/hooks'
 import { atom, useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
-import { chainInfo } from '@/config/chainInfo'
+import {
+  addEthereumChainParams,
+  keplrChainInfo,
+  switchEthereumChainParams,
+} from '@/config/chainInfo'
 import config from '@/config'
 
 export type WalletType = 'metamask' | 'keplr'
@@ -16,6 +20,7 @@ const walletTypeAtom = atomWithStorage<WalletType | false>(
   'connect-wallet-type',
   false
 )
+const connectedAtom = atom<boolean | null>(null)
 const web3ProviderAtom = atom<Web3Provider | null>(null)
 const chainIDAtom = atom<number | null>(null)
 const signerAtom = atom<OfflineSigner | EIP712Signer | null>(null)
@@ -27,7 +32,10 @@ const incConnSignal = () => {
 }
 
 export function useConnectWallet(): {
+  // string: wallet type, false: wallet not selected
   walletType: WalletType | false
+  // true: connected, null: not connected, false: connected but wrong chain
+  connected: boolean | null
   web3Provider: Web3Provider | null
   chainID: number | null
   signer: OfflineSigner | EIP712Signer | null
@@ -36,18 +44,26 @@ export function useConnectWallet(): {
   onDisconnect: () => void
 } {
   const [walletType, setWalletType] = useAtom(walletTypeAtom)
+  const [connected, setConnected] = useAtom(connectedAtom)
   const [web3Provider, setWeb3Provider] = useAtom(web3ProviderAtom)
   const [chainID, setChainID] = useAtom(chainIDAtom)
   const [signer, setSigner] = useAtom(signerAtom)
   const [account, setAccount] = useAtom(accountAtom)
 
-  const handleEthereumChainChanged = useCallbackRef(() => {
-    if (walletType !== 'metamask') {
-      return
-    }
-    // Reload page since chain has been changed
-    window.location.reload()
-  }, [walletType])
+  const handleEthereumChainChanged = useCallbackRef(
+    (chainIDStr: string) => {
+      if (walletType !== 'metamask') {
+        return
+      }
+      // Reload page since chain has been changed
+      // window.location.reload()
+
+      const chainID = Number(chainIDStr)
+      setConnected(chainID === config.getChainID().eip155)
+      setChainID(chainID)
+    },
+    [walletType]
+  )
 
   const handleEthereumAccountsChanged = useCallbackRef(
     (accounts: string[]) => {
@@ -100,27 +116,29 @@ export function useConnectWallet(): {
 
   const disconnect = useCallback(
     (willConnect: boolean) => {
-      incConnSignal()
       if (!willConnect) {
         addOrRemoveListeners(false)
         setWalletType(false)
       }
       setWeb3Provider(null)
+      setConnected(null)
       setChainID(null)
       setSigner(null)
       setAccount(null)
     },
     [
-      addOrRemoveListeners,
       setWalletType,
       setWeb3Provider,
+      setConnected,
       setChainID,
       setSigner,
       setAccount,
+      addOrRemoveListeners,
     ]
   )
 
   const onDisconnect = useCallbackRef(() => {
+    incConnSignal()
     disconnect(false)
   })
 
@@ -131,6 +149,7 @@ export function useConnectWallet(): {
       }
 
       addOrRemoveListeners(false)
+      disconnect(true)
       incConnSignal()
       const thisConnSignal = connSignal
       const cancelled = () => {
@@ -158,24 +177,35 @@ export function useConnectWallet(): {
           return
         }
 
-        const chainID = await window.ethereum.request({ method: 'eth_chainId' })
+        const chainID = Number(
+          await window.ethereum.request({ method: 'eth_chainId' })
+        )
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = new Web3EIP712Signer(provider) // TODO
 
         if (cancelled()) return
-        addOrRemoveListeners(true)
-        setWeb3Provider(provider)
-        setChainID(+chainID)
-        setSigner(signer)
+        if (chainID !== config.getChainID().eip155) {
+          await switchEthereumChain()
+        }
+
+        if (cancelled()) return
+        const onConnected = (account: string) => {
+          addOrRemoveListeners(true)
+          setWeb3Provider(provider)
+          setConnected(chainID === config.getChainID().eip155)
+          setChainID(chainID)
+          setSigner(signer)
+          setAccount(account)
+        }
 
         try {
           const accounts = await window.ethereum.request({
             method: 'eth_accounts',
           })
           if (cancelled()) return
-          handleEthereumAccountsChanged(accounts)
           if (accounts.length) {
             // account connected
+            onConnected(accounts[0])
             return
           }
         } catch (err) {
@@ -188,7 +218,9 @@ export function useConnectWallet(): {
             method: 'eth_requestAccounts',
           })
           if (cancelled()) return
-          handleEthereumAccountsChanged(accounts)
+          if (accounts.length) {
+            onConnected(accounts[0])
+          }
         } catch (err) {
           if ((<any>err).code === 4001) {
             // EIP-1193 userRejectedRequest error
@@ -208,7 +240,7 @@ export function useConnectWallet(): {
 
         if (cancelled()) return
         // https://docs.keplr.app/api/suggest-chain.html
-        await window.keplr.experimentalSuggestChain(chainInfo)
+        await window.keplr.experimentalSuggestChain(keplrChainInfo)
         if (cancelled()) return
         // https://docs.keplr.app/api/cosmjs.html
         await window.keplr.enable(config.chainID)
@@ -218,7 +250,8 @@ export function useConnectWallet(): {
 
         if (cancelled()) return
         addOrRemoveListeners(true)
-        setChainID(new ChainId(config.chainID).eip155)
+        setConnected(true)
+        setChainID(config.getChainID().eip155)
         setSigner(signer)
         if (accounts.length) {
           setAccount(accounts[0].address)
@@ -239,12 +272,13 @@ export function useConnectWallet(): {
     [
       walletType,
       setWalletType,
+      setConnected,
       setWeb3Provider,
       setChainID,
       setSigner,
       setAccount,
-      handleEthereumAccountsChanged,
       addOrRemoveListeners,
+      disconnect,
     ]
   )
 
@@ -252,11 +286,38 @@ export function useConnectWallet(): {
 
   return {
     walletType,
+    connected,
     web3Provider,
     chainID,
     signer,
     account,
     onConnect,
     onDisconnect,
+  }
+}
+
+export async function switchEthereumChain() {
+  if (typeof window === 'undefined' || !window.ethereum) {
+    return
+  }
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [switchEthereumChainParams],
+    })
+  } catch (switchError) {
+    if ((<any>switchError).code === 4902) {
+      // the chain has not been added to MetaMask
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [addEthereumChainParams],
+        })
+      } catch (addError) {
+        console.error(addError)
+      }
+    } else {
+      console.error(switchError)
+    }
   }
 }

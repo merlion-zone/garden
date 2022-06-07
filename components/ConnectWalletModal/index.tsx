@@ -14,6 +14,7 @@ import { FiArrowLeft } from 'react-icons/fi'
 import { useConnectWallet } from '@/hooks'
 import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
 import { KeplrIcon } from '@/components/Icons/KeplrIcon'
+import { VscCircleFilled } from 'react-icons/vsc'
 
 interface ConnectWalletModalProps {
   back?: boolean
@@ -59,6 +60,13 @@ export const ConnectWalletModal = ({
           <Stack>
             <Button
               leftIcon={<MetaMaskIcon />}
+              rightIcon={
+                walletType === 'metamask' && !!account ? (
+                  <VscCircleFilled />
+                ) : (
+                  <></>
+                )
+              }
               variant="outline"
               size="xl"
               justifyContent="flex-start"
@@ -73,6 +81,13 @@ export const ConnectWalletModal = ({
             </Button>
             <Button
               leftIcon={<KeplrIcon />}
+              rightIcon={
+                walletType === 'keplr' && !!account ? (
+                  <VscCircleFilled />
+                ) : (
+                  <></>
+                )
+              }
               variant="outline"
               size="xl"
               justifyContent="flex-start"

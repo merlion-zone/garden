@@ -19,6 +19,7 @@ import { ConnectWalletModal } from '@/components/ConnectWalletModal'
 import { AccountModal } from '@/components/AccountModal'
 import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
 import { KeplrIcon } from '@/components/Icons/KeplrIcon'
+import { WrongNetworkAlert } from '@/components/WrongNetworkAlert'
 
 export const Toolbar = () => {
   const { colorMode, toggleColorMode } = useColorMode()
@@ -32,8 +33,13 @@ export const Toolbar = () => {
     onOpen: onAccountModalOpen,
     onClose: onAccountModalClose,
   } = useDisclosure()
+  const {
+    isOpen: isWrongNetworkOpen,
+    onOpen: onWrongNetworkOpen,
+    onClose: onWrongNetworkClose,
+  } = useDisclosure()
 
-  const { walletType, account, onConnect } = useConnectWallet()
+  const { walletType, connected, account, onConnect } = useConnectWallet()
   useEffectOnce(() => {
     onConnect(null)
   })
@@ -84,15 +90,11 @@ export const Toolbar = () => {
             )}
           </ButtonGroup>
           <ButtonGroup variant="ghost">
-            {!account ? (
-              <Button
-                colorScheme="brand"
-                variant="solid"
-                onClick={onConnectWalletOpen}
-              >
+            {connected === null ? (
+              <Button variant="solid" onClick={onConnectWalletOpen}>
                 Connect
               </Button>
-            ) : (
+            ) : connected ? (
               <Button
                 leftIcon={
                   walletType === 'metamask' ? <MetaMaskIcon /> : <KeplrIcon />
@@ -101,6 +103,14 @@ export const Toolbar = () => {
                 onClick={onAccountModalOpen}
               >
                 {walletType === 'metamask' ? ethAddr : merAddr}
+              </Button>
+            ) : (
+              <Button
+                variant="solid"
+                colorScheme="red"
+                onClick={onWrongNetworkOpen}
+              >
+                Wrong network
               </Button>
             )}
           </ButtonGroup>
@@ -121,6 +131,10 @@ export const Toolbar = () => {
         onClose={onAccountModalClose}
         onChange={onAccountModalChange}
       ></AccountModal>
+      <WrongNetworkAlert
+        isOpen={isWrongNetworkOpen}
+        onClose={onWrongNetworkClose}
+      ></WrongNetworkAlert>
     </Box>
   )
 }

@@ -1,28 +1,7 @@
 import { constantCase } from 'constant-case'
+import { Config, config as defaultConfig } from '@/config/config'
 
-interface Config extends NodeJS.Dict<string | number | boolean> {
-  chainID: string
-  chainName: string
-  rpcEndpoint: string
-  restEndpoint: string
-  bech32Prefix: string
-  denom: string
-  denomDecimals: number
-  displayDenom: string
-}
-
-function buildConfig(): Config {
-  const config: Config = {
-    chainID: 'merlion_5000-101',
-    chainName: 'Merlion Localnet',
-    rpcEndpoint: 'http://127.0.0.1:26657',
-    restEndpoint: 'http://127.0.0.1:1317',
-    bech32Prefix: 'mer',
-    denom: 'alion',
-    denomDecimals: 18,
-    displayDenom: 'LION',
-  }
-
+function buildConfig(config: Config): Config {
   const truthyValues = ['true', '1', 't']
 
   for (const key in config) {
@@ -30,7 +9,7 @@ function buildConfig(): Config {
     // key: camelCase -> UPPER_CASE
     const envValue = process.env[constantCase(key)]
 
-    if (envValue !== undefined && defaultValue !== undefined) {
+    if (envValue !== undefined) {
       switch (typeof defaultValue) {
         case 'string':
           config[key] = envValue
@@ -40,6 +19,7 @@ function buildConfig(): Config {
           break
         case 'boolean':
           config[key] = truthyValues.includes((<string>envValue).toLowerCase())
+          break
       }
     }
   }
@@ -47,6 +27,6 @@ function buildConfig(): Config {
   return config
 }
 
-const config = buildConfig()
+const config = buildConfig(defaultConfig)
 
 export default config

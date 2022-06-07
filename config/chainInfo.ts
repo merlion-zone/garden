@@ -1,7 +1,42 @@
 import { ChainInfo } from '@keplr-wallet/types'
 import config from '@/config'
+import { ethers } from 'ethers'
 
-export const chainInfo: ChainInfo = {
+// https://eips.ethereum.org/EIPS/eip-3085
+interface EIP3085AddEthereumChainParameter {
+  chainId: string
+  chainName?: string
+  nativeCurrency: {
+    name: string
+    symbol: string
+    decimals: number
+  }
+  rpcUrls: string[]
+  blockExplorerUrls?: string[]
+  iconUrls?: string[]
+}
+
+// https://eips.ethereum.org/EIPS/eip-3326
+interface EIP3326SwitchEthereumChainParameter {
+  chainId: string
+}
+
+export const addEthereumChainParams: EIP3085AddEthereumChainParameter = {
+  chainId: ethers.utils.hexlify(config.getChainID().eip155),
+  chainName: config.chainName,
+  nativeCurrency: {
+    name: config.displayDenom,
+    symbol: config.displayDenom,
+    decimals: config.denomDecimals,
+  },
+  rpcUrls: [config.web3RpcEndpoint],
+}
+
+export const switchEthereumChainParams: EIP3326SwitchEthereumChainParameter = {
+  chainId: ethers.utils.hexlify(config.getChainID().eip155),
+}
+
+export const keplrChainInfo: ChainInfo = {
   chainId: config.chainID,
   chainName: config.chainName,
   rpc: config.rpcEndpoint,
