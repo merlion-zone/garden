@@ -31,7 +31,7 @@ export const Sidebar = () => {
         color={useColorModeValue('on-accent', 'white')}
         overflowY="auto"
         boxShadow={useColorModeValue('sm', 'sm-dark')}
-        maxW={{ base: 'full', sm: 'xs' }}
+        maxW={{ base: 'full', sm: '2xs' }}
         py={{ base: '4', sm: '6' }}
         px={{ base: '4', sm: '6' }}
       >
@@ -49,7 +49,7 @@ export const Sidebar = () => {
               />
             </InputGroup>
             <Stack spacing="1">
-              <NavButton href="/porfolio" label="Portfolio" icon={GiWallet} />
+              <NavButton href="/portfolio" label="Portfolio" icon={GiWallet} />
             </Stack>
             <Stack>
               <Text fontSize="sm" color={textColor} fontWeight="medium">

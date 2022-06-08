@@ -11,6 +11,9 @@ export interface Config
   denom: string
   denomDecimals: number
   displayDenom: string
+  merDenom: string
+  merDenomDecimals: number
+  merDisplayDenom: string
 
   getChainID: () => ChainId
 }
@@ -26,6 +29,9 @@ export const config: Config = {
   denom: 'alion',
   denomDecimals: 18,
   displayDenom: 'LION',
+  merDenom: 'uusd',
+  merDenomDecimals: 6,
+  merDisplayDenom: 'USM',
 } as Config
 
 config.getChainID = () => {

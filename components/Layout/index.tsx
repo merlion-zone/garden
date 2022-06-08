@@ -32,10 +32,12 @@ export const Layout = ({ children }: LayoutProps) => {
     >
       {isDesktop ? <Sidebar /> : <Navbar />}
 
-      <Container maxW="100%" px="0" flex="1">
+      <Flex direction="column" maxW="100%" px="0" flex="1">
         <Toolbar></Toolbar>
-        <Stack spacing={{ base: '8', lg: '6' }}>{children}</Stack>
-      </Container>
+        <Stack spacing={{ base: '8', lg: '6' }} flex="1">
+          {children}
+        </Stack>
+      </Flex>
     </Flex>
   )
 }

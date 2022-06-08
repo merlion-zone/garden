@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { Web3Provider } from '@ethersproject/providers'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
+import { Address, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
 import { useCallbackRef } from '@chakra-ui/hooks'
 import { atom, useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
@@ -320,4 +320,9 @@ export async function switchEthereumChain() {
       console.error(switchError)
     }
   }
+}
+
+export function useAccountAddress(): Address | null {
+  const { account } = useConnectWallet()
+  return account ? new Address(account) : null
 }

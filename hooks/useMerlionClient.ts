@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 import {
+  AuthExtension,
+  BankExtension,
   DistributionExtension,
   GasPrice,
   QueryClient,
+  setupAuthExtension,
+  setupBankExtension,
   setupDistributionExtension,
   setupStakingExtension,
   StakingExtension,
@@ -15,9 +19,12 @@ import {
 } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
+import { atom, useAtom } from 'jotai'
+
+const merlionClientAtom = atom<MerlionClient | null>(null)
 
 export function useMerlionClient(): MerlionClient | null {
-  const [merlionClient, setMerlionClient] = useState<MerlionClient | null>(null)
+  const [merlionClient, setMerlionClient] = useAtom(merlionClientAtom)
 
   const { signer } = useConnectWallet()
 
@@ -31,40 +38,47 @@ export function useMerlionClient(): MerlionClient | null {
     })
       .then((client) => setMerlionClient(client))
       .catch(console.error)
-  }, [signer])
+  }, [setMerlionClient, signer])
 
   return merlionClient
 }
 
-type MerlionQueryClient = QueryClient &
+export type MerlionQueryClient = QueryClient &
+  AuthExtension &
+  BankExtension &
   StakingExtension &
-  OracleExtension &
-  DistributionExtension
+  DistributionExtension &
+  OracleExtension
+
+export const QueryModules = {
+  AUTH: 'auth' as const,
+  BANK: 'bank' as const,
+  STAKING: 'staking' as const,
+  DISTRIBUTION: 'distribution' as const,
+  ORACLE: 'oracle' as const,
+}
+
+const merlionQueryClientAtom = atom<MerlionQueryClient | null>(null)
 
 export function useMerlionQueryClient(): MerlionQueryClient | null {
-  const [tmClient, setTmClient] = useState<Tendermint34Client | null>(null)
-  const [queryClient, setQueryClient] = useState<MerlionQueryClient | null>(
-    null
-  )
+  const [queryClient, setQueryClient] = useAtom(merlionQueryClientAtom)
 
   useEffect(() => {
-    Tendermint34Client.connect(config.rpcEndpoint)
-      .then((tmClient) => setTmClient(tmClient))
-      .catch((error) => console.log(error))
-  }, [])
-
-  useEffect(() => {
-    if (!tmClient) return
-
-    setQueryClient(
-      QueryClient.withExtensions(
-        tmClient,
-        setupStakingExtension,
-        setupOracleExtension,
-        setupDistributionExtension
+    const connect = async () => {
+      const tmClient = await Tendermint34Client.connect(config.rpcEndpoint)
+      setQueryClient(
+        QueryClient.withExtensions(
+          tmClient,
+          setupAuthExtension,
+          setupBankExtension,
+          setupStakingExtension,
+          setupDistributionExtension,
+          setupOracleExtension
+        )
       )
-    )
-  }, [tmClient])
+    }
+    connect().catch(console.error)
+  }, [setQueryClient])
 
   return queryClient
 }
