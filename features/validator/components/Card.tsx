@@ -33,7 +33,7 @@ export const UserAvatar = (props: UserAvatarProps) => {
   const iconColor = useColorModeValue('teal.500', 'teal.200')
 
   return (
-    <Avatar size="2xl" {...avatarProps}>
+    <Avatar size={{ base: 'md', md: 'lg' }} {...avatarProps}>
       {isVerified && (
         <AvatarBadge
           borderWidth="4px"

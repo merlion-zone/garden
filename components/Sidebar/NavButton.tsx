@@ -2,7 +2,6 @@ import {
   As,
   Button,
   ButtonProps,
-  forwardRef,
   HStack,
   Icon,
   Link,
@@ -10,26 +9,28 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import React from 'react'
+import NextLink from 'next/link'
+import { useRouter } from 'next/router'
 
 interface NavButtonProps extends ButtonProps {
-  href?: string
+  href: string
   isExternal?: boolean
   icon: As
   label: string
 }
 
-export const NavButton = forwardRef((props: NavButtonProps, ref) => {
-  const { isExternal, icon, label, ...buttonProps } = props
+export const NavButton = (props: NavButtonProps) => {
+  const { href, isExternal, icon, label, ...buttonProps } = props
+  const router = useRouter()
 
-  return (
+  const button = (
     <Button
-      as="a"
+      w="full"
+      as="div"
       variant={useColorModeValue('ghost-on-accent', 'ghost')}
       justifyContent="start"
-      target={isExternal ? '_blank' : '_self'}
-      rel={isExternal ? 'noopener' : ''}
+      isActive={router.pathname === href}
       {...buttonProps}
-      ref={ref}
     >
       <HStack spacing="3">
         <Icon
@@ -41,4 +42,24 @@ export const NavButton = forwardRef((props: NavButtonProps, ref) => {
       </HStack>
     </Button>
   )
-})
+
+  if (isExternal) {
+    return (
+      <Link
+        href={href}
+        isExternal={isExternal}
+        _hover={{ textDecoration: undefined }}
+      >
+        {button}
+      </Link>
+    )
+  } else {
+    return (
+      <NextLink href={href} passHref>
+        <Link isExternal={isExternal} _hover={{ textDecoration: undefined }}>
+          {button}
+        </Link>
+      </NextLink>
+    )
+  }
+}

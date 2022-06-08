@@ -7,6 +7,7 @@ import {
   HStack,
   Icon,
   Link,
+  Spacer,
   Stack,
   Text,
   useColorModeValue,
@@ -31,25 +32,26 @@ export function Info({ address }: InfoProps) {
         spacing={{ base: '3', md: '10' }}
         align="flex-start"
       >
-        {/* TODO */}
-        <UserAvatar
-          name={data?.description!.moniker}
-          src=""
-          isVerified={!data?.description?.identity}
-        />
-
         <Box>
-          <Flex justifyContent="space-between" alignItems="center">
+          <Flex alignItems="center">
+            <UserAvatar
+              mr="4"
+              name={data?.description!.moniker}
+              src="" // TODO
+              isVerified={!!data?.description?.identity}
+            />
+
             <Heading
-              size="md"
+              size={{ base: 'xs', sm: 'md' }}
               fontWeight="extrabold"
               letterSpacing="tight"
               marginEnd="6"
             >
               {data?.description!.moniker}
             </Heading>
+            <Spacer />
             <Button
-              size="sm"
+              size={{ base: 'xs', sm: 'sm' }}
               variant="outline"
               rightIcon={
                 <Icon

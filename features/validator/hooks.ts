@@ -58,12 +58,31 @@ export function useDelegations(address?: string) {
   const queryClient = useMerlionQueryClient()
 
   return useQuery(
-    [],
+    ['validator', 'delegations', address],
     async () => {
       const { delegationResponses } =
         await queryClient!.staking.validatorDelegations(address!)
       return delegationResponses
     },
     { enabled: !!queryClient && !!address }
+  )
+}
+
+export function useDelegation(
+  delegator?: string | null,
+  validator?: string | null
+) {
+  const queryClient = useMerlionQueryClient()
+
+  return useQuery(
+    ['delegation', delegator, validator],
+    async () => {
+      const { delegationResponse } = await queryClient!.staking.delegation(
+        delegator!,
+        validator!
+      )
+      return delegationResponse
+    },
+    { enabled: !!queryClient && !!delegator && !!validator }
   )
 }

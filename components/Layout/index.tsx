@@ -22,7 +22,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
       <Flex direction="column" maxW="100%" px="0" flex="1">
         <Toolbar></Toolbar>
-        <Box flex="1">
+        <Box flex="1" overflowY="auto">
           {children}
         </Box>
       </Flex>
