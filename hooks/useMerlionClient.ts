@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 import {
   AuthExtension,
@@ -43,20 +43,13 @@ export function useMerlionClient(): MerlionClient | null {
   return merlionClient
 }
 
-export type MerlionQueryClient = QueryClient &
-  AuthExtension &
+export type QueryModules = AuthExtension &
   BankExtension &
-  StakingExtension &
   DistributionExtension &
-  OracleExtension
+  OracleExtension &
+  StakingExtension
 
-export const QueryModules = {
-  AUTH: 'auth' as const,
-  BANK: 'bank' as const,
-  STAKING: 'staking' as const,
-  DISTRIBUTION: 'distribution' as const,
-  ORACLE: 'oracle' as const,
-}
+export type MerlionQueryClient = QueryClient & QueryModules
 
 const merlionQueryClientAtom = atom<MerlionQueryClient | null>(null)
 
