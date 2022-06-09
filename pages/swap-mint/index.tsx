@@ -154,6 +154,7 @@ export default function Portfolio() {
             icon={<SettingsIcon />}
           ></IconButton>
         </HStack>
+
         <AmountInput token={isMint ? backingToken : usmToken}></AmountInput>
         <OperatorIcon
           icon={isMint ? <SmallAddIcon /> : <ArrowDownIcon />}

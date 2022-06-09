@@ -20,7 +20,7 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@fontsource/inter": "^4.5.10",
-    "@merlionzone/merlionjs": "^0.1.2",
+    "@merlionzone/merlionjs": "^0.1.3",
     "@metamask/detect-provider": "^1.2.0",
     "@tanstack/react-table": "beta",
     "ahooks": "^3.4.1",

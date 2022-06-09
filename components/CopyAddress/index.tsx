@@ -1,6 +1,5 @@
 import { Button, IconButton, Tooltip, useClipboard } from '@chakra-ui/react'
 import { FiCheckCircle, FiCopy } from 'react-icons/fi'
-import { FaQuestionCircle } from 'react-icons/fa'
 
 export const CopyAddressButton = ({ addr }: { addr: string }) => {
   const { hasCopied, onCopy } = useClipboard(addr)
