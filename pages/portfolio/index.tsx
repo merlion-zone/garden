@@ -26,7 +26,7 @@ import { AmountDisplay } from '@/components/AmountDisplay'
 import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
 import { Hint } from '@/components/Hint'
 import QRCodeSVG from 'qrcode.react'
-import { shortenAddress } from '@/utils'
+import { CopyAddressIcon } from '@/components/CopyAddress'
 
 const Card = (props: BoxProps) => (
   <Box
@@ -54,12 +54,40 @@ export default function Portfolio() {
     config.merDenom
   )
 
-  const qrCodeBg = useColorModeValue('white', 'black')
-  const qrCodeFg = useColorModeValue('black', 'white')
-
   const [addressTabIndex, setAddressTabIndex] = useState(0)
 
   const [assetsTabIndex, setAssetsTabIndex] = useState(0)
+
+  const qrCodeBg = useColorModeValue('white', 'black')
+  const qrCodeFg = useColorModeValue('black', 'white')
+
+  const AddressQRCode = ({
+    addr,
+    addrType,
+  }: {
+    addr: string
+    addrType: string
+  }) => (
+    <HStack>
+      <QRCodeSVG
+        value={addr}
+        size={96}
+        bgColor={qrCodeBg}
+        fgColor={qrCodeFg}
+        level={'L'}
+        includeMargin={false}
+        renderAs="svg"
+      />
+      <Stack width="calc(100% - 104px)" ps="4">
+        <Text fontSize="xs" color="subtle">
+          Your {addrType} address
+        </Text>
+        <Text fontSize="sm">
+          {addr} <CopyAddressIcon addr={addr} />
+        </Text>
+      </Stack>
+    </HStack>
+  )
 
   return (
     <Container maxW="9xl" py="8" height="full">
@@ -174,7 +202,14 @@ export default function Portfolio() {
               </Center>
             </Card>
             <Card>
-              <Text>Address</Text>
+              <Text>
+                Address
+                <Hint
+                  hint={
+                    'EVM address and Cosmos address are both derived from the same wallet of yours. You can use either of them seamlessly in different scenarios.'
+                  }
+                ></Hint>
+              </Text>
               <Stack mt="6">
                 <Tabs
                   size="sm"
@@ -189,40 +224,16 @@ export default function Portfolio() {
                 <Tabs index={addressTabIndex}>
                   <TabPanels>
                     <TabPanel>
-                      <HStack>
-                        <QRCodeSVG
-                          value={address?.eth() || ''}
-                          size={96}
-                          bgColor={qrCodeBg}
-                          fgColor={qrCodeFg}
-                          level={'L'}
-                          includeMargin={false}
-                        />
-                        <Stack width="calc(100% - 104px)" ps="4">
-                          <Text fontSize="xs" color="subtle">
-                            Your EVM address
-                          </Text>
-                          <Text fontSize="sm">{address?.eth()}</Text>
-                        </Stack>
-                      </HStack>
+                      <AddressQRCode
+                        addr={address?.eth() || ''}
+                        addrType="EVM"
+                      ></AddressQRCode>
                     </TabPanel>
                     <TabPanel>
-                      <HStack>
-                        <QRCodeSVG
-                          value={address?.mer() || ''}
-                          size={96}
-                          bgColor={qrCodeBg}
-                          fgColor={qrCodeFg}
-                          level={'L'}
-                          includeMargin={false}
-                        />
-                        <Stack width="calc(100% - 104px)" ps="4">
-                          <Text fontSize="xs" color="subtle">
-                            Your Cosmos address
-                          </Text>
-                          <Text fontSize="sm">{address?.mer()}</Text>
-                        </Stack>
-                      </HStack>
+                      <AddressQRCode
+                        addr={address?.mer() || ''}
+                        addrType="Cosmos"
+                      ></AddressQRCode>
                     </TabPanel>
                   </TabPanels>
                 </Tabs>

@@ -38,7 +38,9 @@ export const NavButton = (props: NavButtonProps) => {
           boxSize="6"
           color={useColorModeValue('on-accent-subtle', 'subtle')}
         />
-        <Text>{label}</Text>
+        <Text color={useColorModeValue('on-accent-subtle', 'subtle')}>
+          {label}
+        </Text>
       </HStack>
     </Button>
   )

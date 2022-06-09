@@ -11,6 +11,7 @@
     "localtunnel": "lt"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.2",
     "@chakra-ui/pro-theme": "^0.0.53",
     "@chakra-ui/react": "^2.1.0",
     "@cosmjs/encoding": "^0.28.4",

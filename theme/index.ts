@@ -21,7 +21,21 @@ export const theme: Record<string, any> = extendTheme(
         },
       },
     },
-    colors: { ...proTheme.colors, brand: proTheme.colors.green } as Colors,
+    colors: {
+      ...proTheme.colors,
+      brand: {
+        '50': '#eaebfe',
+        '100': '#c4c4ee',
+        '200': '#9d9ce0',
+        '300': '#7675d4',
+        '400': '#4f4ec7',
+        '500': '#3735ae',
+        '600': '#2a2987',
+        '700': '#1e1d61',
+        '800': '#11113b',
+        '900': '#050518',
+      },
+    } as Colors,
     config: {
       cssVarPrefix: 'ck',
       initialColorMode: 'dark',

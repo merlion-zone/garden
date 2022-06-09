@@ -17,6 +17,7 @@ import { useConnectWallet } from '@/hooks'
 import { shortenAddress } from '@/utils'
 import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
 import { KeplrIcon } from '@/components/Icons/KeplrIcon'
+import { CopyAddressButton } from '@/components/CopyAddress'
 
 interface AccountModalProps {
   isOpen: boolean
@@ -24,19 +25,6 @@ interface AccountModalProps {
   onClose(): void
 
   onChange(): void
-}
-
-const CopyAddressButton = ({ addr }: { addr: string }) => {
-  const { hasCopied, onCopy } = useClipboard(addr)
-  return !hasCopied ? (
-    <Button variant="ghost" size="xs" leftIcon={<FiCopy />} onClick={onCopy}>
-      Copy Address
-    </Button>
-  ) : (
-    <Button variant="ghost" size="xs" leftIcon={<FiCheckCircle />}>
-      Copied
-    </Button>
-  )
 }
 
 export const AccountModal = ({
