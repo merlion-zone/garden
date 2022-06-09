@@ -1,42 +1,46 @@
-import useSWR from 'swr'
+import useSWR, { Fetcher } from 'swr'
 import { QueryModules, useMerlionQueryClient } from '@/hooks'
 import { useCallback } from 'react'
-import { QueryDenomMetadataResponse } from 'cosmjs-types/cosmos/bank/v1beta1/query'
-import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 
-function useMerlionQuery<Data = any, Error = any>(
-  module: string,
-  method: string,
-  ...params: string[]
-): {
-  data?: Data
-  error?: Error
-} {
+function useMerlionQuery<
+  Module extends keyof QueryModules,
+  Method extends keyof QueryModules[Module],
+  Params extends QueryModules[Module][Method] extends (...args: any[]) => any
+    ? Parameters<QueryModules[Module][Method]>
+    : never,
+  Response extends QueryModules[Module][Method] extends (...args: any[]) => any
+    ? Awaited<ReturnType<QueryModules[Module][Method]>>
+    : never
+>(module: Module, method: Method, ...params: Params) {
   const client = useMerlionQueryClient()
 
   const querier = useCallback(
-    (module: string, method: string, ...params: string[]) => {
+    (module: Module, method: Method, ...params: Params) => {
       if (!client) {
         throw new Error('Null query client')
       }
       if (!(module in client)) {
         throw new Error(`Module ${module} not found in Merlion client`)
       }
-      const moduleQuery = (<any>client)[module]
+      const moduleQuery = client[module]
       if (!(method in moduleQuery)) {
         throw new Error(
           `RPC method ${method} not found in module ${module} of Merlion client`
         )
       }
 
-      return moduleQuery[method](...params)
+      const fun: (...args: Params) => Promise<Response> = moduleQuery[
+        method
+      ] as any
+
+      return fun(...params)
     },
     [client]
   )
 
-  return useSWR<Data, Error>(
+  return useSWR(
     client ? [module, method, ...params] : null,
-    querier
+    querier as Fetcher<Response, any> // TODO
   )
 }
 
@@ -49,12 +53,7 @@ export function useBalance(
   balance?: string
   error?: any
 } {
-  const { data, error } = useMerlionQuery<Coin>(
-    QueryModules.BANK,
-    'balance',
-    address,
-    denom
-  )
+  const { data, error } = useMerlionQuery('bank', 'balance', address, denom)
   return {
     balance: data && data.amount,
     error,
@@ -62,23 +61,11 @@ export function useBalance(
 }
 
 export function useSupplyOf(denom: string) {
-  const { data, error } = useMerlionQuery<Coin>(
-    QueryModules.BANK,
-    'supplyOf',
-    denom
-  )
-  return {
-    supply: data && data.amount,
-    error,
-  }
+  return useMerlionQuery('bank', 'supplyOf', denom)
 }
 
 export function useDenomMetadata(denom: string) {
-  return useMerlionQuery<QueryDenomMetadataResponse>(
-    QueryModules.BANK,
-    'denomMetadata',
-    denom
-  )
+  return useMerlionQuery('bank', 'denomMetadata', denom)
 }
 
 /****************************** Oracle ******************************/
