@@ -1,13 +1,11 @@
-import { constantCase } from 'constant-case'
-import { Config, config as defaultConfig } from '@/config/config'
+import { Config, config as defaultConfig, envConfig } from '@/config/config'
 
-function buildConfig(config: Config): Config {
+function hydrateConfigFromEnv(config: Config): Config {
   const truthyValues = ['true', '1', 't']
 
   for (const key in config) {
     const defaultValue = config[key]
-    // key: camelCase -> UPPER_CASE
-    const envValue = process.env[constantCase(key)]
+    const envValue = (<any>envConfig)[key]
 
     if (envValue !== undefined) {
       switch (typeof defaultValue) {
@@ -27,6 +25,6 @@ function buildConfig(config: Config): Config {
   return config
 }
 
-const config = buildConfig(defaultConfig)
+const config = hydrateConfigFromEnv(defaultConfig)
 
 export default config

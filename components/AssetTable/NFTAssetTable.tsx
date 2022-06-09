@@ -9,7 +9,6 @@ import {
   Tr,
   Button,
   Stack,
-  Box,
 } from '@chakra-ui/react'
 
 export const NFTAssetTable = () => {

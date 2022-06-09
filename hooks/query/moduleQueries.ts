@@ -55,15 +55,22 @@ export function useBalance(
     address,
     denom
   )
-  if (error || !data) {
-    if (error) console.error(error)
-    return { error }
+  return {
+    balance: data && data.amount,
+    error,
   }
-  return { balance: data.amount }
 }
 
 export function useSupplyOf(denom: string) {
-  return useMerlionQuery<Coin>(QueryModules.BANK, 'supplyOf', denom)
+  const { data, error } = useMerlionQuery<Coin>(
+    QueryModules.BANK,
+    'supplyOf',
+    denom
+  )
+  return {
+    supply: data && data.amount,
+    error,
+  }
 }
 
 export function useDenomMetadata(denom: string) {

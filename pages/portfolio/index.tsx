@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Box,
   BoxProps,
@@ -9,34 +10,27 @@ import {
   SimpleGrid,
   Stack,
   Tab,
-  Table,
-  TableCaption,
-  TableContainer,
   TabList,
   TabPanel,
   TabPanels,
   Tabs,
-  Tbody,
-  Td,
   Text,
-  Tfoot,
-  Th,
-  Thead,
-  Tr,
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useBalance, useLionPrice, useMerPrice } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
 import config from '@/config'
-import { AmountDisplay } from '@/components/AmountDisplay'
 import { BigNumber } from 'ethers'
+import { AmountDisplay } from '@/components/AmountDisplay'
 import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
-import { useState } from 'react'
+import { Hint } from '@/components/Hint'
+import QRCodeSVG from 'qrcode.react'
+import { shortenAddress } from '@/utils'
 
 const Card = (props: BoxProps) => (
   <Box
-    minH="3xs"
+    minH="2xs"
     p="4"
     bg="bg-surface"
     boxShadow={useColorModeValue('sm', 'sm-dark')}
@@ -60,7 +54,12 @@ export default function Portfolio() {
     config.merDenom
   )
 
-  const [tabIndex, setTabIndex] = useState(0)
+  const qrCodeBg = useColorModeValue('white', 'black')
+  const qrCodeFg = useColorModeValue('black', 'white')
+
+  const [addressTabIndex, setAddressTabIndex] = useState(0)
+
+  const [assetsTabIndex, setAssetsTabIndex] = useState(0)
 
   return (
     <Container maxW="9xl" py="8" height="full">
@@ -74,7 +73,7 @@ export default function Portfolio() {
           </Heading>
         </Stack>
         <Stack spacing={{ base: '5', lg: '6' }} height="full">
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap="6">
+          <SimpleGrid columns={{ base: 1, md: 4 }} gap="6">
             <Card>
               <Text>Balance</Text>
               <HStack align="baseline">
@@ -123,6 +122,10 @@ export default function Portfolio() {
                   ></AmountDisplay>
                 </Text>
                 <Text fontSize="4xl">USM</Text>
+                <Hint
+                  hint="USM is the stablecoin pegged to $USD"
+                  ariaLabel="Stablecoin Tooltip"
+                ></Hint>
               </HStack>
               <HStack gap="4">
                 <HStack
@@ -170,6 +173,61 @@ export default function Portfolio() {
                 <Button variant="outline">Stake</Button>
               </Center>
             </Card>
+            <Card>
+              <Text>Address</Text>
+              <Stack mt="6">
+                <Tabs
+                  size="sm"
+                  variant="enclosed"
+                  onChange={(index) => setAddressTabIndex(index)}
+                >
+                  <TabList>
+                    <Tab>EVM</Tab>
+                    <Tab>Cosmos</Tab>
+                  </TabList>
+                </Tabs>
+                <Tabs index={addressTabIndex}>
+                  <TabPanels>
+                    <TabPanel>
+                      <HStack>
+                        <QRCodeSVG
+                          value={address?.eth() || ''}
+                          size={96}
+                          bgColor={qrCodeBg}
+                          fgColor={qrCodeFg}
+                          level={'L'}
+                          includeMargin={false}
+                        />
+                        <Stack width="calc(100% - 104px)" ps="4">
+                          <Text fontSize="xs" color="subtle">
+                            Your EVM address
+                          </Text>
+                          <Text fontSize="sm">{address?.eth()}</Text>
+                        </Stack>
+                      </HStack>
+                    </TabPanel>
+                    <TabPanel>
+                      <HStack>
+                        <QRCodeSVG
+                          value={address?.mer() || ''}
+                          size={96}
+                          bgColor={qrCodeBg}
+                          fgColor={qrCodeFg}
+                          level={'L'}
+                          includeMargin={false}
+                        />
+                        <Stack width="calc(100% - 104px)" ps="4">
+                          <Text fontSize="xs" color="subtle">
+                            Your Cosmos address
+                          </Text>
+                          <Text fontSize="sm">{address?.mer()}</Text>
+                        </Stack>
+                      </HStack>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </Stack>
+            </Card>
           </SimpleGrid>
 
           <SimpleGrid columns={1} height="full">
@@ -178,7 +236,7 @@ export default function Portfolio() {
                 <Text fontSize="3xl">Assets</Text>
                 <Tabs
                   variant="with-line"
-                  onChange={(index) => setTabIndex(index)}
+                  onChange={(index) => setAssetsTabIndex(index)}
                 >
                   <TabList>
                     <Tab pb="3" px="4">
@@ -191,7 +249,7 @@ export default function Portfolio() {
                 </Tabs>
               </HStack>
 
-              <Tabs variant="with-line" index={tabIndex}>
+              <Tabs variant="with-line" index={assetsTabIndex}>
                 <TabPanels>
                   <TabPanel px="0">
                     <TokenAssetTable></TokenAssetTable>

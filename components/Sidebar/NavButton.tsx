@@ -43,23 +43,13 @@ export const NavButton = (props: NavButtonProps) => {
     </Button>
   )
 
-  if (isExternal) {
-    return (
-      <Link
-        href={href}
-        isExternal={isExternal}
-        _hover={{ textDecoration: undefined }}
-      >
-        {button}
-      </Link>
-    )
-  } else {
-    return (
-      <NextLink href={href} passHref>
-        <Link isExternal={isExternal} _hover={{ textDecoration: undefined }}>
-          {button}
-        </Link>
-      </NextLink>
-    )
-  }
+  return isExternal ? (
+    <Link href={href} isExternal _hover={{ textDecoration: undefined }}>
+      {button}
+    </Link>
+  ) : (
+    <NextLink href={href} passHref>
+      <Link _hover={{ textDecoration: undefined }}>{button}</Link>
+    </NextLink>
+  )
 }

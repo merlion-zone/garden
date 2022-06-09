@@ -11,6 +11,15 @@ const nextConfig = {
     DECIMALS: process.env.DECIMALS,
     MINIMAL_DENOM: process.env.MINIMAL_DENOM,
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/portfolio',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
