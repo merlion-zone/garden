@@ -3,13 +3,7 @@ import { useQueries, useQuery } from 'react-query'
 import BigNumber from 'bignumber.js'
 
 import { LION } from '@/constants'
-import { useMerlionQueryClient } from '@/hooks'
-
-export type BondStatusString =
-  | 'BOND_STATUS_UNBONDED'
-  | 'BOND_STATUS_UNBONDING'
-  | 'BOND_STATUS_BONDED'
-  | 'UNRECOGNIZED'
+import { BondStatusString, useMerlionQueryClient, useValidators } from '@/hooks'
 
 export interface Validator {
   operatorAddress: string
@@ -46,11 +40,8 @@ export function useValidatorsData(status: BondStatusString) {
       enabled: !!queryClient,
     }
   )
-  const { data: validatorsData, isLoading: isValidatorsLoading } = useQuery(
-    ['validators', status],
-    async () => queryClient!.staking.validators(status),
-    { enabled: !!queryClient }
-  )
+  const { data: validatorsData, isLoading: isValidatorsLoading } =
+    useValidators(status)
 
   const missCounters = useQueries({
     queries:

@@ -1,6 +1,8 @@
-// shorten the checksummed version of the input address to have 0x + 4 characters at start and end
+import { bech32 } from 'bech32'
 import { Address } from '@merlionzone/merlionjs'
+import { BECH32_PREFIX } from '@/constants'
 
+// shorten the checksummed version of the input address to have 0x + 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): [string, string] {
   try {
     const addr = new Address(address)
@@ -17,4 +19,9 @@ export function shortenAddress(address: string, chars = 4): [string, string] {
   } catch {
     throw Error(`Invalid 'address' parameter '${address}'.`)
   }
+}
+
+export const validatorToDelegatorAddress = (address: string) => {
+  const decode = bech32.decode(address).words
+  return bech32.encode(BECH32_PREFIX, decode)
 }

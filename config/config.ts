@@ -1,7 +1,7 @@
 import { ChainId } from '@merlionzone/merlionjs'
 
 export interface Config
-  extends NodeJS.Dict<string | number | boolean | Function> {
+  extends Record<string, string | number | boolean | Function> {
   chainID: string
   chainName: string
   web3RpcEndpoint: string
