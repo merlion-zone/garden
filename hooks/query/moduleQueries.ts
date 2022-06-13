@@ -25,7 +25,9 @@ function useMerlionQuery<
       const moduleQuery = client[module]
       if (!(method in moduleQuery)) {
         throw new Error(
-          `RPC method ${method} not found in module ${module} of Merlion client`
+          `RPC method ${String(
+            method
+          )} not found in module ${module} of Merlion client`
         )
       }
 
@@ -39,8 +41,56 @@ function useMerlionQuery<
   )
 
   return useSWR(
-    client ? [module, method, ...params] : null,
+    client && params.every((p) => p !== undefined && p !== null)
+      ? [module, method, ...params]
+      : null,
     querier as Fetcher<Response, any> // TODO
+  )
+}
+
+function useMerlionQueryMultiple<
+  Module extends keyof QueryModules,
+  Method extends keyof QueryModules[Module],
+  Params extends QueryModules[Module][Method] extends (...args: any[]) => any
+    ? Parameters<QueryModules[Module][Method]>
+    : never,
+  Response extends QueryModules[Module][Method] extends (...args: any[]) => any
+    ? Awaited<ReturnType<QueryModules[Module][Method]>>
+    : never
+>(module: Module, method: Method, params: Params[]) {
+  const client = useMerlionQueryClient()
+
+  const querier = useCallback(
+    (module: Module, method: Method, ...params: Params) => {
+      if (!client) {
+        throw new Error('Null query client')
+      }
+      if (!(module in client)) {
+        throw new Error(`Module ${module} not found in Merlion client`)
+      }
+      const moduleQuery = client[module]
+      if (!(method in moduleQuery)) {
+        throw new Error(
+          `RPC method ${String(
+            method
+          )} not found in module ${module} of Merlion client`
+        )
+      }
+
+      const fun: (...args: Params) => Promise<Response> = moduleQuery[
+        method
+      ] as any
+
+      return Promise.all(params.map((p) => fun(...p)))
+    },
+    [client]
+  )
+
+  return useSWR(
+    client && params.every((p) => p.every((p) => p !== undefined && p !== null))
+      ? [module, method, ...params]
+      : null,
+    querier as Fetcher<Response[], any> // TODO
   )
 }
 
