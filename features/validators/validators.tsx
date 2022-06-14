@@ -21,12 +21,11 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { FiSearch } from 'react-icons/fi'
-import { BondStatusString } from './hooks'
+import { BondStatusString } from '@/hooks'
 import { ValidatorTable } from './table'
 
 export function Validators() {
   const [status, setStatus] = useState<BondStatusString>('BOND_STATUS_BONDED')
-  const [keyword, setKeyword] = useState('')
 
   const onChange = (i: number) => {
     if (i === 0) {
@@ -83,37 +82,7 @@ export function Validators() {
         </Tabs>
       </Container>
       <Container as="section" maxW="5xl">
-        <Box
-          bg="bg-surface"
-          boxShadow={useColorModeValue('sm', 'sm-dark')}
-          borderRadius="lg"
-        >
-          <Stack spacing="5">
-            <Box px={{ base: '4', md: '6' }} pt="5">
-              <Stack
-                direction={{ base: 'column', md: 'row' }}
-                justify="space-between"
-              >
-                <Text fontSize="lg" fontWeight="medium">
-                  Validators
-                </Text>
-                <InputGroup maxW="xs">
-                  <InputLeftElement pointerEvents="none">
-                    <Icon as={FiSearch} color="muted" boxSize="5" />
-                  </InputLeftElement>
-                  <Input
-                    // bg="bg-muted"
-                    placeholder="Search"
-                    onChange={(e) => setKeyword(e.target.value)}
-                  />
-                </InputGroup>
-              </Stack>
-            </Box>
-            <Box overflowX="auto">
-              <ValidatorTable status={status} keyword={keyword} />
-            </Box>
-          </Stack>
-        </Box>
+        <ValidatorTable status="BOND_STATUS_BONDED" />
       </Container>
     </>
   )

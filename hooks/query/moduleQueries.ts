@@ -1,8 +1,8 @@
 import useSWR, { Fetcher } from 'swr'
-import { QueryModules, useMerlionQueryClient } from '@/hooks'
+import { BondStatusString, QueryModules, useMerlionQueryClient } from '@/hooks'
 import { useCallback } from 'react'
 
-function useMerlionQuery<
+export function useMerlionQuery<
   Module extends keyof QueryModules,
   Method extends keyof QueryModules[Module],
   Params extends QueryModules[Module][Method] extends (...args: any[]) => any
@@ -48,7 +48,7 @@ function useMerlionQuery<
   )
 }
 
-function useMerlionQueryMultiple<
+export function useMerlionQueryMultiple<
   Module extends keyof QueryModules,
   Method extends keyof QueryModules[Module],
   Params extends QueryModules[Module][Method] extends (...args: any[]) => any
@@ -118,6 +118,10 @@ export function useDenomMetadata(denom: string) {
   return useMerlionQuery('bank', 'denomMetadata', denom)
 }
 
+export function useQueryOracleParams() {
+  return useMerlionQuery('oracle', 'params')
+}
+
 /****************************** Oracle ******************************/
 
 export function useCoinPrice(denom: string): number {
@@ -133,4 +137,39 @@ export function useLionPrice(): number {
 export function useMerPrice(): number {
   // TODO
   return 1
+}
+
+/***************************** Staking ******************************/
+
+export function useQueryPool() {
+  return useMerlionQuery('staking', 'pool')
+}
+
+export function useQueryValidators(status: BondStatusString) {
+  // @ts-ignore
+  return useMerlionQuery('staking', 'validators', status)
+}
+
+export function useQueryDelegatorValidators(address: string) {
+  return useMerlionQuery('staking', 'delegatorValidators', address)
+}
+
+export function useQueryValidatorRewardsMultiple(params: [string][]) {
+  return useMerlionQueryMultiple(
+    'distribution',
+    'validatorOutstandingRewards',
+    params
+  )
+}
+
+export function useQueryDelegatorRewardsMultiple(params: [string, string][]) {
+  return useMerlionQueryMultiple('distribution', 'delegationRewards', params)
+}
+
+export function useQueryValidatorMissCounters(params: [string][]) {
+  return useMerlionQueryMultiple('oracle', 'missCounter', params)
+}
+
+export function useQueryDelegatorDelegations(address?: string | null) {
+  return useMerlionQuery('staking', 'delegatorDelegations', address as string)
 }

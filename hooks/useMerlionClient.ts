@@ -16,6 +16,8 @@ import {
   MerlionClient,
   OracleExtension,
   setupOracleExtension,
+  setupVeExtension,
+  VeExtension,
 } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -47,7 +49,8 @@ export type QueryModules = AuthExtension &
   BankExtension &
   DistributionExtension &
   OracleExtension &
-  StakingExtension
+  StakingExtension &
+  VeExtension
 
 export type MerlionQueryClient = QueryClient & QueryModules
 
@@ -66,7 +69,8 @@ export function useMerlionQueryClient(): MerlionQueryClient | null {
           setupBankExtension,
           setupStakingExtension,
           setupDistributionExtension,
-          setupOracleExtension
+          setupOracleExtension,
+          setupVeExtension
         )
       )
     }

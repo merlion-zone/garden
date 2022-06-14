@@ -6,8 +6,12 @@ import {
   Center,
   HStack,
   Icon,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Link,
   Skeleton,
+  Stack,
   Table,
   Tbody,
   Td,
@@ -16,6 +20,7 @@ import {
   Thead,
   Tr,
   VStack,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   createTable,
@@ -31,17 +36,17 @@ import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { useMemo } from 'react'
 import { BondStatusString } from '@/hooks'
 import { useValidatorsData, Validator } from './hooks'
+import { FiSearch } from 'react-icons/fi'
 
 export interface ValidatorTableProps {
   status: BondStatusString
-  keyword: string
 }
 
 const table = createTable().setRowType<Validator>()
 
 numeral.nullFormat('N/A')
 
-export function ValidatorTable({ status, keyword }: ValidatorTableProps) {
+export function ValidatorTable({ status }: ValidatorTableProps) {
   const {
     data,
     missCounters,
@@ -50,6 +55,8 @@ export function ValidatorTable({ status, keyword }: ValidatorTableProps) {
     isOracleParamsLoading,
     isValidatorsLoading,
   } = useValidatorsData(status)
+  const [keyword, setKeyword] = useState('')
+
   const validatorsFuse = useMemo(
     () =>
       new Fuse(data, {
@@ -179,91 +186,126 @@ export function ValidatorTable({ status, keyword }: ValidatorTableProps) {
   })
 
   return (
-    <Table>
-      <Thead>
-        {instance.getHeaderGroups().map(({ id, headers }) => (
-          <Tr key={id}>
-            {headers.map(({ id, column, renderHeader }) => (
-              <Th key={id} isNumeric={id !== 'description'}>
-                <Button
-                  h="unset"
-                  variant="unstyled"
-                  onClick={column.getToggleSortingHandler()}
-                >
-                  <Center>
-                    {renderHeader()}
-                    <Box position="relative" w="4" h="4">
-                      <Icon
-                        position="absolute"
-                        as={FaSortUp}
-                        color="muted"
-                        opacity={column.getIsSorted() === 'asc' ? '1' : '0.2'}
-                      />
-                      <Icon
-                        position="absolute"
-                        as={FaSortDown}
-                        color="muted"
-                        opacity={column.getIsSorted() === 'desc' ? '1' : '0.2'}
-                      />
-                    </Box>
-                  </Center>
-                </Button>
-              </Th>
-            ))}
-          </Tr>
-        ))}
-      </Thead>
-      <Tbody>
-        {isValidatorsLoading &&
-          [0, 1, 2, 3].map((i) => (
-            <Tr key={i}>
-              <Td>
-                <Skeleton>
-                  <Text>&nbsp;</Text>
-                </Skeleton>
-              </Td>
-              <Td>
-                <Skeleton>
-                  <Text>&nbsp;</Text>
-                </Skeleton>
-              </Td>
-              <Td>
-                <Skeleton>
-                  <Text>&nbsp;</Text>
-                </Skeleton>
-              </Td>
-              <Td>
-                <Skeleton>
-                  <Text>&nbsp;</Text>
-                </Skeleton>
-              </Td>
-              <Td>
-                <Skeleton>
-                  <Text>&nbsp;</Text>
-                </Skeleton>
-              </Td>
-            </Tr>
-          ))}
-        {instance.getRowModel().rows.map(({ original, getVisibleCells }) => (
-          <Tr key={original?.operatorAddress}>
-            {getVisibleCells().map(({ id, renderCell }) => (
-              <Td key={id}>{renderCell()}</Td>
-            ))}
-          </Tr>
-        ))}
-        {!isValidatorsLoading && instance.getRowModel().rows.length <= 0 && (
-          <Tr aria-rowspan={4}>
-            <Td colSpan={5}>
-              <Center minH="56">
-                <VStack>
-                  <Icon as={FaBoxOpen} boxSize="16" />
-                  <Text color="muted">No Data</Text>
-                </VStack>
-              </Center>
-            </Td>
-          </Tr>
-        )}
-      </Tbody>
-    </Table>
+    <Box
+      bg="bg-surface"
+      boxShadow={useColorModeValue('sm', 'sm-dark')}
+      borderRadius="lg"
+    >
+      <Stack spacing="5">
+        <Box px={{ base: '4', md: '6' }} pt="5">
+          <Stack
+            direction={{ base: 'column', md: 'row' }}
+            justify="space-between"
+          >
+            <Text fontSize="lg" fontWeight="medium">
+              Validators
+            </Text>
+            <InputGroup maxW="xs">
+              <InputLeftElement pointerEvents="none">
+                <Icon as={FiSearch} color="muted" boxSize="5" />
+              </InputLeftElement>
+              <Input
+                placeholder="Search"
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+            </InputGroup>
+          </Stack>
+        </Box>
+        <Box overflowX="auto">
+          <Table>
+            <Thead>
+              {instance.getHeaderGroups().map(({ id, headers }) => (
+                <Tr key={id}>
+                  {headers.map(({ id, column, renderHeader }) => (
+                    <Th key={id} isNumeric={id !== 'description'}>
+                      <Button
+                        h="unset"
+                        variant="unstyled"
+                        onClick={column.getToggleSortingHandler()}
+                      >
+                        <Center>
+                          {renderHeader()}
+                          <Box position="relative" w="4" h="4">
+                            <Icon
+                              position="absolute"
+                              as={FaSortUp}
+                              color="muted"
+                              opacity={
+                                column.getIsSorted() === 'asc' ? '1' : '0.2'
+                              }
+                            />
+                            <Icon
+                              position="absolute"
+                              as={FaSortDown}
+                              color="muted"
+                              opacity={
+                                column.getIsSorted() === 'desc' ? '1' : '0.2'
+                              }
+                            />
+                          </Box>
+                        </Center>
+                      </Button>
+                    </Th>
+                  ))}
+                </Tr>
+              ))}
+            </Thead>
+            <Tbody>
+              {isValidatorsLoading &&
+                [0, 1, 2, 3].map((i) => (
+                  <Tr key={i}>
+                    <Td>
+                      <Skeleton>
+                        <Text>&nbsp;</Text>
+                      </Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton>
+                        <Text>&nbsp;</Text>
+                      </Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton>
+                        <Text>&nbsp;</Text>
+                      </Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton>
+                        <Text>&nbsp;</Text>
+                      </Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton>
+                        <Text>&nbsp;</Text>
+                      </Skeleton>
+                    </Td>
+                  </Tr>
+                ))}
+              {instance
+                .getRowModel()
+                .rows.map(({ original, getVisibleCells }) => (
+                  <Tr key={original?.operatorAddress}>
+                    {getVisibleCells().map(({ id, renderCell }) => (
+                      <Td key={id}>{renderCell()}</Td>
+                    ))}
+                  </Tr>
+                ))}
+              {!isValidatorsLoading && instance.getRowModel().rows.length <= 0 && (
+                <Tr aria-rowspan={4}>
+                  <Td colSpan={5}>
+                    <Center minH="56">
+                      <VStack>
+                        <Icon as={FaBoxOpen} boxSize="16" />
+                        <Text color="muted">No Data</Text>
+                      </VStack>
+                    </Center>
+                  </Td>
+                </Tr>
+              )}
+            </Tbody>
+          </Table>
+        </Box>
+      </Stack>
+    </Box>
   )
 }
