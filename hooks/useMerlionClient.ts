@@ -5,10 +5,12 @@ import {
   BankExtension,
   DistributionExtension,
   GasPrice,
+  GovExtension,
   QueryClient,
   setupAuthExtension,
   setupBankExtension,
   setupDistributionExtension,
+  setupGovExtension,
   setupStakingExtension,
   StakingExtension,
 } from '@cosmjs/stargate'
@@ -48,6 +50,7 @@ export function useMerlionClient(): MerlionClient | null {
 export type QueryModules = AuthExtension &
   BankExtension &
   DistributionExtension &
+  GovExtension &
   OracleExtension &
   StakingExtension &
   VeExtension
@@ -69,6 +72,7 @@ export function useMerlionQueryClient(): MerlionQueryClient | null {
           setupBankExtension,
           setupStakingExtension,
           setupDistributionExtension,
+          setupGovExtension,
           setupOracleExtension,
           setupVeExtension
         )
