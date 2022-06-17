@@ -17,9 +17,13 @@ import {
 import {
   MerlionClient,
   OracleExtension,
+  MakerExtension,
   setupOracleExtension,
+  setupMakerExtension,
   setupVeExtension,
   VeExtension,
+  setupTendermintExtension,
+  TendermintExtension,
 } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -47,15 +51,17 @@ export function useMerlionClient(): MerlionClient | null {
   return merlionClient
 }
 
-export type QueryModules = AuthExtension &
+export type QueryExtensions = TendermintExtension &
+  AuthExtension &
   BankExtension &
   DistributionExtension &
   GovExtension &
   OracleExtension &
+  MakerExtension &
   StakingExtension &
   VeExtension
 
-export type MerlionQueryClient = QueryClient & QueryModules
+export type MerlionQueryClient = QueryClient & QueryExtensions
 
 const merlionQueryClientAtom = atom<MerlionQueryClient | null>(null)
 
@@ -68,12 +74,14 @@ export function useMerlionQueryClient(): MerlionQueryClient | null {
       setQueryClient(
         QueryClient.withExtensions(
           tmClient,
+          setupTendermintExtension(tmClient),
           setupAuthExtension,
           setupBankExtension,
           setupStakingExtension,
           setupDistributionExtension,
           setupGovExtension,
           setupOracleExtension,
+          setupMakerExtension,
           setupVeExtension
         )
       )

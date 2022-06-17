@@ -13,7 +13,7 @@ import { FaCoins } from 'react-icons/fa'
 import { FiActivity, FiCamera, FiFilm, FiSearch } from 'react-icons/fi'
 import { IoMdSwap } from 'react-icons/io'
 import { GiWallet, GiVote, GiStrong } from 'react-icons/gi'
-import { RiGovernmentLine } from 'react-icons/ri'
+import { RiGovernmentLine, RiCurrencyFill } from 'react-icons/ri'
 import { SiDiscord, SiTelegram, SiTwitter } from 'react-icons/si'
 import { TbGauge } from 'react-icons/tb'
 import { NavButton } from '@/components/Sidebar/NavButton'
@@ -56,6 +56,11 @@ export const Sidebar = () => {
                 Stablecoin
               </Text>
               <Stack spacing="1">
+                <NavButton
+                  href="/stablecoin-view"
+                  label="General View"
+                  icon={RiCurrencyFill}
+                />
                 <NavButton
                   href="/swap-mint"
                   label="Swap Mint"

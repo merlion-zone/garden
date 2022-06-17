@@ -15,16 +15,15 @@ import {
 import { useBalance, useLionPrice, useMerPrice } from '@/hooks/query'
 import config from '@/config'
 import { useAccountAddress } from '@/hooks'
-import { AmountDisplay } from '@/components/AmountDisplay'
+import { AmountDisplay } from '@/components/NumberDisplay'
 import { CgArrowsExchange } from 'react-icons/cg'
 import Avvvatars from 'avvvatars-react'
-import { BigNumber } from 'ethers'
 
 export const TokenAssetTable = () => {
   const address = useAccountAddress()
 
-  const lionPrice = useLionPrice()
-  const merPrice = useMerPrice()
+  const { price: lionPrice } = useLionPrice()
+  const { price: merPrice } = useMerPrice()
 
   const { balance: lionBalance } = useBalance(
     address?.mer() || '',
@@ -69,7 +68,8 @@ export const TokenAssetTable = () => {
                   <AmountDisplay
                     value={
                       lionBalance &&
-                      BigNumber.from(lionBalance).mul(lionPrice).toString()
+                      lionPrice &&
+                      lionPrice.mul(lionBalance).toString()
                     }
                     decimals={config.denomDecimals}
                     prefix="$"
@@ -103,7 +103,8 @@ export const TokenAssetTable = () => {
                   <AmountDisplay
                     value={
                       merBalance &&
-                      BigNumber.from(merBalance).mul(merPrice).toString()
+                      merPrice &&
+                      merPrice.mul(merBalance).toString()
                     }
                     decimals={config.merDenomDecimals}
                     prefix="$"

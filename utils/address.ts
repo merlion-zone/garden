@@ -21,6 +21,15 @@ export function shortenAddress(address: string, chars = 4): [string, string] {
   }
 }
 
+export function shortenDenom(denom: string, chars = 4): string {
+  const [prefix, address] = denom.split('/')
+  if (address) {
+    return `${prefix}/${shortenAddress(address, chars)[1]}`
+  } else {
+    return denom
+  }
+}
+
 export const validatorToDelegatorAddress = (address: string) => {
   const decode = bech32.decode(address).words
   return bech32.encode(BECH32_PREFIX, decode)

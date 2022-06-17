@@ -1,15 +1,24 @@
 import useSWR, { Fetcher } from 'swr'
-import { BondStatusString, QueryModules, useMerlionQueryClient } from '@/hooks'
+import {
+  BondStatusString,
+  QueryExtensions,
+  useMerlionQueryClient,
+} from '@/hooks'
 import { useCallback } from 'react'
+import { Dec } from '@merlionzone/merlionjs'
+import { Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
+import { DenomUnit } from '../../../merlionjs/src/proto/cosmos/bank/v1beta1/bank'
 
 export function useMerlionQuery<
-  Module extends keyof QueryModules,
-  Method extends keyof QueryModules[Module],
-  Params extends QueryModules[Module][Method] extends (...args: any[]) => any
-    ? Parameters<QueryModules[Module][Method]>
+  Module extends keyof QueryExtensions,
+  Method extends keyof QueryExtensions[Module],
+  Params extends QueryExtensions[Module][Method] extends (...args: any[]) => any
+    ? Parameters<QueryExtensions[Module][Method]>
     : never,
-  Response extends QueryModules[Module][Method] extends (...args: any[]) => any
-    ? Awaited<ReturnType<QueryModules[Module][Method]>>
+  Response extends QueryExtensions[Module][Method] extends (
+    ...args: any[]
+  ) => any
+    ? Awaited<ReturnType<QueryExtensions[Module][Method]>>
     : never
 >(module: Module, method: Method, ...params: Params) {
   const client = useMerlionQueryClient()
@@ -49,13 +58,15 @@ export function useMerlionQuery<
 }
 
 export function useMerlionQueryMultiple<
-  Module extends keyof QueryModules,
-  Method extends keyof QueryModules[Module],
-  Params extends QueryModules[Module][Method] extends (...args: any[]) => any
-    ? Parameters<QueryModules[Module][Method]>
+  Module extends keyof QueryExtensions,
+  Method extends keyof QueryExtensions[Module],
+  Params extends QueryExtensions[Module][Method] extends (...args: any[]) => any
+    ? Parameters<QueryExtensions[Module][Method]>
     : never,
-  Response extends QueryModules[Module][Method] extends (...args: any[]) => any
-    ? Awaited<ReturnType<QueryModules[Module][Method]>>
+  Response extends QueryExtensions[Module][Method] extends (
+    ...args: any[]
+  ) => any
+    ? Awaited<ReturnType<QueryExtensions[Module][Method]>>
     : never
 >(module: Module, method: Method, params: Params[]) {
   const client = useMerlionQueryClient()
@@ -94,6 +105,12 @@ export function useMerlionQueryMultiple<
   )
 }
 
+/****************************** Tendermint ******************************/
+
+export function useStatus() {
+  return useMerlionQuery('tendermint', 'status')
+}
+
 /****************************** Bank ******************************/
 
 export function useBalance(
@@ -114,29 +131,98 @@ export function useSupplyOf(denom: string) {
   return useMerlionQuery('bank', 'supplyOf', denom)
 }
 
-export function useDenomMetadata(denom: string) {
-  return useMerlionQuery('bank', 'denomMetadata', denom)
+export interface DenomMetadata extends Metadata {
+  denomUnitsMap: Map<string, DenomUnit>
+  displayExponent?: number
 }
 
-export function useQueryOracleParams() {
-  return useMerlionQuery('oracle', 'params')
+function extendDenomMetadata(metadata: Metadata): DenomMetadata {
+  const denomUnitsMap = new Map<string, DenomUnit>()
+  metadata.denomUnits.forEach((d) => {
+    denomUnitsMap.set(d.denom, d)
+  })
+  return {
+    denomUnitsMap,
+    displayExponent: denomUnitsMap.get(metadata.display)?.exponent,
+    ...metadata,
+  }
+}
+
+export function useDenomMetadata(denom: string) {
+  const { data, ...remain } = useMerlionQuery('bank', 'denomMetadata', denom)
+  return {
+    data: data && extendDenomMetadata(data),
+    ...remain,
+  }
+}
+
+export function useDenomsMetadata() {
+  const { data, ...remain } = useMerlionQuery('bank', 'denomsMetadata')
+  return {
+    data: data && data.map((metadata) => extendDenomMetadata(metadata)),
+    ...remain,
+  }
 }
 
 /****************************** Oracle ******************************/
 
-export function useCoinPrice(denom: string): number {
-  // TODO
-  return 0
+export function useOracleParams() {
+  return useMerlionQuery('oracle', 'params')
 }
 
-export function useLionPrice(): number {
-  // TODO
-  return 10
+export function useCoinPrice(denom: string): { price?: Dec; error: any } {
+  const { data, error } = useMerlionQuery('oracle', 'exchangeRate', denom)
+  console.debug(
+    `useCoinPrice, denom ${denom}, price ${
+      data && Dec.fromProto(data).toString()
+    }`
+  )
+  return {
+    price: data ? Dec.fromProto(data) : undefined,
+    error,
+  }
 }
 
-export function useMerPrice(): number {
-  // TODO
-  return 1
+export function useLionPrice(): { price?: Dec; error: any } {
+  return useCoinPrice('alion')
+}
+
+export function useMerPrice(): { price?: Dec; error: any } {
+  return useCoinPrice('uusd')
+}
+
+/****************************** Maker ******************************/
+
+export function useMakerParams() {
+  return useMerlionQuery('maker', 'params')
+}
+
+export function useAllBackingParams() {
+  return useMerlionQuery('maker', 'allBackingRiskParams')
+}
+
+export function useAllCollateralParams() {
+  return useMerlionQuery('maker', 'allCollateralRiskParams')
+}
+
+export function useTotalBacking() {
+  return useMerlionQuery('maker', 'totalBacking')
+}
+
+export function useTotalCollateral() {
+  return useMerlionQuery('maker', 'totalCollateral')
+}
+
+export function useAllBackingPools() {
+  return useMerlionQuery('maker', 'allBackingPools')
+}
+
+export function useAllCollateralPools() {
+  return useMerlionQuery('maker', 'allCollateralPools')
+}
+
+export function useBackingRatio() {
+  return useMerlionQuery('maker', 'backingRatio')
 }
 
 /***************************** Staking ******************************/

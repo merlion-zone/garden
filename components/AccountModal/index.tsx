@@ -9,9 +9,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Button,
-  useClipboard,
 } from '@chakra-ui/react'
-import { FiCheckCircle, FiCopy } from 'react-icons/fi'
 import { MdOpenInNew } from 'react-icons/md'
 import { useConnectWallet } from '@/hooks'
 import { shortenAddress } from '@/utils'

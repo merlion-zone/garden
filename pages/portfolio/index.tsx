@@ -21,8 +21,7 @@ import {
 import { useBalance, useLionPrice, useMerPrice } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
 import config from '@/config'
-import { BigNumber } from 'ethers'
-import { AmountDisplay } from '@/components/AmountDisplay'
+import { AmountDisplay } from '@/components/NumberDisplay'
 import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
 import { Hint } from '@/components/Hint'
 import QRCodeSVG from 'qrcode.react'
@@ -42,8 +41,8 @@ const Card = (props: BoxProps) => (
 export default function Portfolio() {
   const address = useAccountAddress()
 
-  const lionPrice = useLionPrice()
-  const merPrice = useMerPrice()
+  const { price: lionPrice } = useLionPrice()
+  const { price: merPrice } = useMerPrice()
 
   const { balance: lionBalance } = useBalance(
     address?.mer() || '',
@@ -126,7 +125,8 @@ export default function Portfolio() {
                     <AmountDisplay
                       value={
                         lionBalance &&
-                        BigNumber.from(lionBalance).mul(lionPrice).toString()
+                        lionPrice &&
+                        lionPrice.mul(lionBalance).toString()
                       }
                       decimals={config.denomDecimals}
                       prefix="$"
@@ -137,7 +137,10 @@ export default function Portfolio() {
                 <HStack fontSize="md" color="gray.500">
                   <Text fontWeight="bold">
                     1 LION = &nbsp;
-                    <AmountDisplay value={lionPrice} prefix="$"></AmountDisplay>
+                    <AmountDisplay
+                      value={lionPrice?.toString()}
+                      prefix="$"
+                    ></AmountDisplay>
                   </Text>
                   <Text>USD</Text>
                 </HStack>
@@ -168,7 +171,8 @@ export default function Portfolio() {
                     <AmountDisplay
                       value={
                         merBalance &&
-                        BigNumber.from(merBalance).mul(merPrice).toString()
+                        merPrice &&
+                        merPrice.mul(merBalance).toString()
                       }
                       decimals={config.merDenomDecimals}
                       prefix="$"
@@ -179,7 +183,10 @@ export default function Portfolio() {
                 <HStack fontSize="md" color="gray.500">
                   <Text fontWeight="bold">
                     1 USM = &nbsp;
-                    <AmountDisplay value={merPrice} prefix="$"></AmountDisplay>
+                    <AmountDisplay
+                      value={merPrice?.toString()}
+                      prefix="$"
+                    ></AmountDisplay>
                   </Text>
                   <Text>USD</Text>
                 </HStack>
