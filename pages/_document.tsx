@@ -7,8 +7,6 @@ export default class Document extends NextDocument {
     return (
       <Html lang="en">
         <Head>
-          {/* eslint-disable-next-line @next/next/no-title-in-document-head */}
-          <title>Merlion Garden</title>
           <link
             rel="icon"
             type="image/png"

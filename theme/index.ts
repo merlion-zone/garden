@@ -19,6 +19,13 @@ export const theme: Record<string, any> = extendTheme(
         'html, body': {
           fontSize: 'md',
         },
+        '*::-webkit-scrollbar': {
+          display: 'none',
+        },
+        '*': {
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
+        },
       },
     },
     colors: {
