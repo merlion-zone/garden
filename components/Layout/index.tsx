@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Box, Flex, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Flex, useBreakpoint, useBreakpointValue } from '@chakra-ui/react'
 import { Sidebar } from '@/components/Sidebar'
 import { Navbar } from '@/components/Navbar'
 import { Toolbar } from '@/components/Toolbar'
@@ -10,7 +10,7 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const isDesktop = useBreakpointValue({ base: false, lg: true })
+  const isDesktop = useBreakpointValue({ base: false, lg: true }, 'lg')
   return (
     <>
       <Head>

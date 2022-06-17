@@ -19,7 +19,11 @@ import { TbGauge } from 'react-icons/tb'
 import { NavButton } from '@/components/Sidebar/NavButton'
 import { Logo } from '@/components/Logo'
 
-export const Sidebar = () => {
+interface SidebarProps {
+  onButtonClick?: () => void
+}
+
+export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
   const inputColor = useColorModeValue('bg-accent', 'muted')
   const textColor = useColorModeValue('on-accent-muted', 'muted')
 
@@ -49,7 +53,12 @@ export const Sidebar = () => {
               />
             </InputGroup>
             <Stack spacing="1">
-              <NavButton href="/portfolio" label="Portfolio" icon={GiWallet} />
+              <NavButton
+                href="/portfolio"
+                label="Portfolio"
+                icon={GiWallet}
+                onClick={onButtonClick}
+              />
             </Stack>
             <Stack>
               <Text fontSize="sm" color={textColor} fontWeight="medium">
@@ -60,22 +69,31 @@ export const Sidebar = () => {
                   href="/stablecoin-view"
                   label="General View"
                   icon={RiCurrencyFill}
+                  onClick={onButtonClick}
                 />
                 <NavButton
                   href="/swap-mint"
                   label="Swap Mint"
                   icon={IoMdSwap}
+                  onClick={onButtonClick}
                 />
                 <NavButton
                   href="/collateral-mint"
                   label="Collateral Mint"
                   icon={BsCurrencyExchange}
+                  onClick={onButtonClick}
                 />
-                <NavButton href="/backing" label="Backing" icon={GiStrong} />
+                <NavButton
+                  href="/backing"
+                  label="Backing"
+                  icon={GiStrong}
+                  onClick={onButtonClick}
+                />
                 <NavButton
                   href="/collateral"
                   label="Collateral"
                   icon={FaCoins}
+                  onClick={onButtonClick}
                 />
               </Stack>
             </Stack>
@@ -84,8 +102,18 @@ export const Sidebar = () => {
                 Voting Escrow
               </Text>
               <Stack spacing="1">
-                <NavButton href="/ve-nft" label="veNFT" icon={GiVote} />
-                <NavButton href="/gauge" label="Gauge" icon={TbGauge} />
+                <NavButton
+                  href="/ve-nft"
+                  label="veNFT"
+                  icon={GiVote}
+                  onClick={onButtonClick}
+                />
+                <NavButton
+                  href="/gauge"
+                  label="Gauge"
+                  icon={TbGauge}
+                  onClick={onButtonClick}
+                />
               </Stack>
             </Stack>
             <Stack>
@@ -93,11 +121,17 @@ export const Sidebar = () => {
                 Staking
               </Text>
               <Stack spacing="1">
-                <NavButton href="/stake" label="Stake" icon={FiFilm} />
+                <NavButton
+                  href="/stake"
+                  label="Stake"
+                  icon={FiFilm}
+                  onClick={onButtonClick}
+                />
                 <NavButton
                   href="/validators"
                   label="Validators"
                   icon={FiCamera}
+                  onClick={onButtonClick}
                 />
               </Stack>
             </Stack>
@@ -110,6 +144,7 @@ export const Sidebar = () => {
                   href="/governance"
                   label="Governance"
                   icon={RiGovernmentLine}
+                  onClick={onButtonClick}
                 />
               </Stack>
             </Stack>
@@ -122,6 +157,7 @@ export const Sidebar = () => {
                   href="/activity"
                   label="Activity"
                   icon={FiActivity}
+                  onClick={onButtonClick}
                 />
               </Stack>
             </Stack>
@@ -135,18 +171,21 @@ export const Sidebar = () => {
                   isExternal
                   label="Twitter"
                   icon={SiTwitter}
+                  onClick={onButtonClick}
                 />
                 <NavButton
                   href="/discord"
                   isExternal
                   label="Discord"
                   icon={SiDiscord}
+                  onClick={onButtonClick}
                 />
                 <NavButton
                   href="/telegram"
                   isExternal
                   label="Telegram"
                   icon={SiTelegram}
+                  onClick={onButtonClick}
                 />
               </Stack>
             </Stack>

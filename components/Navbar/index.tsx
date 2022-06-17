@@ -38,7 +38,7 @@ export const Navbar = () => {
         >
           <DrawerOverlay />
           <DrawerContent>
-            <Sidebar />
+            <Sidebar onButtonClick={onClose} />
           </DrawerContent>
         </Drawer>
       </Flex>
