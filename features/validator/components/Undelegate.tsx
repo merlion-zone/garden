@@ -1,5 +1,5 @@
 import config from '@/config'
-import { useConnectWallet, useMerlionClient } from '@/hooks'
+import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
 import { formatCoin, parseCoin } from '@/utils'
 import {
   Button,
@@ -35,6 +35,7 @@ export function Undelegate() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { query } = useRouter()
   const { account, connected } = useConnectWallet()
+  const address = useAccountAddress()
   const merlionClient = useMerlionClient()
   const toast = useToast()
   const { data: delegationData } = useDelegation(
@@ -73,7 +74,7 @@ export function Undelegate() {
     const message: MsgUndelegateEncodeObject = {
       typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate',
       value: {
-        delegatorAddress: account,
+        delegatorAddress: address?.mer(),
         validatorAddress: query.address as string,
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },
