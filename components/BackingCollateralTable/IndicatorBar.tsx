@@ -23,11 +23,11 @@ const indicatorColors = {
   Buyback: 'cyan',
   Reback: 'purple',
   Interest: 'orange',
-  BasicLTV: 'cyan',
-  MaxLTV: 'purple',
+  Basic: 'cyan',
+  Max: 'purple',
   Catalytic: 'teal',
-  LiquidationFee: 'yellow.500',
-  LiquidationThreshold: 'cyan',
+  Fee: 'yellow.500',
+  Threshold: 'cyan',
 }
 
 interface IndicatorTextProps {

@@ -1,3 +1,3 @@
-import { NewProposal } from "@/features";
+import { NewProposal } from '@/features'
 
 export default NewProposal

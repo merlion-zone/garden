@@ -12,6 +12,8 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react'
 import { Hint } from '@/components/Hint'
 import {
@@ -31,8 +33,8 @@ import {
   BackingPoolsTable,
   CollateralPoolsTable,
 } from '@/components/BackingCollateralTable'
-import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
 import { useState } from 'react'
+import { BackingPie } from '@/components/BackingCollateralChart'
 
 const Card = (props: BoxProps) => (
   <Box
@@ -59,7 +61,12 @@ export default function StablecoinView() {
     <Container maxW="9xl" py="8" height="full">
       <Stack spacing={{ base: '8', lg: '6' }}>
         <SimpleGrid columns={{ base: 1, md: 3 }} gap={{ base: '8', lg: '6' }}>
-          <Card></Card>
+          <Card>
+            <Text>Backing & Collateral</Text>
+            <HStack h="sm">
+              <BackingPie></BackingPie>
+            </HStack>
+          </Card>
 
           <Card>
             <HStack align="baseline">

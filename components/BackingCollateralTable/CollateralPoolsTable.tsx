@@ -86,8 +86,8 @@ export const CollateralPoolsTable = () => {
                   <Text>LTV</Text>
                   <IndicatorTextBox
                     items={[
-                      { name: 'BasicLTV' },
-                      { name: 'MaxLTV' },
+                      { name: 'Basic' },
+                      { name: 'Max' },
                       { name: 'Catalytic' },
                     ]}
                   />
@@ -97,10 +97,7 @@ export const CollateralPoolsTable = () => {
                 <HStack>
                   <Text>Liquidation</Text>
                   <IndicatorTextBox
-                    items={[
-                      { name: 'LiquidationFee' },
-                      { name: 'LiquidationThreshold' },
-                    ]}
+                    items={[{ name: 'Fee' }, { name: 'Threshold' }]}
                   />
                 </HStack>
               </Th>
@@ -197,11 +194,11 @@ export const CollateralPoolsTable = () => {
                       percentage
                       items={[
                         {
-                          name: 'BasicLTV',
+                          name: 'Basic',
                           content: params.basicLoanToValue,
                         },
                         {
-                          name: 'MaxLTV',
+                          name: 'Max',
                           content: params.loanToValue,
                         },
                         {
@@ -216,11 +213,11 @@ export const CollateralPoolsTable = () => {
                       percentage
                       items={[
                         {
-                          name: 'LiquidationFee',
+                          name: 'Fee',
                           content: params.liquidationFee,
                         },
                         {
-                          name: 'LiquidationThreshold',
+                          name: 'Threshold',
                           content: params.liquidationThreshold,
                         },
                       ]}
