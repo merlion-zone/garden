@@ -74,7 +74,7 @@ export function Delegate() {
     const message: MsgDelegateEncodeObject = {
       typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
       value: {
-        delegatorAddress: account,
+        delegatorAddress: address!.mer(),
         validatorAddress: query.address as string,
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },

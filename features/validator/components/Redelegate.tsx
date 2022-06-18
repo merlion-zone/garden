@@ -26,7 +26,12 @@ import { useMemo } from 'react'
 import { MsgBeginRedelegateEncodeObject } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { formatCoin, parseCoin } from '@/utils'
-import { useConnectWallet, useMerlionClient, useValidators } from '@/hooks'
+import {
+  useAccountAddress,
+  useConnectWallet,
+  useMerlionClient,
+  useValidators,
+} from '@/hooks'
 
 interface FormData {
   validator: string
@@ -38,6 +43,7 @@ export function Redelegate() {
   const { query } = useRouter()
   const { data } = useValidators()
   const { account, connected } = useConnectWallet()
+  const address = useAccountAddress()
   const merlionClient = useMerlionClient()
   const toast = useToast()
   const { data: delegationData } = useDelegation(
@@ -78,7 +84,7 @@ export function Redelegate() {
     const message: MsgBeginRedelegateEncodeObject = {
       typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegate',
       value: {
-        delegatorAddress: account,
+        delegatorAddress: address?.mer(),
         validatorDstAddress: validator,
         validatorSrcAddress: query.address as string,
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
