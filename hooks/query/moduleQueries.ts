@@ -4,10 +4,11 @@ import {
   QueryExtensions,
   useMerlionQueryClient,
 } from '@/hooks'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Dec } from '@merlionzone/merlionjs'
 import { Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
 import { DenomUnit } from '../../../merlionjs/src/proto/cosmos/bank/v1beta1/bank'
+import config from '@/config'
 
 export function useMerlionQuery<
   Module extends keyof QueryExtensions,
@@ -127,6 +128,22 @@ export function useBalance(
   }
 }
 
+export function useBalances(address: string) {
+  return useMerlionQuery('bank', 'allBalances', address)
+}
+
+export function useBalancesMap(address: string) {
+  const { data: balances, error } = useBalances(address)
+  const data = useMemo(() => {
+    const balancesMap = new Map()
+    balances?.forEach((b) => {
+      balancesMap.set(b.denom, b.amount)
+    })
+    return balancesMap
+  }, [balances])
+  return { data, error }
+}
+
 export function useSupplyOf(denom: string) {
   return useMerlionQuery('bank', 'supplyOf', denom)
 }
@@ -148,8 +165,29 @@ function extendDenomMetadata(metadata: Metadata): DenomMetadata {
   }
 }
 
+const lionMetadata: Metadata = {
+  base: config.denom,
+  denomUnits: [
+    { denom: config.denom, exponent: 0, aliases: [] },
+    {
+      denom: config.displayDenom.toLowerCase(),
+      exponent: config.denomDecimals,
+      aliases: [],
+    },
+  ],
+  description: 'The native gas & staking token of the Merlion.',
+  display: config.displayDenom.toLowerCase(),
+  name: config.displayDenom,
+  symbol: config.displayDenom,
+}
+
 export function useDenomMetadata(denom: string) {
   const { data, ...remain } = useMerlionQuery('bank', 'denomMetadata', denom)
+  if (denom === config.denom) {
+    return {
+      data: extendDenomMetadata(lionMetadata),
+    }
+  }
   return {
     data: data && extendDenomMetadata(data),
     ...remain,
@@ -159,8 +197,29 @@ export function useDenomMetadata(denom: string) {
 export function useDenomsMetadata() {
   const { data, ...remain } = useMerlionQuery('bank', 'denomsMetadata')
   return {
-    data: data && data.map((metadata) => extendDenomMetadata(metadata)),
+    data:
+      data &&
+      data
+        .concat([lionMetadata])
+        .map((metadata) => extendDenomMetadata(metadata)),
     ...remain,
+  }
+}
+
+export function useDenomsMetadataMap() {
+  const { data: denomsMetadata, error } = useDenomsMetadata()
+
+  const data = useMemo(() => {
+    const denomsMetadataMap = new Map<string, DenomMetadata>()
+    denomsMetadata?.forEach((metadata) => {
+      denomsMetadataMap.set(metadata.base, metadata)
+    })
+    return denomsMetadataMap
+  }, [denomsMetadata])
+
+  return {
+    data: denomsMetadata && data,
+    error,
   }
 }
 

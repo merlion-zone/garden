@@ -19,6 +19,7 @@ import {
   useAllCollateralParams,
   useAllCollateralPools,
   useDenomsMetadata,
+  useDenomsMetadataMap,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
 import { Coin } from '@merlionzone/merlionjs'
@@ -30,18 +31,13 @@ import config from '@/config'
 export const CollateralPoolsTable = () => {
   const { data: allCollateralParams } = useAllCollateralParams()
   const { data: allCollateralPools } = useAllCollateralPools()
-  const { data: denomsMetadata } = useDenomsMetadata()
+  const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
   const collateralPoolsMap = new Map<string, PoolCollateral>()
   allCollateralPools?.forEach((pool) => {
     if (pool.collateral) {
       collateralPoolsMap.set(pool.collateral.denom, pool)
     }
-  })
-
-  const denomsMetadataMap = new Map<string, DenomMetadata>()
-  denomsMetadata?.forEach((metadata) => {
-    denomsMetadataMap.set(metadata.base, metadata)
   })
 
   const hoverRowBg = useColorModeValue('gray.50', 'gray.900')

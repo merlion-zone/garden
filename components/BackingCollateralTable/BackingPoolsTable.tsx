@@ -19,6 +19,7 @@ import {
   useAllBackingParams,
   useAllBackingPools,
   useDenomsMetadata,
+  useDenomsMetadataMap,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
 import { PoolBacking } from '@merlionzone/merlionjs/dist/proto/merlion/maker/v1/maker'
@@ -33,18 +34,13 @@ import {
 export const BackingPoolsTable = () => {
   const { data: allBackingParams } = useAllBackingParams()
   const { data: allBackingPools } = useAllBackingPools()
-  const { data: denomsMetadata } = useDenomsMetadata()
+  const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
   const backingPoolsMap = new Map<string, PoolBacking>()
   allBackingPools?.forEach((pool) => {
     if (pool.backing) {
       backingPoolsMap.set(pool.backing.denom, pool)
     }
-  })
-
-  const denomsMetadataMap = new Map<string, DenomMetadata>()
-  denomsMetadata?.forEach((metadata) => {
-    denomsMetadataMap.set(metadata.base, metadata)
   })
 
   const hoverRowBg = useColorModeValue('gray.50', 'gray.900')
