@@ -1939,9 +1939,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@merlionzone/merlionjs@npm:^0.1.6":
-  version: 0.1.6
-  resolution: "@merlionzone/merlionjs@npm:0.1.6"
+"@merlionzone/merlionjs@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "@merlionzone/merlionjs@npm:0.1.7"
   dependencies:
     "@cosmjs/amino": ^0.28.7
     "@cosmjs/crypto": ^0.28.7
@@ -1961,7 +1961,7 @@ __metadata:
     long: ^4.0.0
     protobufjs: ~6.11.2
     utf-8-validate: ^5.0.9
-  checksum: 27a154c0d1c5b3490f2b9c126fca74655aaa19b50c8fb3ba0e5dffb80c976c0cdd90ee99cd7cbe8e3987585fe154c041483ad01f887a5ff91451d4b4b84c5981
+  checksum: bf37d6a24ffd8275b8488d8b69a1cce5002e48d117d476a65e94813884d1daa015479d5d8b8082def51b41f91b7f43c1f800b16e69fca0dee8fbd378b5b65334
   languageName: node
   linkType: hard
 
@@ -4295,7 +4295,7 @@ __metadata:
     "@ethersproject/providers": ^5.6.8
     "@fontsource/inter": ^4.5.10
     "@keplr-wallet/types": ^0.10.5
-    "@merlionzone/merlionjs": ^0.1.6
+    "@merlionzone/merlionjs": ^0.1.7
     "@metamask/detect-provider": ^1.2.0
     "@nivo/core": ^0.78.0
     "@nivo/pie": ^0.78.0

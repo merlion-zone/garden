@@ -24,7 +24,7 @@ export function shortenAddress(address: string, chars = 4): [string, string] {
 export function shortenDenom(denom: string, chars = 4): string {
   const [prefix, address] = denom.split('/')
   if (address) {
-    return `${prefix}/${shortenAddress(address, chars)[1]}`
+    return `${prefix}/${shortenAddress(address, chars)[0]}`
   } else {
     return denom
   }

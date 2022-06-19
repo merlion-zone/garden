@@ -243,11 +243,31 @@ export function useCoinPrice(denom: string): { price?: Dec; error: any } {
 }
 
 export function useLionPrice(): { price?: Dec; error: any } {
-  return useCoinPrice('alion')
+  return useCoinPrice(config.denom)
 }
 
 export function useMerPrice(): { price?: Dec; error: any } {
-  return useCoinPrice('uusd')
+  return useCoinPrice(config.merDenom)
+}
+
+function displayCoinPrice(metadata?: DenomMetadata, price?: Dec): Dec | null {
+  if (!metadata || !price || metadata.displayExponent === undefined) {
+    return null
+  }
+  return price.mul(new Dec(10).pow(metadata.displayExponent)).div(1e6)
+}
+
+export function useDisplayCoinPrice(denom: string) {
+  const { data: denomsMetadata, error: err1 } = useDenomsMetadataMap()
+  const { price, error: err2 } = useCoinPrice(denom)
+  const displayPrice = useMemo(
+    () => displayCoinPrice(denomsMetadata?.get(denom), price),
+    [denom, denomsMetadata, price]
+  )
+  return {
+    displayPrice,
+    error: err1 || err2,
+  }
 }
 
 /****************************** Maker ******************************/

@@ -2,7 +2,7 @@ import NumberFormat from 'react-number-format'
 import { Dec } from '@merlionzone/merlionjs'
 
 interface AmountDisplayProps {
-  value: string | number | null | undefined
+  value: Dec | string | number | null | undefined
   prefix?: string
   suffix?: string
   decimals?: number
@@ -16,6 +16,9 @@ export const AmountDisplay = ({
   decimals,
   precision,
 }: AmountDisplayProps) => {
+  if (value instanceof Dec) {
+    value = value.toString()
+  }
   if (value && decimals) {
     value = Dec.withPrecision(value, decimals).toString()
   }

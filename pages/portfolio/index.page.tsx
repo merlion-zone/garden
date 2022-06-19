@@ -18,7 +18,7 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useBalance, useLionPrice, useMerPrice } from '@/hooks/query'
+import { useBalance, useDisplayCoinPrice } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
 import config from '@/config'
 import { AmountDisplay } from '@/components/NumberDisplay'
@@ -41,8 +41,8 @@ const Card = (props: BoxProps) => (
 export default function Portfolio() {
   const address = useAccountAddress()
 
-  const { price: lionPrice } = useLionPrice()
-  const { price: merPrice } = useMerPrice()
+  const { displayPrice: lionDisplayPrice } = useDisplayCoinPrice(config.denom)
+  const { displayPrice: merDisplayPrice } = useDisplayCoinPrice(config.merDenom)
 
   const { balance: lionBalance } = useBalance(
     address?.mer() || '',
@@ -125,8 +125,8 @@ export default function Portfolio() {
                     <AmountDisplay
                       value={
                         lionBalance &&
-                        lionPrice &&
-                        lionPrice.mul(lionBalance).toString()
+                        lionDisplayPrice &&
+                        lionDisplayPrice.mul(lionBalance)
                       }
                       decimals={config.denomDecimals}
                       prefix="$"
@@ -138,7 +138,7 @@ export default function Portfolio() {
                   <Text fontWeight="bold">
                     1 LION = &nbsp;
                     <AmountDisplay
-                      value={lionPrice?.toString()}
+                      value={lionDisplayPrice}
                       prefix="$"
                     ></AmountDisplay>
                   </Text>
@@ -171,8 +171,8 @@ export default function Portfolio() {
                     <AmountDisplay
                       value={
                         merBalance &&
-                        merPrice &&
-                        merPrice.mul(merBalance).toString()
+                        merDisplayPrice &&
+                        merDisplayPrice.mul(merBalance)
                       }
                       decimals={config.merDenomDecimals}
                       prefix="$"
@@ -184,7 +184,7 @@ export default function Portfolio() {
                   <Text fontWeight="bold">
                     1 USM = &nbsp;
                     <AmountDisplay
-                      value={merPrice?.toString()}
+                      value={merDisplayPrice}
                       prefix="$"
                     ></AmountDisplay>
                   </Text>

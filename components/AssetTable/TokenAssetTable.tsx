@@ -12,7 +12,7 @@ import {
   Center,
   Button,
 } from '@chakra-ui/react'
-import { useBalance, useLionPrice, useMerPrice } from '@/hooks/query'
+import { useBalance, useDisplayCoinPrice } from '@/hooks/query'
 import config from '@/config'
 import { useAccountAddress } from '@/hooks'
 import { AmountDisplay } from '@/components/NumberDisplay'
@@ -22,8 +22,8 @@ import Avvvatars from 'avvvatars-react'
 export const TokenAssetTable = () => {
   const address = useAccountAddress()
 
-  const { price: lionPrice } = useLionPrice()
-  const { price: merPrice } = useMerPrice()
+  const { displayPrice: lionDisplayPrice } = useDisplayCoinPrice(config.denom)
+  const { displayPrice: merDisplayPrice } = useDisplayCoinPrice(config.merDenom)
 
   const { balance: lionBalance } = useBalance(
     address?.mer() || '',
@@ -68,8 +68,8 @@ export const TokenAssetTable = () => {
                   <AmountDisplay
                     value={
                       lionBalance &&
-                      lionPrice &&
-                      lionPrice.mul(lionBalance).toString()
+                      lionDisplayPrice &&
+                      lionDisplayPrice.mul(lionBalance)
                     }
                     decimals={config.denomDecimals}
                     prefix="$"
@@ -103,8 +103,8 @@ export const TokenAssetTable = () => {
                   <AmountDisplay
                     value={
                       merBalance &&
-                      merPrice &&
-                      merPrice.mul(merBalance).toString()
+                      merDisplayPrice &&
+                      merDisplayPrice.mul(merBalance)
                     }
                     decimals={config.merDenomDecimals}
                     prefix="$"

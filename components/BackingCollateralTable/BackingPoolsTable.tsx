@@ -91,7 +91,9 @@ export const BackingPoolsTable = () => {
           <Tbody>
             {allBackingParams?.map((params) => {
               const backingPool = backingPoolsMap.get(params.backingDenom)
-              const backingMetadata = denomsMetadataMap.get(params.backingDenom)
+              const backingMetadata = denomsMetadataMap?.get(
+                params.backingDenom
+              )
 
               return (
                 <Tr

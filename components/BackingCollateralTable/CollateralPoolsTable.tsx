@@ -105,7 +105,7 @@ export const CollateralPoolsTable = () => {
               const collateralPool = collateralPoolsMap.get(
                 params.collateralDenom
               )
-              const collateralMetadata = denomsMetadataMap.get(
+              const collateralMetadata = denomsMetadataMap?.get(
                 params.collateralDenom
               )
 
