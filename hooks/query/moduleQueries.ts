@@ -9,6 +9,7 @@ import { Dec } from '@merlionzone/merlionjs'
 import { Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
 import { DenomUnit } from '../../../merlionjs/src/proto/cosmos/bank/v1beta1/bank'
 import config from '@/config'
+import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 
 export function useMerlionQuery<
   Module extends keyof QueryExtensions,
@@ -337,4 +338,12 @@ export function useQueryValidatorMissCounters(params: [string][]) {
 
 export function useQueryDelegatorDelegations(address?: string | null) {
   return useMerlionQuery('staking', 'delegatorDelegations', address as string)
+}
+
+export function useQueryProposals(
+  proposalStatus: ProposalStatus,
+  depositor: string,
+  voter: string
+) {
+  return useMerlionQuery('gov', 'proposals', proposalStatus, depositor, voter)
 }
