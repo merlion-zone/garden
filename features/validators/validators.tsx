@@ -4,23 +4,16 @@ import {
   AlertDescription,
   AlertIcon,
   AlertTitle,
-  Box,
   Button,
   Container,
   Heading,
-  Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Stack,
   Tab,
   TabList,
   Tabs,
   Text,
   useBreakpointValue,
-  useColorModeValue,
 } from '@chakra-ui/react'
-import { FiSearch } from 'react-icons/fi'
 import { BondStatusString } from '@/hooks'
 import { ValidatorTable } from './table'
 
@@ -82,7 +75,7 @@ export function Validators() {
         </Tabs>
       </Container>
       <Container as="section" maxW="5xl">
-        <ValidatorTable status="BOND_STATUS_BONDED" />
+        <ValidatorTable status={status} />
       </Container>
     </>
   )
