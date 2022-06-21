@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from '@chakra-ui/react'
-import { FaQuestionCircle, FaRegQuestionCircle } from 'react-icons/fa'
 import { PlacementWithLogical } from '@chakra-ui/popper/dist/declarations/src/popper.placement'
+import { FaQuestionCircle, FaRegQuestionCircle } from 'react-icons/fa'
+import { BsQuestionCircle } from 'react-icons/bs'
 
 interface HintProps {
   hint: string
@@ -20,9 +21,7 @@ export const Hint = ({
       variant="ghost"
       size="xs"
       color="subtle"
-      icon={
-        outlineQuestionIcon ? <FaRegQuestionCircle /> : <FaQuestionCircle />
-      }
+      icon={outlineQuestionIcon ? <BsQuestionCircle /> : <FaQuestionCircle />}
       aria-label={ariaLabel ?? hint}
     ></IconButton>
   </Tooltip>

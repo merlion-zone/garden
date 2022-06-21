@@ -129,10 +129,12 @@ export function useBalance(
   }
 }
 
+// deprecated: it cannot fetch all denom balances
 export function useBalances(address: string) {
   return useMerlionQuery('bank', 'allBalances', address)
 }
 
+// deprecated: it cannot fetch all denom balances
 export function useBalancesMap(address: string) {
   const { data: balances, error } = useBalances(address)
   const data = useMemo(() => {
@@ -184,25 +186,32 @@ const lionMetadata: Metadata = {
 
 export function useDenomMetadata(denom: string) {
   const { data, ...remain } = useMerlionQuery('bank', 'denomMetadata', denom)
-  if (denom === config.denom) {
-    return {
-      data: extendDenomMetadata(lionMetadata),
+  return useMemo(() => {
+    if (denom === config.denom) {
+      return {
+        data: extendDenomMetadata(lionMetadata),
+      }
     }
-  }
-  return {
-    data: data && extendDenomMetadata(data),
-    ...remain,
-  }
+    return {
+      data: data && extendDenomMetadata(data),
+      ...remain,
+    }
+  }, [data, denom, remain])
 }
 
 export function useDenomsMetadata() {
   const { data, ...remain } = useMerlionQuery('bank', 'denomsMetadata')
-  return {
-    data:
+  const denomsMetadata = useMemo(() => {
+    return (
       data &&
       data
         .concat([lionMetadata])
-        .map((metadata) => extendDenomMetadata(metadata)),
+        .map((metadata) => extendDenomMetadata(metadata))
+    )
+  }, [data])
+
+  return {
+    data: denomsMetadata,
     ...remain,
   }
 }
@@ -211,15 +220,18 @@ export function useDenomsMetadataMap() {
   const { data: denomsMetadata, error } = useDenomsMetadata()
 
   const data = useMemo(() => {
+    if (!denomsMetadata) {
+      return denomsMetadata
+    }
     const denomsMetadataMap = new Map<string, DenomMetadata>()
-    denomsMetadata?.forEach((metadata) => {
+    denomsMetadata.forEach((metadata) => {
       denomsMetadataMap.set(metadata.base, metadata)
     })
     return denomsMetadataMap
   }, [denomsMetadata])
 
   return {
-    data: denomsMetadata && data,
+    data,
     error,
   }
 }
@@ -232,15 +244,12 @@ export function useOracleParams() {
 
 export function useCoinPrice(denom: string): { price?: Dec; error: any } {
   const { data, error } = useMerlionQuery('oracle', 'exchangeRate', denom)
-  console.debug(
-    `useCoinPrice, denom ${denom}, price ${
-      data && Dec.fromProto(data).toString()
-    }`
-  )
-  return {
-    price: data ? Dec.fromProto(data) : undefined,
-    error,
-  }
+  return useMemo(() => {
+    return {
+      price: data ? Dec.fromProto(data) : undefined,
+      error,
+    }
+  }, [data, error])
 }
 
 export function useLionPrice(): { price?: Dec; error: any } {
@@ -272,6 +281,16 @@ export function useDisplayCoinPrice(denom: string) {
 }
 
 /****************************** Maker ******************************/
+
+export function useMerTargetPrice(): { price?: Dec; error: any } {
+  // TODO: get on-chain
+  return useMemo(() => {
+    return {
+      price: new Dec(1),
+      error: null,
+    }
+  }, [])
+}
 
 export function useMakerParams() {
   return useMerlionQuery('maker', 'params')

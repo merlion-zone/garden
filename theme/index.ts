@@ -59,6 +59,32 @@ export const theme: Record<string, any> = extendTheme(
         ...proTheme.components.Button,
         variants: {
           ...proTheme.components.Button.variants,
+          solid: (props: StyleFunctionProps) => {
+            const { colorScheme: c } = props
+            if (c === 'gray') {
+              return proTheme.components.Button.variants.solid
+            }
+            const {
+              bg = `${c}.500`,
+              color = 'white',
+              hoverBg = `${c}.600`,
+              activeBg = `${c}.700`,
+            } = {}
+
+            const background = mode(bg, `${c}.400`)(props)
+
+            return {
+              bg: background,
+              color: mode(color, `gray.100`)(props),
+              _hover: {
+                bg: mode(hoverBg, `${c}.500`)(props),
+                _disabled: {
+                  bg: background,
+                },
+              },
+              _active: { bg: mode(activeBg, `${c}.600`)(props) },
+            }
+          },
           ghost: baseTheme.components.Button.variants.ghost,
           outline: baseTheme.components.Button.variants.outline,
           'ghost-on-accent': (props: StyleFunctionProps) => {

@@ -36,18 +36,18 @@ export const config: Config = {
 
 // Mapping to environment variables
 export const envConfig = {
-  chainID: process.env.CHAIN_ID,
-  chainName: process.env.CHAIN_NAME,
-  web3RpcEndpoint: process.env.WEB3_RPC_ENDPOINT,
-  rpcEndpoint: process.env.RPC_ENDPOINT,
-  restEndpoint: process.env.REST_ENDPOINT,
-  bech32Prefix: process.env.BECH32_PREFIX,
-  denom: process.env.DENOM,
-  denomDecimals: process.env.DENOM_DECIMALS,
-  displayDenom: process.env.DISPLAY_DENOM,
-  merDenom: process.env.MER_DENOM,
-  merDenomDecimals: process.env.MER_DENOM_DECIMALS,
-  merDisplayDenom: process.env.MER_DISPLAY_DENOM,
+  chainID: process.env.NEXT_PUBLIC_CHAIN_ID,
+  chainName: process.env.NEXT_PUBLIC_CHAIN_NAME,
+  web3RpcEndpoint: process.env.NEXT_PUBLIC_WEB3_RPC_ENDPOINT,
+  rpcEndpoint: process.env.NEXT_PUBLIC_RPC_ENDPOINT,
+  restEndpoint: process.env.NEXT_PUBLIC_REST_ENDPOINT,
+  bech32Prefix: process.env.NEXT_PUBLIC_BECH32_PREFIX,
+  denom: process.env.NEXT_PUBLIC_DENOM,
+  denomDecimals: process.env.NEXT_PUBLIC_DENOM_DECIMALS,
+  displayDenom: process.env.NEXT_PUBLIC_DISPLAY_DENOM,
+  merDenom: process.env.NEXT_PUBLIC_MER_DENOM,
+  merDenomDecimals: process.env.NEXT_PUBLIC_MER_DENOM_DECIMALS,
+  merDisplayDenom: process.env.NEXT_PUBLIC_MER_DISPLAY_DENOM,
 }
 
 config.getChainID = () => {

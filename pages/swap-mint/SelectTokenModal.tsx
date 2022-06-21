@@ -2,6 +2,7 @@ import { useAccountAddress } from '@/hooks'
 import {
   useAllBackingParams,
   useAllBackingPools,
+  useBalance,
   useBalancesMap,
   useDenomsMetadataMap,
 } from '@/hooks/query'
@@ -39,7 +40,16 @@ export const SelectTokenModal = ({
   const { data: allBackingPools } = useAllBackingPools()
   const { data: allBackingParams } = useAllBackingParams()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
-  const { data: balances } = useBalancesMap(account?.mer() || '')
+
+  const BalanceDisplay = ({ denom }: any) => {
+    const { balance } = useBalance(account?.mer() as any, denom)
+    return (
+      <AmountDisplay
+        value={balance}
+        decimals={denomsMetadataMap?.get(denom)?.displayExponent}
+      />
+    )
+  }
 
   const hoverRowBg = useColorModeValue('gray.50', 'gray.900')
 
@@ -82,13 +92,7 @@ export const SelectTokenModal = ({
                       </Text>
                     </Box>
                   </HStack>
-                  <AmountDisplay
-                    value={balances.get(params.backingDenom) || 0}
-                    decimals={
-                      denomsMetadataMap?.get(params.backingDenom)
-                        ?.displayExponent
-                    }
-                  />
+                  <BalanceDisplay denom={params.backingDenom} />
                 </HStack>
               )
             })}

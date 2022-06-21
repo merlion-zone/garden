@@ -16,7 +16,7 @@ export const AmountDisplay = ({
   decimals,
   precision,
 }: AmountDisplayProps) => {
-  if (value instanceof Dec) {
+  if (value && typeof value === 'object') {
     value = value.toString()
   }
   if (value && decimals) {

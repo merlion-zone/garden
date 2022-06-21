@@ -1,4 +1,4 @@
-import { DenomMetadata } from '@/hooks/query'
+import { DenomMetadata, useBalance, useDenomsMetadataMap } from '@/hooks/query'
 import React, { ChangeEvent } from 'react'
 import {
   Box,
@@ -11,6 +11,8 @@ import {
 } from '@chakra-ui/react'
 import Avvvatars from 'avvvatars-react'
 import { ChevronDownIcon } from '@chakra-ui/icons'
+import { useAccountAddress } from '@/hooks'
+import { AmountDisplay } from '@/components/NumberDisplay'
 
 export interface TokenAmount {
   metadata?: DenomMetadata
@@ -24,6 +26,7 @@ interface AmountInputProps {
   value: string
   onSelectToken?: false | (() => void)
   onInput?: (event: ChangeEvent<HTMLInputElement>) => void
+  isDisabled?: boolean
 }
 
 export const AmountInput = ({
@@ -31,7 +34,14 @@ export const AmountInput = ({
   value,
   onSelectToken,
   onInput,
+  isDisabled,
 }: AmountInputProps) => {
+  const account = useAccountAddress()
+  const { balance } = useBalance(
+    account?.mer() as any,
+    token.metadata?.base as any
+  )
+
   return (
     <Box
       w="full"
@@ -48,10 +58,23 @@ export const AmountInput = ({
           fontSize="3xl"
           fontWeight="550"
           placeholder="0.0"
-          type="number"
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          autoCorrect="off"
+          pattern="^[0-9]*[.,]?[0-9]*$"
+          minLength={1}
+          maxLength={79}
+          spellCheck={false}
           name={token.metadata?.base}
           value={value}
-          onChange={onInput}
+          onChange={(event) => {
+            if (!event.target.value.match(/^\d*[.,]?\d*$/)) {
+              return
+            }
+            onInput?.(event)
+          }}
+          isDisabled={isDisabled}
         ></Input>
         <Box borderRadius="2xl" boxShadow={useColorModeValue('md', 'md-dark')}>
           <Button
@@ -63,7 +86,7 @@ export const AmountInput = ({
             borderRadius="2xl"
             leftIcon={
               <Avvvatars
-                value={token.metadata?.symbol ?? ''}
+                value={token.metadata?.base ?? ''}
                 style="shape"
                 size={24}
               />
@@ -72,6 +95,7 @@ export const AmountInput = ({
               <ChevronDownIcon color={!token.selectable ? 'transparent' : ''} />
             }
             onClick={onSelectToken || (() => {})}
+            isDisabled={isDisabled}
           >
             {token.metadata?.symbol}
           </Button>
@@ -86,7 +110,11 @@ export const AmountInput = ({
           )}
         </Text>
         <Text fontSize="sm" color="subtle">
-          Balance: 0
+          Balance:&nbsp;
+          <AmountDisplay
+            value={balance}
+            decimals={token.metadata?.displayExponent}
+          />
         </Text>
       </HStack>
     </Box>
