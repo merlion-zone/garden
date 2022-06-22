@@ -28,6 +28,7 @@
     "@metamask/detect-provider": "^1.2.0",
     "@nivo/core": "^0.78.0",
     "@nivo/pie": "^0.78.0",
+    "@react-spring/web": "^9.4.5",
     "@tanstack/react-table": "beta",
     "ahooks": "^3.4.1",
     "avvvatars-react": "^0.4.2",

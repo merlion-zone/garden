@@ -98,7 +98,8 @@ export const Explain = ({
         onClick={onToggle}
       >
         <HStack
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation()
             rates.length && setRatesIndex((ratesIndex + 1) % rates.length)
           }}
         >

@@ -322,7 +322,7 @@ export async function switchEthereumChain() {
   }
 }
 
-export function useAccountAddress(): Address | null {
+export function useAccountAddress(): Address | undefined {
   const { account } = useConnectWallet()
-  return account ? new Address(account) : null
+  return account ? new Address(account) : undefined
 }
