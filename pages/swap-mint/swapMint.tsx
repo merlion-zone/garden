@@ -17,6 +17,7 @@ interface SwapMintArgs {
   backingAmt: string | number
   lionAmt: string | number
   usmAmt: string | number
+  slippageTolerance: Dec
   sendTx: (msg: EncodeObject) => Promise<DeliverTxResponse> | undefined
   toast: ReturnType<typeof useToast>
 }
@@ -28,11 +29,13 @@ export function swapMint({
   backingAmt,
   lionAmt,
   usmAmt,
+  slippageTolerance,
   sendTx,
   toast,
 }: SwapMintArgs) {
   let receiptPromise: Promise<DeliverTxResponse> | undefined
   let title = ''
+  const tolerance = new Dec(1).sub(slippageTolerance)
 
   if (account && backingMetadata?.displayExponent) {
     let msg: EncodeObject
@@ -43,7 +46,10 @@ export function swapMint({
           sender: account.mer(),
           mintOutMin: new Coin(
             config.merDenom,
-            new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()
+            new Dec(usmAmt)
+              .mul(tolerance)
+              .mulPow(config.merDenomDecimals)
+              .toInt()
           ).toProto(),
           backingInMax: new Coin(
             backingMetadata.base,
@@ -56,7 +62,6 @@ export function swapMint({
           fullBacking: false, // TODO
         },
       }
-
       msg = msgMintBySwap
       title = `Swap ${backingAmt} ${backingMetadata.display} + ${lionAmt} ${config.displayDenom} for ${usmAmt} ${config.merDisplayDenom}`
     } else {
@@ -70,11 +75,14 @@ export function swapMint({
           ).toProto(),
           backingOutMin: new Coin(
             backingMetadata.base,
-            new Dec(backingAmt).mulPow(backingMetadata.displayExponent).toInt()
+            new Dec(backingAmt)
+              .mul(tolerance)
+              .mulPow(backingMetadata.displayExponent)
+              .toInt()
           ).toProto(),
           lionOutMin: new Coin(
             config.denom,
-            new Dec(lionAmt).mulPow(config.denomDecimals).toInt()
+            new Dec(lionAmt).mul(tolerance).mulPow(config.denomDecimals).toInt()
           ).toProto(),
         },
       }
@@ -87,12 +95,14 @@ export function swapMint({
   }
 
   toast({
-    render: ({ onClose }) => (
-      <TransactionToast
-        title={title}
-        receiptPromise={receiptPromise}
-        onClose={onClose}
-      />
-    ),
+    render: ({ onClose }) => {
+      return (
+        <TransactionToast
+          title={title}
+          receiptPromise={receiptPromise}
+          onClose={onClose}
+        />
+      )
+    },
   })
 }

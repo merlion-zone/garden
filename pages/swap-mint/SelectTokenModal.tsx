@@ -3,7 +3,6 @@ import {
   useAllBackingParams,
   useAllBackingPools,
   useBalance,
-  useBalancesMap,
   useDenomsMetadataMap,
 } from '@/hooks/query'
 import {

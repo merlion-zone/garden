@@ -1,5 +1,4 @@
-import { DenomMetadata, useBalance, useDenomsMetadataMap } from '@/hooks/query'
-import React, { ChangeEvent } from 'react'
+import { DenomMetadata, useBalance } from '@/hooks/query'
 import {
   Box,
   Button,
@@ -13,20 +12,22 @@ import Avvvatars from 'avvvatars-react'
 import { ChevronDownIcon } from '@chakra-ui/icons'
 import { useAccountAddress } from '@/hooks'
 import { AmountDisplay } from '@/components/NumberDisplay'
+import { Dec } from '@merlionzone/merlionjs'
 
-export interface TokenAmount {
+export interface AmountMetadata {
   metadata?: DenomMetadata
-  selectable?: boolean
+  price?: Dec | null
   proportion?: string
   proportionHint?: string
 }
 
 interface AmountInputProps {
-  token: TokenAmount
+  token: AmountMetadata
   value: string
   onSelectToken?: false | (() => void)
-  onInput?: (event: ChangeEvent<HTMLInputElement>) => void
+  onInput?: (name: string, value: string) => void
   isDisabled?: boolean
+  noAnnotation?: boolean
 }
 
 export const AmountInput = ({
@@ -35,27 +36,35 @@ export const AmountInput = ({
   onSelectToken,
   onInput,
   isDisabled,
+  noAnnotation,
 }: AmountInputProps) => {
   const account = useAccountAddress()
   const { balance } = useBalance(
     account?.mer() as any,
     token.metadata?.base as any
   )
+  const balanceDisplay = new Dec(balance).divPow(
+    token.metadata?.displayExponent || 0
+  )
+
+  const amountValue = value && token.price && new Dec(value).mul(token.price)
+
+  const borderColor = useColorModeValue('gray.300', 'gray.700')
 
   return (
     <Box
       w="full"
-      h="28"
+      h={!noAnnotation ? '28' : '16'}
       bg={useColorModeValue('gray.50', 'gray.800')}
       borderRadius="3xl"
       border="1px"
-      borderColor="transparent"
-      _hover={{ borderColor: useColorModeValue('gray.300', 'gray.700') }}
+      borderColor={!noAnnotation ? 'transparent' : borderColor}
+      _hover={{ borderColor }}
     >
-      <HStack p="4">
+      <HStack px="4" py={!noAnnotation ? '4' : '3'}>
         <Input
           variant="unstyled"
-          fontSize="3xl"
+          fontSize={!noAnnotation ? '3xl' : 'xl'}
           fontWeight="550"
           placeholder="0.0"
           type="text"
@@ -69,12 +78,13 @@ export const AmountInput = ({
           name={token.metadata?.base}
           value={value}
           onChange={(event) => {
-            if (!event.target.value.match(/^\d*[.,]?\d*$/)) {
+            const { name, value } = event.target
+            if (!value.match(/^\d*[.,]?\d*$/)) {
               return
             }
-            onInput?.(event)
+            onInput?.(name, value)
           }}
-          isDisabled={isDisabled}
+          isDisabled={isDisabled || !onInput}
         ></Input>
         <Box borderRadius="2xl" boxShadow={useColorModeValue('md', 'md-dark')}>
           <Button
@@ -92,7 +102,7 @@ export const AmountInput = ({
               />
             }
             rightIcon={
-              <ChevronDownIcon color={!token.selectable ? 'transparent' : ''} />
+              <ChevronDownIcon color={!onSelectToken ? 'transparent' : ''} />
             }
             onClick={onSelectToken || (() => {})}
             isDisabled={isDisabled}
@@ -101,22 +111,46 @@ export const AmountInput = ({
           </Button>
         </Box>
       </HStack>
-      <HStack justify="space-between" px="6">
-        <Text fontSize="sm" color="subtle">
-          {token.proportion && (
-            <Tooltip hasArrow placement="right" label={token.proportionHint}>
-              {token.proportion}
-            </Tooltip>
-          )}
-        </Text>
-        <Text fontSize="sm" color="subtle">
-          Balance:&nbsp;
-          <AmountDisplay
-            value={balance}
-            decimals={token.metadata?.displayExponent}
-          />
-        </Text>
-      </HStack>
+      {!noAnnotation && (
+        <HStack justify="space-between" px="5">
+          <HStack fontSize="sm" color="subtle">
+            {token.proportion && (
+              <Text>
+                <Tooltip
+                  hasArrow
+                  placement="right"
+                  label={token.proportionHint}
+                >
+                  {token.proportion}
+                </Tooltip>
+              </Text>
+            )}
+            <Text>
+              <AmountDisplay value={amountValue} prefix="$" />
+            </Text>
+          </HStack>
+          <Text
+            fontSize="sm"
+            color="subtle"
+            cursor="pointer"
+            onClick={() => {
+              balanceDisplay.isPositive() &&
+                onInput?.(token.metadata?.base || '', balanceDisplay.toString())
+            }}
+          >
+            Balance:&nbsp;
+            <AmountDisplay
+              value={balance}
+              decimals={token.metadata?.displayExponent}
+            />
+            {balanceDisplay.isPositive() && (
+              <Button variant="ghost" size="xs">
+                Max
+              </Button>
+            )}
+          </Text>
+        </HStack>
+      )}
     </Box>
   )
 }

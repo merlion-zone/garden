@@ -27,6 +27,7 @@ export const TransactionToast = ({
   onClose,
 }: TransactionToastProps) => {
   const [status, setStatus] = useState<AlertStatus>('loading')
+  const [desc, setDesc] = useState('')
   const [txHash, setTxHash] = useState('')
   const [progress, setProgress] = useState(100)
 
@@ -69,6 +70,9 @@ export const TransactionToast = ({
       .catch((e) => {
         console.error(`Deliver transaction: ${e}`)
         setStatus('error')
+        if (e.toString().includes('Request rejected')) {
+          setDesc('Transaction rejected')
+        }
       })
       .finally(() => {
         progressClose()
@@ -85,7 +89,9 @@ export const TransactionToast = ({
           <AlertTitle>{title}</AlertTitle>
           <AlertDescription>
             <Text color={statusColor}>
-              {status === 'loading'
+              {desc
+                ? desc
+                : status === 'loading'
                 ? 'Pending'
                 : status === 'success'
                 ? 'Success'

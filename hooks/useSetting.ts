@@ -1,5 +1,7 @@
 import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
+import { useMemo } from 'react'
+import { Dec } from '@merlionzone/merlionjs'
 
 export function useFiatCurrency() {
   // TODO
@@ -13,14 +15,24 @@ const slippageToleranceAtom = atomWithStorage<string | ''>(
 const expertModeAtom = atomWithStorage<boolean>('swap-mint-expert-mode', false)
 
 export function useSwapMintSettings() {
-  const [slippageTolerance, setSlippageTolerance] = useAtom(
+  const [slippageTolerancePercentage, setSlippageTolerancePercentage] = useAtom(
     slippageToleranceAtom
   )
+
   const [expertMode, setExpertMode] = useAtom(expertModeAtom)
+
+  const slippageTolerance = useMemo(() => {
+    let slippage = new Dec(slippageTolerancePercentage || 0.5)
+    if (slippage.greaterThan(50)) {
+      slippage = new Dec(50)
+    }
+    return slippage.div(100)
+  }, [slippageTolerancePercentage])
+
   return {
-    defaultSlippageTolerance: '0.5', // percentage
-    slippageTolerance, // percentage
-    setSlippageTolerance,
+    slippageTolerance,
+    slippageTolerancePercentage,
+    setSlippageTolerancePercentage,
     expertMode,
     setExpertMode,
   }

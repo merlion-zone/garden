@@ -7,6 +7,7 @@ import {
 } from '@chakra-ui/react'
 import { theme as proTheme } from '@chakra-ui/pro-theme'
 import {
+  cssVar,
   mode,
   StyleFunctionProps,
   transparentize,
@@ -100,6 +101,29 @@ export const theme: Record<string, any> = extendTheme(
               },
             }
           },
+        },
+      },
+      Tooltip: {
+        ...proTheme.components.Tooltip,
+        baseStyle: (props: StyleFunctionProps) => {
+          const borderColor = mode('gray.300', 'gray.700')(props)
+          const bg = mode('white', 'gray.800')(props)
+          const $bg = cssVar('tooltip-bg')
+          const $arrowBg = cssVar('popper-arrow-bg')
+          const $arrowShadowColor = cssVar('popper-arrow-shadow-color')
+          return {
+            ...proTheme.components.Tooltip.baseStyle(props),
+            [$bg.variable]: `colors.${bg}`,
+            bg: [$bg.reference],
+            [$arrowBg.variable]: [$bg.reference],
+            [$arrowShadowColor.variable]: `colors.${borderColor}`,
+            color: mode('gray.500', 'whiteAlpha.700')(props),
+            border: '1px',
+            borderRadius: '2xl',
+            borderColor,
+            px: '16px',
+            py: '8px',
+          }
         },
       },
     },

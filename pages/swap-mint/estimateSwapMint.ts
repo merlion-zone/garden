@@ -1,11 +1,11 @@
-import { DenomMetadata } from '@/hooks/query'
+import { DenomMetadata, getModuleErrorMsg } from '@/hooks/query'
 import { Coin, Dec } from '@merlionzone/merlionjs'
 import { Coin as CosmCoin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 import { MerlionQueryClient } from '@/hooks'
 import { isValidAmount } from '@/utils'
 
-export enum DenomInput {
-  None = 'None',
+export enum InputKind {
+  None = 'none',
   Backing = 'backing',
   Lion = 'lion',
   Usm = 'usm',
@@ -13,7 +13,7 @@ export enum DenomInput {
 
 interface EstimateSwapMintArgs {
   isMint: boolean
-  denomInput: DenomInput
+  inputKind: InputKind
   backingMetadata: DenomMetadata
   lionMetadata: DenomMetadata
   usmMetadata: DenomMetadata
@@ -26,7 +26,7 @@ interface EstimateSwapMintArgs {
 
 export async function estimateSwapMint({
   isMint,
-  denomInput,
+  inputKind,
   backingMetadata,
   lionMetadata,
   usmMetadata,
@@ -41,18 +41,19 @@ export async function estimateSwapMint({
   usmAmt: string
   feeAmt: string
   estimated: boolean
+  errMsg?: string
 }> {
   const estimateSwapMintOut = async () => {
     const backingInMax = new Coin(
       backingMetadata.base,
-      new Dec(denomInput === DenomInput.Backing ? backingAmt : 0).mulPow(
+      new Dec(inputKind === InputKind.Backing ? backingAmt : 0).mulPow(
         backingMetadata.displayExponent || 0
       )
     ).toProto()
 
     const lionInMax = new Coin(
       lionMetadata.base,
-      new Dec(denomInput === DenomInput.Lion ? lionAmt : 0).mulPow(
+      new Dec(inputKind === InputKind.Lion ? lionAmt : 0).mulPow(
         lionMetadata.displayExponent || 0
       )
     ).toProto()
@@ -66,11 +67,11 @@ export async function estimateSwapMint({
     return {
       backingAmt: displayAmount(
         resp.backingIn,
-        denomInput === DenomInput.Backing && backingAmt
+        inputKind === InputKind.Backing && backingAmt
       ),
       lionAmt: displayAmount(
         resp.lionIn,
-        denomInput === DenomInput.Lion && lionAmt
+        inputKind === InputKind.Lion && lionAmt
       ),
       usmAmt: displayAmount(resp.mintOut),
       feeAmt: displayAmount(resp.mintFee),
@@ -119,14 +120,14 @@ export async function estimateSwapMint({
   const estimateSwapBurnIn = async () => {
     const backingOutMax = new Coin(
       backingMetadata.base,
-      new Dec(denomInput === DenomInput.Backing ? backingAmt : 0).mulPow(
+      new Dec(inputKind === InputKind.Backing ? backingAmt : 0).mulPow(
         backingMetadata.displayExponent || 0
       )
     ).toProto()
 
     const lionOutMax = new Coin(
       lionMetadata.base,
-      new Dec(denomInput === DenomInput.Lion ? lionAmt : 0).mulPow(
+      new Dec(inputKind === InputKind.Lion ? lionAmt : 0).mulPow(
         lionMetadata.displayExponent || 0
       )
     ).toProto()
@@ -137,39 +138,45 @@ export async function estimateSwapMint({
     })
 
     return {
-      backingAmt: displayAmount(resp.backingOut),
-      lionAmt: displayAmount(resp.lionOut),
+      backingAmt: displayAmount(
+        resp.backingOut,
+        inputKind === InputKind.Backing && backingAmt
+      ),
+      lionAmt: displayAmount(
+        resp.lionOut,
+        inputKind === InputKind.Lion && lionAmt
+      ),
       usmAmt: displayAmount(resp.burnIn),
       feeAmt: displayAmount(resp.burnFee),
     }
   }
 
-  const cleanAmouts = (skipDenom: DenomInput) => {
+  const cleanAmouts = (skipDenom: InputKind) => {
     return {
-      backingAmt: skipDenom === DenomInput.Backing ? backingAmt : '',
-      lionAmt: skipDenom === DenomInput.Lion ? lionAmt : '',
-      usmAmt: skipDenom === DenomInput.Usm ? usmAmt : '',
+      backingAmt: skipDenom === InputKind.Backing ? backingAmt : '',
+      lionAmt: skipDenom === InputKind.Lion ? lionAmt : '',
+      usmAmt: skipDenom === InputKind.Usm ? usmAmt : '',
       feeAmt: '',
       estimated: false,
     }
   }
 
-  switch (denomInput) {
-    case DenomInput.None:
+  switch (inputKind) {
+    case InputKind.None:
       throw new Error('invalid denom input kind')
-    case DenomInput.Backing:
+    case InputKind.Backing:
       if (!isValidAmount(backingAmt)) {
-        return cleanAmouts(DenomInput.Backing)
+        return cleanAmouts(InputKind.Backing)
       }
       break
-    case DenomInput.Lion:
+    case InputKind.Lion:
       if (!isValidAmount(lionAmt)) {
-        return cleanAmouts(DenomInput.Lion)
+        return cleanAmouts(InputKind.Lion)
       }
       break
-    case DenomInput.Usm:
+    case InputKind.Usm:
       if (!isValidAmount(usmAmt)) {
-        return cleanAmouts(DenomInput.Usm)
+        return cleanAmouts(InputKind.Usm)
       }
       break
   }
@@ -178,23 +185,31 @@ export async function estimateSwapMint({
 
   if (isMint) {
     // mint
-    if (denomInput === DenomInput.Backing || denomInput === DenomInput.Lion) {
+    if (inputKind === InputKind.Backing || inputKind === InputKind.Lion) {
       promise = estimateSwapMintOut()
     } else {
       promise = estimateSwapMintIn()
     }
   } else {
     // burn
-    if (denomInput === DenomInput.Usm) {
+    if (inputKind === InputKind.Usm) {
       promise = estimateSwapBurnOut()
     } else {
       promise = estimateSwapBurnIn()
     }
   }
 
-  const result = await promise
-  return {
-    ...result,
-    estimated: !!(result.backingAmt || result.lionAmt || result.usmAmt),
+  try {
+    const result = await promise
+    return {
+      ...result,
+      estimated: !!(result.backingAmt || result.lionAmt || result.usmAmt),
+    }
+  } catch (e: any) {
+    console.warn(`estimateSwapMint: ${e}`)
+    return {
+      ...cleanAmouts(inputKind),
+      errMsg: getModuleErrorMsg('maker', e.toString()),
+    }
   }
 }

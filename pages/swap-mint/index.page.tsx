@@ -15,24 +15,16 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { ArrowDownIcon, SettingsIcon, SmallAddIcon } from '@chakra-ui/icons'
-import React, {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   errors,
-  getModuleErrorMsg,
   moduleAlerts,
   useAllBackingParams,
   useBackingRatio,
-  useCoinPrice,
+  useBalance,
   useDenomsMetadataMap,
-  useLionPrice,
+  useDisplayCoinPrice,
   useMakerParams,
-  useMerPrice,
   useMerTargetPrice,
 } from '@/hooks/query'
 import { useAccountAddress, useMerlionQueryClient } from '@/hooks'
@@ -48,10 +40,9 @@ import { Explain } from '@/pages/swap-mint/Explain'
 import { swapMint } from '@/pages/swap-mint/swapMint'
 import { useToast } from '@/hooks/useToast'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
-import {
-  DenomInput,
-  estimateSwapMint,
-} from '@/pages/swap-mint/estimateSwapMint'
+import { estimateSwapMint, InputKind } from '@/pages/swap-mint/estimateSwapMint'
+import { ConfirmModal } from '@/pages/swap-mint/ConfirmModal'
+import { useSwapMintSettings } from '@/hooks/useSetting'
 
 export default function SwapMint() {
   const queryClient = useMerlionQueryClient()
@@ -64,7 +55,7 @@ export default function SwapMint() {
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
   const { data: backingRatio } = useBackingRatio()
-  const backingRatioDec =
+  const backingRatioPercentage =
     backingRatio && Dec.fromProto(backingRatio.backingRatio).mul(100)
 
   const [backingDenom, setBackingDenom] = useState('')
@@ -74,46 +65,73 @@ export default function SwapMint() {
     }
   }, [allBackingParams])
 
+  const { displayPrice: backingPrice } = useDisplayCoinPrice(
+    // TODO
+    backingDenom as string
+  )
+  const { displayPrice: lionPrice } = useDisplayCoinPrice(config.denom)
+  const { displayPrice: merPrice } = useDisplayCoinPrice(config.merDenom)
+  const { price: merTargetPrice } = useMerTargetPrice()
+
   const backingToken = useMemo(() => {
     return {
       metadata: denomsMetadataMap?.get(backingDenom),
-      selectable: true,
-      proportion: backingRatioDec && `${backingRatioDec}%`,
+      price: backingPrice,
+      proportion: backingRatioPercentage && `${backingRatioPercentage}%`,
       proportionHint: 'Current system backing ratio (BR)',
     }
-  }, [denomsMetadataMap, backingDenom, backingRatio])
+  }, [denomsMetadataMap, backingDenom, backingPrice, backingRatioPercentage])
 
   const lionToken = useMemo(
     () => ({
       metadata: denomsMetadataMap?.get(config.denom),
-      proportion: backingRatioDec && `${new Dec(100).sub(backingRatioDec)}%`,
+      price: lionPrice,
+      proportion:
+        backingRatioPercentage &&
+        `${new Dec(100).sub(backingRatioPercentage)}%`,
       proportionHint: '= 100% - BR',
     }),
-    [denomsMetadataMap, backingRatio]
+    [denomsMetadataMap, lionPrice, backingRatioPercentage]
   )
   const usmToken = useMemo(
     () => ({
       metadata: denomsMetadataMap?.get(config.merDenom),
+      price: merPrice,
     }),
-    [denomsMetadataMap]
+    [denomsMetadataMap, merPrice]
   )
 
-  const [sendTitle, setSendTitle] = useState<string | null>('Enter an amount')
   const [sendEnabled, setSendEnabled] = useState(false)
+  const [sendTitle, setSendTitle] = useState<string | null>('Enter an amount')
+  const { isSendReady } = useSendCosmTx()
 
-  const { price: backingPrice } = useCoinPrice(
-    // TODO
-    backingToken.metadata?.base as string
+  const { balance: backingBalance } = useBalance(
+    account?.mer() || '',
+    backingDenom
   )
-  const { price: lionPrice } = useLionPrice()
-  const { price: merPrice } = useMerPrice()
-  const { price: merTargetPrice } = useMerTargetPrice()
+  const { balance: lionBalance } = useBalance(
+    account?.mer() || '',
+    config.denom
+  )
+  const { balance: usmBalance } = useBalance(
+    account?.mer() || '',
+    config.merDenom
+  )
 
   const [disabled, setDisabled] = useState(false)
   const [merPriceBound, setMerPriceBound] = useState('')
 
   useEffect(() => {
     if (!merPrice || !merTargetPrice || !makerParams) {
+      return
+    }
+    const params = allBackingParams?.find(
+      (params) => params.backingDenom === backingDenom
+    )
+    if (params && !params.enabled) {
+      setDisabled(true)
+      setSendEnabled(false)
+      setSendTitle(errors.backingDisabled)
       return
     }
     const merPriceLowerBound = merTargetPrice.mul(
@@ -124,19 +142,38 @@ export default function SwapMint() {
     )
     if (isMint && merPrice.lessThan(merPriceLowerBound)) {
       setDisabled(true)
-      setMerPriceBound(merPriceLowerBound.toSignificantDigits(4).toString())
       setSendEnabled(false)
+      setMerPriceBound(merPriceLowerBound.toSignificantDigits(4).toString())
+      setSendTitle(errors.usmPriceTooLow)
     } else if (!isMint && merPrice.greaterThan(merPriceUpperBound)) {
       setDisabled(true)
+      setSendEnabled(false)
       setMerPriceBound(merPriceUpperBound.toSignificantDigits(4).toString())
       setSendTitle(errors.usmPriceTooHigh)
     }
-  }, [isMint, makerParams, merPrice, merTargetPrice])
+  }, [
+    allBackingParams,
+    backingDenom,
+    isMint,
+    makerParams,
+    merPrice,
+    merTargetPrice,
+  ])
 
   const [backingAmt, setBackingAmt] = useState('')
   const [lionAmt, setLionAmt] = useState('')
   const [usmAmt, setUsmAmt] = useState('')
   const [feeAmt, setFeeAmt] = useState('')
+
+  useEffect(() => {
+    setTimeout(() => {
+      setBackingAmt('')
+      setLionAmt('')
+      setUsmAmt('')
+      setSendEnabled(false)
+      setSendTitle('Enter an amount')
+    }, 500)
+  }, [isMint])
 
   const displayAmount = useCallback(
     (coin?: CosmCoin, oldAmt?: string | boolean) => {
@@ -154,25 +191,24 @@ export default function SwapMint() {
     [denomsMetadataMap]
   )
 
-  const [denomInput, setDenomInput] = useState<DenomInput>(DenomInput.None)
-  const [emptyInput, setEmptyInput] = useState(true)
+  const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
+  const [estimated, setEstimated] = useState(false)
 
   const onInput = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      console.debug(event.target.value, event.target.name)
-      setEmptyInput(!event.target.value)
-      switch (event.target.name) {
+    (name: string, value: string) => {
+      console.debug(value, name)
+      switch (name) {
         case backingToken.metadata?.base:
-          setDenomInput(DenomInput.Backing)
-          setBackingAmt(event.target.value)
+          setInputKind(InputKind.Backing)
+          setBackingAmt(value)
           break
         case config.denom:
-          setDenomInput(DenomInput.Lion)
-          setLionAmt(event.target.value)
+          setInputKind(InputKind.Lion)
+          setLionAmt(value)
           break
         case config.merDenom:
-          setDenomInput(DenomInput.Usm)
-          setUsmAmt(event.target.value)
+          setInputKind(InputKind.Usm)
+          setUsmAmt(value)
           break
       }
     },
@@ -189,14 +225,14 @@ export default function SwapMint() {
       if (!(backingToken.metadata && lionToken.metadata && usmToken.metadata)) {
         return
       }
-      if (denomInput === DenomInput.None) {
+      if (inputKind === InputKind.None) {
         return
       }
       setInEstimate(true)
       const start = Date.now()
       estimateSwapMint({
         isMint,
-        denomInput,
+        inputKind: inputKind,
         backingMetadata: backingToken.metadata,
         lionMetadata: lionToken.metadata,
         usmMetadata: usmToken.metadata,
@@ -205,37 +241,63 @@ export default function SwapMint() {
         usmAmt,
         displayAmount,
         queryClient,
-      })
-        .then((estimated) => {
-          setBackingAmt(estimated.backingAmt)
-          setLionAmt(estimated.lionAmt)
-          setUsmAmt(estimated.usmAmt)
-          setFeeAmt(estimated.feeAmt)
+      }).then((estimated) => {
+        setBackingAmt(estimated.backingAmt)
+        setLionAmt(estimated.lionAmt)
+        setUsmAmt(estimated.usmAmt)
+        setFeeAmt(estimated.feeAmt)
+        setEstimated(estimated.estimated)
 
-          if (estimated.estimated) {
-            setSendTitle('Swap Mint')
-            setSendEnabled(true)
-          } else {
-            setSendTitle('Enter an amount')
+        if (estimated.estimated) {
+          setSendTitle('Swap Mint')
+          setSendEnabled(true)
+
+          if (isMint) {
+            if (
+              new Dec(estimated.backingAmt || 0).greaterThan(
+                new Dec(backingBalance || 0).divPow(
+                  backingToken.metadata!.displayExponent
+                )
+              )
+            ) {
+              setSendEnabled(false)
+              setSendTitle(errors.backingInsufficientBalance)
+            } else if (
+              new Dec(estimated.lionAmt || 0).greaterThan(
+                new Dec(lionBalance || 0).divPow(
+                  lionToken.metadata!.displayExponent
+                )
+              )
+            ) {
+              setSendEnabled(false)
+              setSendTitle(errors.lionInsufficientBalance)
+            }
+          } else if (
+            new Dec(estimated.usmAmt || 0).greaterThan(
+              new Dec(usmBalance || 0).divPow(
+                usmToken.metadata!.displayExponent
+              )
+            )
+          ) {
             setSendEnabled(false)
+            setSendTitle(errors.usmInsufficientBalance)
           }
-        })
-        .catch((e) => {
-          console.warn(`swap-mint estimate: ${e}`)
-          setSendTitle(getModuleErrorMsg('maker', e.toString()))
+        } else {
           setSendEnabled(false)
-        })
-        .finally(() => {
-          setDenomInput(DenomInput.None)
-          setTimeout(
-            () => setInEstimate(false),
-            Math.max(start - Date.now() + 500, 0)
-          )
-        })
+          setSendTitle(estimated.errMsg || 'Enter an amount')
+        }
+
+        setInputKind(InputKind.None)
+        setTimeout(
+          () => setInEstimate(false),
+          // delay 500ms to avoid flash
+          Math.max(start - Date.now() + 500, 0)
+        )
+      })
     },
     1000,
     [
-      denomInput,
+      inputKind,
       backingToken,
       lionToken,
       usmToken,
@@ -249,7 +311,9 @@ export default function SwapMint() {
   const { sendTx } = useSendCosmTx()
   const toast = useToast()
 
-  const onSubmit = () => {
+  const { expertMode, slippageTolerance } = useSwapMintSettings()
+
+  const onSubmit = useCallback(() => {
     swapMint({
       isMint,
       account,
@@ -257,15 +321,31 @@ export default function SwapMint() {
       backingAmt: backingAmt || 0,
       lionAmt: lionAmt || 0,
       usmAmt: usmAmt || 0,
+      slippageTolerance,
       sendTx,
       toast,
     })
-  }
+  }, [
+    account,
+    backingAmt,
+    backingToken.metadata,
+    isMint,
+    lionAmt,
+    sendTx,
+    slippageTolerance,
+    toast,
+    usmAmt,
+  ])
 
   const {
     isOpen: isSelectTokenModalOpen,
     onOpen: onSelectTokenModalOpen,
     onClose: onSelectTokenModalClose,
+  } = useDisclosure()
+  const {
+    isOpen: isConfirmModalOpen,
+    onOpen: onConfirmModalOpen,
+    onClose: onConfirmModalClose,
   } = useDisclosure()
 
   return (
@@ -298,7 +378,7 @@ export default function SwapMint() {
             <Portal>
               <PopoverContent>
                 <PopoverBody>
-                  <Settings></Settings>
+                  <Settings />
                 </PopoverBody>
               </PopoverContent>
             </Portal>
@@ -334,7 +414,7 @@ export default function SwapMint() {
           isDisabled={disabled}
         ></AmountInput>
 
-        {backingToken.metadata && !emptyInput && (
+        {backingToken.metadata && estimated && (
           <Explain
             loading={inEstimate}
             isMint={isMint}
@@ -352,8 +432,12 @@ export default function SwapMint() {
           mt="4"
           borderRadius="2xl"
           fontSize="xl"
-          isDisabled={!sendEnabled}
-          onClick={onSubmit}
+          isDisabled={!sendEnabled || !isSendReady}
+          isLoading={!isSendReady}
+          loadingText="Waiting for transaction completed"
+          onClick={() => {
+            expertMode ? onSubmit() : onConfirmModalOpen()
+          }}
         >
           {sendTitle}
         </Button>
@@ -373,8 +457,22 @@ export default function SwapMint() {
         onClose={onSelectTokenModalClose}
         onSelect={(denom) => {
           setBackingDenom(denom)
-          setDenomInput(DenomInput.Backing)
+          setInputKind(InputKind.Backing)
         }}
+      />
+
+      <ConfirmModal
+        isMint={isMint}
+        backingToken={backingToken}
+        lionToken={lionToken}
+        usmToken={usmToken}
+        backingAmt={backingAmt}
+        lionAmt={lionAmt}
+        usmAmt={usmAmt}
+        feeAmt={feeAmt}
+        isOpen={isConfirmModalOpen}
+        onClose={onConfirmModalClose}
+        onSubmit={onSubmit}
       />
     </Container>
   )

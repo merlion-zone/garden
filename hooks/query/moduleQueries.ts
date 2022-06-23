@@ -153,7 +153,7 @@ export function useSupplyOf(denom: string) {
 
 export interface DenomMetadata extends Metadata {
   denomUnitsMap: Map<string, DenomUnit>
-  displayExponent?: number
+  displayExponent: number
 }
 
 function extendDenomMetadata(metadata: Metadata): DenomMetadata {
@@ -163,7 +163,7 @@ function extendDenomMetadata(metadata: Metadata): DenomMetadata {
   })
   return {
     denomUnitsMap,
-    displayExponent: denomUnitsMap.get(metadata.display)?.exponent,
+    displayExponent: denomUnitsMap.get(metadata.display)?.exponent || 0,
     ...metadata,
   }
 }
@@ -264,7 +264,7 @@ function displayCoinPrice(metadata?: DenomMetadata, price?: Dec): Dec | null {
   if (!metadata || !price || metadata.displayExponent === undefined) {
     return null
   }
-  return price.mul(new Dec(10).pow(metadata.displayExponent)).div(1e6)
+  return price.mulPow(metadata.displayExponent).div(1e6)
 }
 
 export function useDisplayCoinPrice(denom: string) {

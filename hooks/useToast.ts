@@ -1,13 +1,17 @@
-import { useToast as useBaseToast } from '@chakra-ui/react'
+import { useToast as useBaseToast, UseToastOptions } from '@chakra-ui/react'
+import { useMemo } from 'react'
 
 export function useToast() {
-  return useBaseToast({
-    position: 'top-right',
-    duration: null,
-    containerStyle: {
-      position: 'relative',
-      top: '20',
-      right: '2',
-    },
-  })
+  const defaultOptions = useMemo(() => {
+    return {
+      position: 'top-right',
+      duration: null,
+      containerStyle: {
+        position: 'relative',
+        top: '20',
+        right: '2',
+      },
+    } as UseToastOptions
+  }, [])
+  return useBaseToast(defaultOptions)
 }

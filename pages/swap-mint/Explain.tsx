@@ -14,8 +14,9 @@ import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
 import { Dec } from '@merlionzone/merlionjs'
 import { DenomMetadata, useDisplayCoinPrice } from '@/hooks/query'
 import config from '@/config'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { ChevronDownIcon, InfoOutlineIcon } from '@chakra-ui/icons'
+import { WithHint } from '@/components/Hint'
 
 interface ExplainProps {
   loading: boolean
@@ -25,6 +26,7 @@ interface ExplainProps {
   lionAmt: string
   usmAmt: string
   feeAmt: string
+  noCollapse?: boolean
 }
 
 function exchangeRates(...amounts: [Dec, string][]) {
@@ -49,6 +51,7 @@ export const Explain = ({
   lionAmt,
   usmAmt,
   feeAmt,
+  noCollapse,
 }: ExplainProps) => {
   const { isOpen, onToggle } = useDisclosure()
 
@@ -62,12 +65,8 @@ export const Explain = ({
   const { displayPrice: usmPrice } = useDisplayCoinPrice(config.merDenom)
   const fee = usmPrice && feeAmt && usmPrice?.mul(feeAmt)
 
-  const { defaultSlippageTolerance, slippageTolerance } = useSwapMintSettings()
-  let slippage = new Dec(slippageTolerance || defaultSlippageTolerance)
-  if (slippage.greaterThan(50)) {
-    slippage = new Dec(50)
-  }
-  const tolerance = new Dec(1).sub(slippage.div(100))
+  const { slippageTolerance: slippage } = useSwapMintSettings()
+  const tolerance = new Dec(1).sub(slippage)
 
   let [backingAmtMin, lionAmtMin, usmAmtMin] = [
     new Dec(0),
@@ -81,15 +80,97 @@ export const Explain = ({
     lionAmtMin = new Dec(lionAmt || 0).mul(tolerance)
   }
 
+  const MimReceived = () => {
+    return isMint ? (
+      <>
+        <AmountDisplay
+          value={usmAmtMin}
+          suffix={' ' + config.merDisplayDenom}
+        />
+      </>
+    ) : (
+      <>
+        <AmountDisplay
+          value={backingAmtMin}
+          suffix={' ' + backingMetadata.symbol}
+        />
+        <span> + </span>
+        <AmountDisplay value={lionAmtMin} suffix={' ' + config.displayDenom} />
+      </>
+    )
+  }
+
+  const ExplainDetails = () => {
+    return (
+      <Stack fontSize="sm">
+        <HStack justify="space-between">
+          <WithHint
+            hint={
+              'The amount you expect to receive at the current market price. You may receive less or more if the market price changes while your transaction is pending.'
+            }
+            placement="right"
+          >
+            <Text>Expected Output</Text>
+          </WithHint>
+          <Text textAlign="end">
+            {isMint ? (
+              <>
+                <AmountDisplay
+                  value={usmAmt || 0}
+                  suffix={' ' + config.merDisplayDenom}
+                />
+              </>
+            ) : (
+              <>
+                <AmountDisplay
+                  value={backingAmt || 0}
+                  suffix={' ' + backingMetadata.symbol}
+                />
+                <span> + </span>
+                <AmountDisplay
+                  value={lionAmt || 0}
+                  suffix={' ' + config.displayDenom}
+                />
+              </>
+            )}
+          </Text>
+        </HStack>
+        <Divider />
+        <HStack justify="space-between" color="gray.500">
+          <WithHint
+            hint={
+              'The minimum amount you are guaranteed to receive. If the price slips any further, your transaction will revert.'
+            }
+            placement="right"
+          >
+            <Text>
+              Minimum received after slippage ({<DecDisplay value={slippage} />}
+              %)
+            </Text>
+          </WithHint>
+          <Text textAlign="end">
+            <MimReceived />
+          </Text>
+        </HStack>
+        <HStack justify="space-between" color="gray.500">
+          <Text>{isMint ? 'Mint' : 'Burn'} Fee</Text>
+          <Text textAlign="end">
+            <AmountDisplay value={fee} prefix="$" />
+          </Text>
+        </HStack>
+      </Stack>
+    )
+  }
+
   return (
     <>
       <HStack
         justify="space-between"
         my="3"
         px="3"
-        mb={!isOpen ? '0' : undefined}
+        mb={!(noCollapse || isOpen) ? '0' : undefined}
         fontSize="sm"
-        cursor="pointer"
+        cursor={!noCollapse ? 'pointer' : undefined}
         userSelect="none"
         borderRadius="xl"
         _hover={{
@@ -97,114 +178,72 @@ export const Explain = ({
         }}
         onClick={onToggle}
       >
-        <HStack
-          onClick={(event) => {
-            event.stopPropagation()
-            rates.length && setRatesIndex((ratesIndex + 1) % rates.length)
-          }}
-        >
+        <HStack>
           {rates.length > 0 && (
             <>
-              <Box w="4">
-                {loading ? (
-                  <Spinner speed="0.65s" color="gray.400" size="xs" />
-                ) : (
-                  <InfoOutlineIcon />
-                )}
+              {!noCollapse && (
+                <Box w="4">
+                  {loading ? (
+                    <Spinner speed="0.65s" color="gray.400" size="xs" />
+                  ) : isOpen ? (
+                    <InfoOutlineIcon />
+                  ) : (
+                    <WithHint hint={<ExplainDetails />} placement="bottom">
+                      <InfoOutlineIcon />
+                    </WithHint>
+                  )}
+                </Box>
+              )}
+              <Box
+                cursor="pointer"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  rates.length && setRatesIndex((ratesIndex + 1) % rates.length)
+                }}
+              >
+                <AmountDisplay
+                  value={rates[ratesIndex][0][0]}
+                  suffix={' ' + rates[ratesIndex][0][1]}
+                />
+                <span> + </span>
+                <AmountDisplay
+                  value={rates[ratesIndex][1][0]}
+                  suffix={' ' + rates[ratesIndex][1][1]}
+                />
+                <span> = </span>
+                <AmountDisplay
+                  value={rates[ratesIndex][2][0]}
+                  suffix={' ' + rates[ratesIndex][2][1]}
+                />
               </Box>
-              <AmountDisplay
-                value={rates[ratesIndex][0][0]}
-                suffix={' ' + rates[ratesIndex][0][1]}
-              />
-              <span>+</span>
-              <AmountDisplay
-                value={rates[ratesIndex][1][0]}
-                suffix={' ' + rates[ratesIndex][1][1]}
-              />
-              <span>=</span>
-              <AmountDisplay
-                value={rates[ratesIndex][2][0]}
-                suffix={' ' + rates[ratesIndex][2][1]}
-              />
             </>
           )}
         </HStack>
-        <Text fontSize="3xl" color="gray.500">
-          <ChevronDownIcon
-            transition="all 0.2s ease-out"
-            transform={isOpen ? 'rotate(180deg)' : undefined}
-          />
-        </Text>
+        {!noCollapse && (
+          <Text fontSize="3xl" color="gray.500">
+            <ChevronDownIcon
+              transition="all 0.2s ease-out"
+              transform={isOpen ? 'rotate(180deg)' : undefined}
+            />
+          </Text>
+        )}
       </HStack>
-      <Collapse in={isOpen} animateOpacity>
-        <Stack
+      <Collapse in={noCollapse || isOpen} animateOpacity>
+        <Box
           p="3"
-          fontSize="sm"
           borderRadius="2xl"
           border="1px"
           borderColor={useColorModeValue('gray.300', 'gray.700')}
         >
-          <HStack justify="space-between">
-            <Text>Expected Output</Text>
-            <Text>
-              {isMint ? (
-                <>
-                  <AmountDisplay
-                    value={usmAmt}
-                    suffix={' ' + config.merDisplayDenom}
-                  />
-                </>
-              ) : (
-                <>
-                  <AmountDisplay
-                    value={backingAmt}
-                    suffix={' ' + backingMetadata.symbol}
-                  />
-                  <span>+</span>
-                  <AmountDisplay
-                    value={lionAmt}
-                    suffix={' ' + config.displayDenom}
-                  />
-                </>
-              )}
-            </Text>
-          </HStack>
-          <Divider />
-          <HStack justify="space-between" color="gray.500">
-            <Text>
-              Minimum received after slippage ({<DecDisplay value={slippage} />}
-              %)
-            </Text>
-            <Text>
-              {isMint ? (
-                <>
-                  <AmountDisplay
-                    value={usmAmtMin}
-                    suffix={' ' + config.merDisplayDenom}
-                  />
-                </>
-              ) : (
-                <>
-                  <AmountDisplay
-                    value={backingAmtMin}
-                    suffix={' ' + backingMetadata.symbol}
-                  />
-                  <span>+</span>
-                  <AmountDisplay
-                    value={lionAmtMin}
-                    suffix={' ' + config.displayDenom}
-                  />
-                </>
-              )}
-            </Text>
-          </HStack>
-          <HStack justify="space-between" color="gray.500">
-            <Text>{isMint ? 'Mint' : 'Burn'} Fee</Text>
-            <Text>
-              <AmountDisplay value={fee} prefix="$" />
-            </Text>
-          </HStack>
-        </Stack>
+          <ExplainDetails />
+        </Box>
+
+        {noCollapse && (
+          <Text fontStyle="italic" fontSize="xs" color="gray.500" mt="2">
+            Output is estimated. You will receive at least {<MimReceived />} or
+            the transaction will revert.
+          </Text>
+        )}
       </Collapse>
     </>
   )

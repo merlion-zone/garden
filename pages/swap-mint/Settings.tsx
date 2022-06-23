@@ -17,29 +17,33 @@ import { useEffect, useState } from 'react'
 import { Hint } from '@/components/Hint'
 
 export const Settings = () => {
-  const { slippageTolerance, setSlippageTolerance, expertMode, setExpertMode } =
-    useSwapMintSettings()
+  const {
+    slippageTolerancePercentage,
+    setSlippageTolerancePercentage,
+    expertMode,
+    setExpertMode,
+  } = useSwapMintSettings()
 
   const [slippageFrontrun, setSlippageFrontrun] = useState(false)
   const [slippageInvalid, setSlippageInvalid] = useState(false)
   useEffect(() => {
-    if (!slippageTolerance) {
+    if (!slippageTolerancePercentage) {
       setSlippageFrontrun(false)
       setSlippageInvalid(false)
     } else {
-      const slippage = new Dec(slippageTolerance)
+      const slippage = new Dec(slippageTolerancePercentage)
       setSlippageFrontrun(slippage.greaterThan(1))
       setSlippageInvalid(slippage.greaterThan(50))
     }
-  }, [slippageTolerance])
+  }, [slippageTolerancePercentage])
 
   const inputBorderColor = (useColorModeValue as any)(
-    ...(!slippageTolerance
+    ...(!slippageTolerancePercentage
       ? ['gray.300', 'gray.600']
       : ['brand.300', 'brand.300'])
   )
   const inputHoverBorderColor = (useColorModeValue as any)(
-    ...(!slippageTolerance
+    ...(!slippageTolerancePercentage
       ? ['gray.400', 'gray.500']
       : ['brand.500', 'brand.200'])
   )
@@ -70,10 +74,10 @@ export const Settings = () => {
         </HStack>
         <HStack>
           <Button
-            variant={slippageTolerance ? 'ghost' : 'solid'}
+            variant={slippageTolerancePercentage ? 'ghost' : 'solid'}
             size="sm"
             onClick={() => {
-              setSlippageTolerance('')
+              setSlippageTolerancePercentage('')
             }}
           >
             Auto
@@ -92,9 +96,12 @@ export const Settings = () => {
               borderColor={inputBorderColor}
               _hover={{ borderColor: inputHoverBorderColor }}
               type="number"
-              value={slippageTolerance}
+              value={slippageTolerancePercentage}
               onChange={(event) => {
-                setSlippageTolerance(event.target.value)
+                if (!event.target.value.match(/^\d*[.,]?\d*$/)) {
+                  return
+                }
+                setSlippageTolerancePercentage(event.target.value)
               }}
               onBlur={(event) => {
                 if (event.target.value) {
@@ -102,9 +109,9 @@ export const Settings = () => {
                     2
                   )
                   if (slippage.lessThanOrEqualTo(50)) {
-                    setSlippageTolerance(slippage.toString())
+                    setSlippageTolerancePercentage(slippage.toString())
                   } else {
-                    setSlippageTolerance('')
+                    setSlippageTolerancePercentage('')
                   }
                 }
               }}

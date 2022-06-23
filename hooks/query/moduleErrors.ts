@@ -6,11 +6,17 @@ export const moduleAlerts = {
 }
 
 export const errors = {
+  backingDisabled: 'Backing asset is disabled',
+  collateralDisabled: 'Collateral asset is disabled',
   usmPriceTooLow: 'Too low USM price',
   usmPriceTooHigh: 'Too high USM price',
   backingInsufficientQuota: 'Exceeds backing asset quota',
   collateralInsufficientQuota: 'Exceeds collateral asset quota',
   usmInsufficientQuota: 'Insufficient USM quota',
+  backingInsufficientBalance: 'Insufficient backing asset balance',
+  collateralInsufficientBalance: 'Insufficient collateral asset balance',
+  lionInsufficientBalance: 'Insufficient LION balance',
+  usmInsufficientBalance: 'Insufficient USM balance',
 }
 
 const moduleErrors = {
@@ -19,20 +25,21 @@ const moduleErrors = {
     'mer stablecoin price too high': errors.usmPriceTooHigh,
     'backing params invalid': '',
     'collateral params invalid': '',
-    'backing coin disabled': '',
-    'collateral coin disabled': '',
+    'backing coin disabled': errors.backingDisabled,
+    'collateral coin disabled': errors.collateralDisabled,
     'backing coin already exists': '',
     'collateral coin already exists': '',
     'backing coin not found': '',
     'collateral coin not found': '',
-    'backing coin over slippage': '',
-    'lion coin over slippage': '',
+    'mer under slippage': '', // TODO
+    'backing coin over slippage': '', // TODO
+    'lion coin over slippage': '', // TODO
     'total backing coin over ceiling': errors.backingInsufficientQuota,
     'total collateral coin over ceiling': errors.collateralInsufficientQuota,
     'total mer coin over ceiling': errors.usmInsufficientQuota,
-    'backing coin balance insufficient': '',
-    'collateral coin balance insufficient': '',
-    'insufficient available lion coin': '',
+    'backing coin balance insufficient': '', // TODO
+    'collateral coin balance insufficient': '', // TODO
+    'insufficient available lion coin': '', // TODO
     'account has no collateral': '',
     'account has insufficient collateral': '',
     'account has no debt': '',
@@ -50,5 +57,5 @@ export function getModuleErrorMsg(
       return (<any>errs)[key]
     }
   }
-  return ''
+  return 'Invalid amount entered'
 }
