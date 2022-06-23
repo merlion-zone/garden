@@ -3,12 +3,20 @@ import { ParameterChangeProposal } from 'cosmjs-types/cosmos/params/v1beta1/para
 import { TextProposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import type { Any } from 'cosmjs-types/google/protobuf/any'
 import { Timestamp } from 'cosmjs-types/google/protobuf/timestamp'
+import { typeUrls } from '@merlionzone/merlionjs'
+import { valueToNode } from '@babel/types'
 
 // TODO: support other proposals
 export enum ProposalType {
   TEXT = 'Text proposal',
   SPEND = 'Community pool spend',
   PARAMS = 'Parameter change',
+}
+
+export interface ProposalContent {
+  'Text proposal': TextProposal
+  'Community pool spend': CommunityPoolSpendProposal
+  'Parameter change': ParameterChangeProposal
 }
 
 export function decodeContent(content: Any) {
@@ -29,6 +37,36 @@ export function decodeContent(content: Any) {
         ...ParameterChangeProposal.decode(content.value),
       }
   }
+}
+
+export function getContent<T extends keyof ProposalContent>(
+  type: T,
+  value: ProposalContent[T]
+) {
+  console.log(type, value)
+  switch (type) {
+    case ProposalType.TEXT:
+      return {
+        typeUrl: '/cosmos.gov.v1beta1.TextProposal',
+        value: TextProposal.encode(value).finish(),
+      }
+    case ProposalType.SPEND:
+      console.log(value)
+      return {
+        typeUrl: '/cosmos.distribution.v1beta1.CommunityPoolSpendProposal',
+        value: CommunityPoolSpendProposal.encode(
+          value as CommunityPoolSpendProposal
+        ).finish(),
+      }
+    case ProposalType.PARAMS:
+      return {
+        typeUrl: '/cosmos.params.v1beta1.ParameterChangeProposal',
+        value: ParameterChangeProposal.encode(
+          value as ParameterChangeProposal
+        ).finish(),
+      }
+  }
+  throw new Error(`Not support proposal type ${type}`)
 }
 
 export function getTime(timestamp: Timestamp) {
