@@ -3,8 +3,6 @@ import { ParameterChangeProposal } from 'cosmjs-types/cosmos/params/v1beta1/para
 import { TextProposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import type { Any } from 'cosmjs-types/google/protobuf/any'
 import { Timestamp } from 'cosmjs-types/google/protobuf/timestamp'
-import { typeUrls } from '@merlionzone/merlionjs'
-import { valueToNode } from '@babel/types'
 
 // TODO: support other proposals
 export enum ProposalType {
@@ -37,6 +35,7 @@ export function decodeContent(content: Any) {
         ...ParameterChangeProposal.decode(content.value),
       }
   }
+  throw new Error(`Not support proposal type ${content.typeUrl}`)
 }
 
 export function getContent<T extends keyof ProposalContent>(
