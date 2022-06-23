@@ -14,6 +14,8 @@ export const parseCoin = (coin: Coin): Coin => {
 
   const decimals = new BigNumber(10).pow(currency.decimals)
 
+  BigNumber.config({ EXPONENTIAL_AT: 1e9 })
+
   return {
     denom: currency.minimalDenom,
     amount: decimals.times(coin.amount).toString(),
