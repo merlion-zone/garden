@@ -366,3 +366,7 @@ export function useQueryProposals(
 ) {
   return useMerlionQuery('gov', 'proposals', proposalStatus, depositor, voter)
 }
+
+export function useQueryProposal(id: string) {
+  return useMerlionQuery('gov', 'proposal', id)
+}
