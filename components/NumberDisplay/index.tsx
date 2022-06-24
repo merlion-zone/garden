@@ -7,6 +7,7 @@ interface AmountDisplayProps {
   suffix?: string
   decimals?: number
   precision?: number
+  placeholder?: string | false
 }
 
 export const AmountDisplay = ({
@@ -15,6 +16,7 @@ export const AmountDisplay = ({
   suffix,
   decimals,
   precision,
+  placeholder,
 }: AmountDisplayProps) => {
   if (value && typeof value === 'object') {
     value = value.toString()
@@ -23,7 +25,7 @@ export const AmountDisplay = ({
     value = Dec.withPrecision(value, decimals).toString()
   }
 
-  return (
+  return value ? (
     <NumberFormat
       value={value}
       displayType={'text'}
@@ -32,6 +34,11 @@ export const AmountDisplay = ({
       suffix={suffix}
       decimalScale={precision ?? 4}
     />
+  ) : (
+    <>
+      {placeholder !== false &&
+        `${prefix ?? ''}${placeholder ?? '--'}${suffix ?? ''}`}
+    </>
   )
 }
 

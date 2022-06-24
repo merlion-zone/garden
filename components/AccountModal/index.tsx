@@ -22,7 +22,7 @@ interface AccountModalProps {
 
   onClose(): void
 
-  onChange(): void
+  onChange(disconnect: boolean): void
 }
 
 export const AccountModal = ({
@@ -46,9 +46,22 @@ export const AccountModal = ({
               <Text fontSize="sm" fontWeight="500" color="subtle">
                 Connected with {walletType}
               </Text>
-              <Button variant="outline" size="sm" onClick={onChange}>
-                Change
-              </Button>
+              <HStack>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => onChange(true)}
+                >
+                  Disconnect
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => onChange(false)}
+                >
+                  Change
+                </Button>
+              </HStack>
             </HStack>
             <HStack pt="2" fontSize="xl">
               {walletType === 'metamask' ? <MetaMaskIcon /> : <KeplrIcon />}

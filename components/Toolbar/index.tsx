@@ -39,7 +39,8 @@ export const Toolbar = () => {
     onClose: onWrongNetworkClose,
   } = useDisclosure()
 
-  const { walletType, connected, account, onConnect } = useConnectWallet()
+  const { walletType, connected, account, onConnect, onDisconnect } =
+    useConnectWallet()
   useEffectOnce(() => {
     onConnect(null)
   })
@@ -48,16 +49,23 @@ export const Toolbar = () => {
 
   const [isConnectWalletBack, setIsConnectWalletBack] = useState(false)
 
-  const onAccountModalChange = useCallback(() => {
-    onAccountModalClose()
-    setIsConnectWalletBack(true)
-    onConnectWalletOpen()
-  }, [onAccountModalClose, onConnectWalletOpen])
+  const onAccountModalChange = useCallback(
+    (disconnect: boolean) => {
+      onAccountModalClose()
+      if (!disconnect) {
+        setIsConnectWalletBack(true)
+      } else {
+        onDisconnect()
+      }
+      setTimeout(onConnectWalletOpen, 200)
+    },
+    [onAccountModalClose, onConnectWalletOpen, onDisconnect]
+  )
 
   const onConnectWalletBack = useCallback(() => {
     onConnectWalletClose()
     setIsConnectWalletBack(false)
-    onAccountModalOpen()
+    setTimeout(onAccountModalOpen, 200)
   }, [onAccountModalOpen, onConnectWalletClose])
 
   return (

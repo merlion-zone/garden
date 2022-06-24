@@ -126,7 +126,11 @@ export const AmountInput = ({
               </Text>
             )}
             <Text>
-              <AmountDisplay value={amountValue} prefix="$" />
+              <AmountDisplay
+                value={amountValue}
+                prefix="$"
+                placeholder={false}
+              />
             </Text>
           </HStack>
           <Text

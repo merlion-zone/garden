@@ -194,6 +194,10 @@ export default function SwapMint() {
   const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
   const [estimated, setEstimated] = useState(false)
 
+  useEffect(() => {
+    setEstimated(false)
+  }, [isMint])
+
   const onInput = useCallback(
     (name: string, value: string) => {
       console.debug(value, name)

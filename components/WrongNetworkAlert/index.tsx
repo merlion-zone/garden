@@ -7,8 +7,16 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
+  HStack,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react'
-import { switchEthereumChain } from '@/hooks'
+import { switchEthereumChain, useConnectWallet } from '@/hooks'
 
 interface WrongNetworkAlertProps {
   isOpen: boolean
@@ -20,41 +28,38 @@ export const WrongNetworkAlert = ({
   isOpen,
   onClose,
 }: WrongNetworkAlertProps) => {
-  const cancelRef = useRef<any>()
+  const { onDisconnect } = useConnectWallet()
 
   return (
-    <AlertDialog
-      isOpen={isOpen}
-      onClose={onClose}
-      leastDestructiveRef={cancelRef}
-      isCentered
-    >
-      <AlertDialogOverlay>
-        <AlertDialogContent>
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Wrong Network
-          </AlertDialogHeader>
-
-          <AlertDialogBody>
-            Please switch to the Merlion network in your wallet.
-          </AlertDialogBody>
-
-          <AlertDialogFooter>
-            <Button ref={cancelRef} variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                switchEthereumChain().then(() => {})
-                onClose()
-              }}
-              ml={3}
-            >
-              Switch network
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
+    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <ModalOverlay />
+      <ModalContent bg="bg-surface">
+        <ModalHeader>Wrong Network</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody pb="6">
+          Please switch to the Merlion network in your wallet.
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              onDisconnect()
+              onClose()
+            }}
+          >
+            Disconnect
+          </Button>
+          <Button
+            onClick={() => {
+              switchEthereumChain().then(() => {})
+              onClose()
+            }}
+            ml={3}
+          >
+            Switch network
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }

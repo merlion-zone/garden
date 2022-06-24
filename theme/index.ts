@@ -65,25 +65,25 @@ export const theme: Record<string, any> = extendTheme(
             if (c === 'gray') {
               return proTheme.components.Button.variants.solid
             }
-            const {
-              bg = `${c}.500`,
-              color = 'white',
-              hoverBg = `${c}.600`,
-              activeBg = `${c}.700`,
-            } = {}
 
-            const background = mode(bg, `${c}.400`)(props)
+            const bg = mode(`${c}.500`, `${c}.400`)(props)
+            const grayBg = mode(`gray.100`, `whiteAlpha.200`)(props)
 
             return {
-              bg: background,
-              color: mode(color, `gray.100`)(props),
+              bg,
+              color: mode('white', `gray.100`)(props),
               _hover: {
-                bg: mode(hoverBg, `${c}.500`)(props),
+                bg: mode(`${c}.600`, `${c}.500`)(props),
                 _disabled: {
-                  bg: background,
+                  bg: grayBg,
                 },
               },
-              _active: { bg: mode(activeBg, `${c}.600`)(props) },
+              _disabled: {
+                opacity: 1,
+                color: mode('gray.500', `gray.400`)(props),
+                bg: grayBg,
+              },
+              _active: { bg: mode(`${c}.700`, `${c}.600`)(props) },
             }
           },
           ghost: baseTheme.components.Button.variants.ghost,
