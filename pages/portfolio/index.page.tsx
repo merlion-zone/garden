@@ -4,6 +4,7 @@ import {
   BoxProps,
   Button,
   Center,
+  chakra,
   Container,
   Heading,
   HStack,
@@ -113,7 +114,7 @@ export default function Portfolio() {
                 <Text fontSize="4xl">LION</Text>
               </HStack>
               <HStack gap="4">
-                <HStack
+                <Text
                   fontSize="md"
                   color="gray.500"
                   bg="bg-canvas"
@@ -121,7 +122,7 @@ export default function Portfolio() {
                   py="1"
                   borderRadius="4"
                 >
-                  <Text fontWeight="bold">
+                  <chakra.span fontWeight="bold">
                     <AmountDisplay
                       value={
                         lionBalance &&
@@ -131,19 +132,21 @@ export default function Portfolio() {
                       decimals={config.denomDecimals}
                       prefix="$"
                     ></AmountDisplay>
-                  </Text>
-                  <Text>USD</Text>
-                </HStack>
-                <HStack fontSize="md" color="gray.500">
-                  <Text fontWeight="bold">
-                    1 LION = &nbsp;
+                  </chakra.span>
+                  &nbsp;
+                  <chakra.span>USD</chakra.span>
+                </Text>
+                <Text fontSize="md" color="gray.500">
+                  <chakra.span fontWeight="bold">
+                    1 LION =&nbsp;
                     <AmountDisplay
                       value={lionDisplayPrice}
                       prefix="$"
                     ></AmountDisplay>
-                  </Text>
-                  <Text>USD</Text>
-                </HStack>
+                  </chakra.span>
+                  &nbsp;
+                  <chakra.span>USD</chakra.span>
+                </Text>
               </HStack>
               <HStack align="baseline">
                 <Text fontSize="3xl">
@@ -159,7 +162,7 @@ export default function Portfolio() {
                 ></Hint>
               </HStack>
               <HStack gap="4">
-                <HStack
+                <Text
                   fontSize="md"
                   color="gray.500"
                   bg="bg-canvas"
@@ -167,7 +170,7 @@ export default function Portfolio() {
                   py="1"
                   borderRadius="4"
                 >
-                  <Text fontWeight="bold">
+                  <chakra.span fontWeight="bold">
                     <AmountDisplay
                       value={
                         merBalance &&
@@ -177,19 +180,20 @@ export default function Portfolio() {
                       decimals={config.merDenomDecimals}
                       prefix="$"
                     ></AmountDisplay>
-                  </Text>
-                  <Text>USD</Text>
-                </HStack>
-                <HStack fontSize="md" color="gray.500">
-                  <Text fontWeight="bold">
-                    1 USM = &nbsp;
+                  </chakra.span>
+                  &nbsp;
+                  <chakra.span>USD</chakra.span>
+                </Text>
+                <Text fontSize="md" color="gray.500">
+                  <chakra.span fontWeight="bold">
+                    1 USM =&nbsp;
                     <AmountDisplay
                       value={merDisplayPrice}
                       prefix="$"
                     ></AmountDisplay>
-                  </Text>
-                  <Text>USD</Text>
-                </HStack>
+                  </chakra.span>
+                  <chakra.span>&nbsp;USD</chakra.span>
+                </Text>
               </HStack>
             </Card>
             <Card>

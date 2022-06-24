@@ -25,7 +25,7 @@ export const AmountDisplay = ({
     value = Dec.withPrecision(value, decimals).toString()
   }
 
-  return value ? (
+  return value || value === 0 ? (
     <NumberFormat
       value={value}
       displayType={'text'}

@@ -144,7 +144,8 @@ export const Explain = ({
             placement="right"
           >
             <Text>
-              Minimum received after slippage ({<DecDisplay value={slippage} />}
+              Minimum received after slippage (
+              {<DecDisplay value={slippage.mul(100)} />}
               %)
             </Text>
           </WithHint>

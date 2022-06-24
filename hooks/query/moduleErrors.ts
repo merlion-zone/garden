@@ -37,8 +37,8 @@ const moduleErrors = {
     'total backing coin over ceiling': errors.backingInsufficientQuota,
     'total collateral coin over ceiling': errors.collateralInsufficientQuota,
     'total mer coin over ceiling': errors.usmInsufficientQuota,
-    'backing coin balance insufficient': '', // TODO
-    'collateral coin balance insufficient': '', // TODO
+    'backing coin balance insufficient': errors.backingInsufficientQuota, // TODO
+    'collateral coin balance insufficient': errors.collateralInsufficientQuota, // TODO
     'insufficient available lion coin': '', // TODO
     'account has no collateral': '',
     'account has insufficient collateral': '',

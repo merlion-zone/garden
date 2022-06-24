@@ -253,7 +253,7 @@ export default function SwapMint() {
         setEstimated(estimated.estimated)
 
         if (estimated.estimated) {
-          setSendTitle('Swap Mint')
+          setSendTitle(isMint ? 'Swap Mint' : 'Swap Burn')
           setSendEnabled(true)
 
           if (isMint) {
@@ -295,7 +295,7 @@ export default function SwapMint() {
         setTimeout(
           () => setInEstimate(false),
           // delay 500ms to avoid flash
-          Math.max(start - Date.now() + 500, 0)
+          Math.max(start - Date.now() + 200, 0)
         )
       })
     },
