@@ -35,13 +35,16 @@ import { useDebounce } from 'react-use'
 import { AmountInput } from './AmountInput'
 import { OperatorIcon } from './OperatorIcon'
 import { SelectTokenModal } from './SelectTokenModal'
-import { Settings } from '@/pages/swap-mint/Settings'
-import { Explain } from '@/pages/swap-mint/Explain'
-import { swapMint } from '@/pages/swap-mint/swapMint'
+import { Settings } from '@/pages/backing/swap-mint/Settings'
+import { Explain } from '@/pages/backing/swap-mint/Explain'
+import { swapMint } from '@/pages/backing/swap-mint/swapMint'
 import { useToast } from '@/hooks/useToast'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
-import { estimateSwapMint, InputKind } from '@/pages/swap-mint/estimateSwapMint'
-import { ConfirmModal } from '@/pages/swap-mint/ConfirmModal'
+import {
+  estimateSwapMint,
+  InputKind,
+} from '@/pages/backing/swap-mint/estimateSwapMint'
+import { ConfirmModal } from '@/pages/backing/swap-mint/ConfirmModal'
 import { useSwapMintSettings } from '@/hooks/useSetting'
 
 export default function SwapMint() {

@@ -29,7 +29,7 @@ export const NavButton = (props: NavButtonProps) => {
       as="div"
       variant={useColorModeValue('ghost-on-accent', 'ghost')}
       justifyContent="start"
-      isActive={router.pathname === href}
+      isActive={router.pathname.startsWith(href)}
       {...buttonProps}
     >
       <HStack spacing="3">

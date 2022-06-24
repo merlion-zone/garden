@@ -9,15 +9,14 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { BsCurrencyExchange } from 'react-icons/bs'
-import { FaCoins } from 'react-icons/fa'
 import { FiActivity, FiCamera, FiFilm, FiSearch } from 'react-icons/fi'
 import { IoMdSwap } from 'react-icons/io'
-import { GiWallet, GiVote, GiStrong } from 'react-icons/gi'
+import { GiWallet, GiVote } from 'react-icons/gi'
 import { RiGovernmentLine, RiCurrencyFill } from 'react-icons/ri'
-import { SiDiscord, SiTelegram, SiTwitter } from 'react-icons/si'
 import { TbGauge } from 'react-icons/tb'
 import { NavButton } from '@/components/Sidebar/NavButton'
 import { Logo } from '@/components/Logo'
+import { Social } from '@/components/Sidebar/Social'
 
 interface SidebarProps {
   onButtonClick?: () => void
@@ -72,27 +71,15 @@ export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
                   onClick={onButtonClick}
                 />
                 <NavButton
-                  href="/swap-mint"
-                  label="Swap Mint"
-                  icon={IoMdSwap}
-                  onClick={onButtonClick}
-                />
-                <NavButton
-                  href="/collateral-mint"
-                  label="Collateral Mint"
-                  icon={BsCurrencyExchange}
-                  onClick={onButtonClick}
-                />
-                <NavButton
                   href="/backing"
                   label="Backing"
-                  icon={GiStrong}
+                  icon={IoMdSwap}
                   onClick={onButtonClick}
                 />
                 <NavButton
                   href="/collateral"
                   label="Collateral"
-                  icon={FaCoins}
+                  icon={BsCurrencyExchange}
                   onClick={onButtonClick}
                 />
               </Stack>
@@ -166,27 +153,7 @@ export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
                 Social
               </Text>
               <Stack spacing="1">
-                <NavButton
-                  href="/twitter"
-                  isExternal
-                  label="Twitter"
-                  icon={SiTwitter}
-                  onClick={onButtonClick}
-                />
-                <NavButton
-                  href="/discord"
-                  isExternal
-                  label="Discord"
-                  icon={SiDiscord}
-                  onClick={onButtonClick}
-                />
-                <NavButton
-                  href="/telegram"
-                  isExternal
-                  label="Telegram"
-                  icon={SiTelegram}
-                  onClick={onButtonClick}
-                />
+                <Social />
               </Stack>
             </Stack>
           </Stack>
