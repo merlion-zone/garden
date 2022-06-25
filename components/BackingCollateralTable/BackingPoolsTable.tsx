@@ -15,21 +15,15 @@ import {
   Button,
 } from '@chakra-ui/react'
 import {
-  DenomMetadata,
   useAllBackingParams,
   useAllBackingPools,
-  useDenomsMetadata,
   useDenomsMetadataMap,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
 import { PoolBacking } from '@merlionzone/merlionjs/dist/proto/merlion/maker/v1/maker'
 import config from '@/config'
-import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
 import { shortenDenom } from '@/utils'
-import {
-  IndicatorBar,
-  IndicatorTextBox,
-} from '@/components/BackingCollateralTable/IndicatorBar'
+import { IndicatorTextBox } from '@/components/BackingCollateralTable/IndicatorBar'
 
 export const BackingPoolsTable = () => {
   const { data: allBackingParams } = useAllBackingParams()

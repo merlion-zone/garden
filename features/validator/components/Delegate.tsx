@@ -36,7 +36,7 @@ export function Delegate() {
   const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
   const { balance: lionBalance = '0' } = useBalance(
-    address?.mer() ?? '',
+    address?.mer(),
     config.denom
   )
   const balance = useMemo(

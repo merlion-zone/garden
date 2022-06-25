@@ -5,17 +5,19 @@ import {
   useMerlionQueryClient,
 } from '@/hooks'
 import { useCallback, useMemo } from 'react'
-import { Dec } from '@merlionzone/merlionjs'
-import { Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
-import { DenomUnit } from '../../../merlionjs/src/proto/cosmos/bank/v1beta1/bank'
-import config from '@/config'
+import { DenomUnit, Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
 import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+import { Coin, Dec, Events } from '@merlionzone/merlionjs'
+import config from '@/config'
+import { formatNumber } from '@/utils'
 
 export function useMerlionQuery<
   Module extends keyof QueryExtensions,
   Method extends keyof QueryExtensions[Module],
   Params extends QueryExtensions[Module][Method] extends (...args: any[]) => any
-    ? Parameters<QueryExtensions[Module][Method]>
+    ? Parameters<QueryExtensions[Module][Method]> extends (infer Param)[]
+      ? (Param | undefined)[]
+      : never
     : never,
   Response extends QueryExtensions[Module][Method] extends (
     ...args: any[]
@@ -55,7 +57,12 @@ export function useMerlionQuery<
     client && params.every((p) => p !== undefined && p !== null)
       ? [module, method, ...params]
       : null,
-    querier as Fetcher<Response, any> // TODO
+    querier as Fetcher<Response, any>,
+    {
+      // onError: (err: Error, key: string) => {
+      // console.debug(`${key}: ${err.stack}`)
+      // },
+    }
   )
 }
 
@@ -103,7 +110,7 @@ export function useMerlionQueryMultiple<
     client && params.every((p) => p.every((p) => p !== undefined && p !== null))
       ? [module, method, ...params]
       : null,
-    querier as Fetcher<Response[], any> // TODO
+    querier as Fetcher<Response[], any>
   )
 }
 
@@ -116,8 +123,8 @@ export function useStatus() {
 /****************************** Bank ******************************/
 
 export function useBalance(
-  address: string,
-  denom: string
+  address?: string,
+  denom?: string
 ): {
   balance?: string
   error?: any
@@ -130,12 +137,12 @@ export function useBalance(
 }
 
 // deprecated: it cannot fetch all denom balances
-export function useBalances(address: string) {
+export function useBalances(address?: string) {
   return useMerlionQuery('bank', 'allBalances', address)
 }
 
 // deprecated: it cannot fetch all denom balances
-export function useBalancesMap(address: string) {
+export function useBalancesMap(address?: string) {
   const { data: balances, error } = useBalances(address)
   const data = useMemo(() => {
     const balancesMap = new Map()
@@ -147,7 +154,7 @@ export function useBalancesMap(address: string) {
   return { data, error }
 }
 
-export function useSupplyOf(denom: string) {
+export function useSupplyOf(denom?: string) {
   return useMerlionQuery('bank', 'supplyOf', denom)
 }
 
@@ -184,7 +191,7 @@ const lionMetadata: Metadata = {
   symbol: config.displayDenom,
 }
 
-export function useDenomMetadata(denom: string) {
+export function useDenomMetadata(denom?: string) {
   const { data, ...remain } = useMerlionQuery('bank', 'denomMetadata', denom)
   return useMemo(() => {
     if (denom === config.denom) {
@@ -217,7 +224,7 @@ export function useDenomsMetadata() {
 }
 
 export function useDenomsMetadataMap() {
-  const { data: denomsMetadata, error } = useDenomsMetadata()
+  const { data: denomsMetadata, ...rest } = useDenomsMetadata()
 
   const data = useMemo(() => {
     if (!denomsMetadata) {
@@ -232,8 +239,40 @@ export function useDenomsMetadataMap() {
 
   return {
     data,
-    error,
+    ...rest,
   }
+}
+
+function parseCoin(coin?: string): Coin | undefined {
+  if (!coin) {
+    return undefined
+  }
+  try {
+    return Coin.fromString(coin)
+  } catch {
+    return undefined
+  }
+}
+
+export function useFormatCoin(coin?: Coin | string): string | undefined {
+  const { data: denomsMetadata } = useDenomsMetadataMap()
+
+  return useMemo(() => {
+    let parsed = coin
+    if (typeof parsed === 'string') {
+      parsed = parseCoin(parsed)
+    }
+    if (!parsed) {
+      return
+    }
+    const metadata = denomsMetadata?.get(parsed.denom)
+    if (!metadata) {
+      return
+    }
+    return `${formatNumber(
+      new Dec(parsed?.amount).divPow(metadata.displayExponent).toString()
+    )} ${metadata.symbol}`
+  }, [coin, denomsMetadata])
 }
 
 /****************************** Oracle ******************************/
@@ -369,4 +408,14 @@ export function useQueryProposals(
 
 export function useQueryProposal(id: string) {
   return useMerlionQuery('gov', 'proposal', id)
+}
+
+/***************************** Txs ******************************/
+
+export function useTxs(events?: Events, page: number = 1, limit: number = 10) {
+  return useMerlionQuery('tx', 'getTxsEvent', events, {
+    offset: (page - 1) * limit,
+    limit,
+    isDesc: true,
+  })
 }

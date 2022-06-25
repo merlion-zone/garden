@@ -39,10 +39,7 @@ export const AmountInput = ({
   noAnnotation,
 }: AmountInputProps) => {
   const account = useAccountAddress()
-  const { balance } = useBalance(
-    account?.mer() as any,
-    token.metadata?.base as any
-  )
+  const { balance } = useBalance(account?.mer(), token.metadata?.base)
   const balanceDisplay = new Dec(balance).divPow(
     token.metadata?.displayExponent || 0
   )

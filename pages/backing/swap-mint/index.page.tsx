@@ -68,10 +68,7 @@ export default function SwapMint() {
     }
   }, [allBackingParams])
 
-  const { displayPrice: backingPrice } = useDisplayCoinPrice(
-    // TODO
-    backingDenom as string
-  )
+  const { displayPrice: backingPrice } = useDisplayCoinPrice(backingDenom)
   const { displayPrice: lionPrice } = useDisplayCoinPrice(config.denom)
   const { displayPrice: merPrice } = useDisplayCoinPrice(config.merDenom)
   const { price: merTargetPrice } = useMerTargetPrice()
@@ -108,18 +105,9 @@ export default function SwapMint() {
   const [sendTitle, setSendTitle] = useState<string | null>('Enter an amount')
   const { isSendReady } = useSendCosmTx()
 
-  const { balance: backingBalance } = useBalance(
-    account?.mer() || '',
-    backingDenom
-  )
-  const { balance: lionBalance } = useBalance(
-    account?.mer() || '',
-    config.denom
-  )
-  const { balance: usmBalance } = useBalance(
-    account?.mer() || '',
-    config.merDenom
-  )
+  const { balance: backingBalance } = useBalance(account?.mer(), backingDenom)
+  const { balance: lionBalance } = useBalance(account?.mer(), config.denom)
+  const { balance: usmBalance } = useBalance(account?.mer(), config.merDenom)
 
   const [disabled, setDisabled] = useState(false)
   const [merPriceBound, setMerPriceBound] = useState('')

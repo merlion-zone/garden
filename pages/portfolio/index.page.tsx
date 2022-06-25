@@ -45,14 +45,8 @@ export default function Portfolio() {
   const { displayPrice: lionDisplayPrice } = useDisplayCoinPrice(config.denom)
   const { displayPrice: merDisplayPrice } = useDisplayCoinPrice(config.merDenom)
 
-  const { balance: lionBalance } = useBalance(
-    address?.mer() || '',
-    config.denom
-  )
-  const { balance: merBalance } = useBalance(
-    address?.mer() || '',
-    config.merDenom
-  )
+  const { balance: lionBalance } = useBalance(address?.mer(), config.denom)
+  const { balance: merBalance } = useBalance(address?.mer(), config.merDenom)
 
   const [addressTabIndex, setAddressTabIndex] = useState(0)
 

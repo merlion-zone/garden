@@ -1244,6 +1244,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dinero.js/calculator-number@npm:2.0.0-alpha.8":
+  version: 2.0.0-alpha.8
+  resolution: "@dinero.js/calculator-number@npm:2.0.0-alpha.8"
+  dependencies:
+    "@dinero.js/core": 2.0.0-alpha.8
+  checksum: 843f05ba3f30e08f78469f1ad0c83bcbbc789455a60061a5a956867c950b2e627ad17708d86e088ff2bc39458d847ba242f6e5c6cdedca1db9d61965f60195b4
+  languageName: node
+  linkType: hard
+
+"@dinero.js/core@npm:2.0.0-alpha.8":
+  version: 2.0.0-alpha.8
+  resolution: "@dinero.js/core@npm:2.0.0-alpha.8"
+  dependencies:
+    "@dinero.js/currencies": 2.0.0-alpha.8
+  checksum: a747cec35e6709e23d8e41666fcce467faffa58248dbbd3440785dbecc8fc55379f608e16ecb7fe9c0007e29b1872f05666ce10891138fe0f856d0e825ecfe2d
+  languageName: node
+  linkType: hard
+
+"@dinero.js/currencies@npm:2.0.0-alpha.8, @dinero.js/currencies@npm:alpha":
+  version: 2.0.0-alpha.8
+  resolution: "@dinero.js/currencies@npm:2.0.0-alpha.8"
+  checksum: db1e2e775df9c2c211f245bd966c9f66d7e3fb7b6989ce6f2246b2c5685337c72eb9b1ae9c38adcb5aa745f5a7e6f8c8e3207dac47f87ab31698b5e9b00c3206
+  languageName: node
+  linkType: hard
+
 "@emotion/babel-plugin@npm:^11.7.1":
   version: 11.9.2
   resolution: "@emotion/babel-plugin@npm:11.9.2"
@@ -1928,9 +1953,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@merlionzone/merlionjs@npm:^0.1.8":
-  version: 0.1.8
-  resolution: "@merlionzone/merlionjs@npm:0.1.8"
+"@merlionzone/merlionjs@npm:^0.1.9":
+  version: 0.1.9
+  resolution: "@merlionzone/merlionjs@npm:0.1.9"
   dependencies:
     "@cosmjs/amino": ^0.28.7
     "@cosmjs/crypto": ^0.28.7
@@ -1950,7 +1975,7 @@ __metadata:
     long: ^4.0.0
     protobufjs: ~6.11.2
     utf-8-validate: ^5.0.9
-  checksum: b37585a3fb81af928483742b456f5fd96a5f4bda7a7aecae0937a3d6eb61044fe938620dc7e735aae733ee9cd1399cde971c93d0516d664c825b708f37cb679b
+  checksum: 6fe930fa9df559e1c8f5f20539c08d015c84c6eab72655501f491572eecedd3833eab227f5a039f7b037da89a1ca1daec363d8c1f2018481234719478c08950f
   languageName: node
   linkType: hard
 
@@ -3637,6 +3662,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dinero.js@npm:alpha":
+  version: 2.0.0-alpha.8
+  resolution: "dinero.js@npm:2.0.0-alpha.8"
+  dependencies:
+    "@dinero.js/calculator-number": 2.0.0-alpha.8
+    "@dinero.js/core": 2.0.0-alpha.8
+    "@dinero.js/currencies": 2.0.0-alpha.8
+  checksum: ca57fc25fa296d3b188ff4b6c47b21461d8d709c8b55c41cb5ce848b7f4986e882ed06ed6348a2c088406a6a57ef683c112b472c7af88c84903d95483ebd0a69
+  languageName: node
+  linkType: hard
+
 "dir-glob@npm:^3.0.1":
   version: 3.0.1
   resolution: "dir-glob@npm:3.0.1"
@@ -4361,6 +4397,7 @@ __metadata:
     "@cosmjs/encoding": ^0.28.7
     "@cosmjs/stargate": ^0.28.7
     "@cosmjs/tendermint-rpc": ^0.28.7
+    "@dinero.js/currencies": alpha
     "@emotion/react": ^11
     "@emotion/styled": ^11
     "@ethersproject/abi": ^5.6.3
@@ -4369,7 +4406,7 @@ __metadata:
     "@ethersproject/providers": ^5.6.8
     "@fontsource/inter": ^4.5.10
     "@keplr-wallet/types": ^0.10.5
-    "@merlionzone/merlionjs": ^0.1.8
+    "@merlionzone/merlionjs": ^0.1.9
     "@metamask/detect-provider": ^1.2.0
     "@nivo/core": ^0.78.0
     "@nivo/pie": ^0.78.0
@@ -4386,6 +4423,7 @@ __metadata:
     constant-case: ^3.0.4
     cosmjs-types: ^0.4.0
     date-fns: ^2.28.0
+    dinero.js: alpha
     eslint: 8.16.0
     eslint-config-next: 12.1.6
     eslint-config-prettier: ^8.5.0

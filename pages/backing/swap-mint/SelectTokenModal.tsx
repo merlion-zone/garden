@@ -41,7 +41,7 @@ export const SelectTokenModal = ({
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
   const BalanceDisplay = ({ denom }: any) => {
-    const { balance } = useBalance(account?.mer() as any, denom)
+    const { balance } = useBalance(account?.mer(), denom)
     return (
       <AmountDisplay
         value={balance}
