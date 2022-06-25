@@ -37,7 +37,7 @@ export function useValidators(address: string | null) {
   const totalBonded =
     balances
       ?.map(({ amount }) => Number(amount))
-      .reduce((prev, current) => prev + current) ?? 0
+      .reduce((prev, current) => prev + current, 0) ?? 0
 
   const data: Validator[] = useMemo(() => {
     const bondedTokens = poolData?.pool?.bondedTokens
