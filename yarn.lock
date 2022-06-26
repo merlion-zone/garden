@@ -1953,9 +1953,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@merlionzone/merlionjs@npm:^0.1.9":
-  version: 0.1.9
-  resolution: "@merlionzone/merlionjs@npm:0.1.9"
+"@merlionzone/merlionjs@npm:^0.1.10":
+  version: 0.1.10
+  resolution: "@merlionzone/merlionjs@npm:0.1.10"
   dependencies:
     "@cosmjs/amino": ^0.28.7
     "@cosmjs/crypto": ^0.28.7
@@ -1975,7 +1975,7 @@ __metadata:
     long: ^4.0.0
     protobufjs: ~6.11.2
     utf-8-validate: ^5.0.9
-  checksum: 6fe930fa9df559e1c8f5f20539c08d015c84c6eab72655501f491572eecedd3833eab227f5a039f7b037da89a1ca1daec363d8c1f2018481234719478c08950f
+  checksum: e2f597c164bedfca879ac5debdb3214ebcd81f85e73ef2e9a75f221dfe04b7ec1283845175f5275b98a62c8ca0f4d5e7b0df939efbe76de03ac05397a1418ab1
   languageName: node
   linkType: hard
 
@@ -3561,6 +3561,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dayjs@npm:^1.11.3":
+  version: 1.11.3
+  resolution: "dayjs@npm:1.11.3"
+  checksum: c87e06b562a51ae6568cc5b840c7579d82a0f8af7163128c858fe512d3d71d07bd8e8e464b8cc41b8698a9e26b80ab2c082d14a1cd4c33df5692d77ccdfc5a43
+  languageName: node
+  linkType: hard
+
 "dayjs@npm:^1.9.1":
   version: 1.11.2
   resolution: "dayjs@npm:1.11.2"
@@ -4406,7 +4413,7 @@ __metadata:
     "@ethersproject/providers": ^5.6.8
     "@fontsource/inter": ^4.5.10
     "@keplr-wallet/types": ^0.10.5
-    "@merlionzone/merlionjs": ^0.1.9
+    "@merlionzone/merlionjs": ^0.1.10
     "@metamask/detect-provider": ^1.2.0
     "@nivo/core": ^0.78.0
     "@nivo/pie": ^0.78.0
@@ -4423,6 +4430,7 @@ __metadata:
     constant-case: ^3.0.4
     cosmjs-types: ^0.4.0
     date-fns: ^2.28.0
+    dayjs: ^1.11.3
     dinero.js: alpha
     eslint: 8.16.0
     eslint-config-next: 12.1.6

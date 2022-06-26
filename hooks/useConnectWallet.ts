@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { ethers } from 'ethers'
 import { Web3Provider } from '@ethersproject/providers'
 import detectEthereumProvider from '@metamask/detect-provider'
@@ -30,6 +30,8 @@ let connSignal = 0
 const incConnSignal = () => {
   ++connSignal
 }
+
+const isSetupAvailableAtom = atom<boolean>(true)
 
 export function useConnectWallet(): {
   // string: wallet type, false: wallet not selected
@@ -141,6 +143,9 @@ export function useConnectWallet(): {
     incConnSignal()
     disconnect(false)
   })
+
+  const [isSetupAvailable, setIsSetupAvailable] = useAtom(isSetupAvailableAtom)
+  const isPromiseQueueRef = useRef<(Function | undefined)[]>([])
 
   const connect = useCallback(
     (newWalletType: WalletType | null) => {
@@ -258,27 +263,53 @@ export function useConnectWallet(): {
         }
       }
 
+      let setup: () => Promise<void>
       switch (newWalletType) {
         case 'metamask':
-          setupMetaMask().catch(console.error)
+          setup = setupMetaMask
           break
         case 'keplr':
-          setupKeplr().catch(console.error)
+          setup = setupKeplr
           break
         default:
           throw new Error(`Wallet type ${newWalletType} not supported`)
       }
+
+      const readyPromise = () => {
+        if (!isSetupAvailable) {
+          let resolve = undefined
+          const promise = new Promise((r) => {
+            resolve = r
+          })
+          isPromiseQueueRef.current.push(resolve)
+          return promise
+        } else {
+          return Promise.resolve()
+        }
+      }
+
+      readyPromise().then(() => {
+        setIsSetupAvailable(false)
+        setup()
+          .catch(console.error)
+          .finally(() => {
+            setIsSetupAvailable(true)
+            isPromiseQueueRef.current.shift()?.()
+          })
+      })
     },
     [
+      addOrRemoveListeners,
+      disconnect,
       walletType,
       setWalletType,
-      setConnected,
       setWeb3Provider,
+      setConnected,
       setChainID,
       setSigner,
       setAccount,
-      addOrRemoveListeners,
-      disconnect,
+      isSetupAvailable,
+      setIsSetupAvailable,
     ]
   )
 

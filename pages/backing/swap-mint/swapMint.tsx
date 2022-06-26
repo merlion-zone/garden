@@ -2,6 +2,7 @@ import {
   MsgBurnBySwapEncodeObject,
   MsgMintBySwapEncodeObject,
 } from '@merlionzone/merlionjs/dist/modules/maker/messages'
+import { proto } from '@merlionzone/merlionjs'
 import { Address, Coin, Dec, typeUrls } from '@merlionzone/merlionjs'
 import { EncodeObject } from '@cosmjs/proto-signing'
 import { DeliverTxResponse } from '@cosmjs/stargate'

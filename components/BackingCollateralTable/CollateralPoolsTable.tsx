@@ -15,15 +15,13 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import {
-  DenomMetadata,
   useAllCollateralParams,
   useAllCollateralPools,
-  useDenomsMetadata,
   useDenomsMetadataMap,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
 import { Coin } from '@merlionzone/merlionjs'
-import { PoolCollateral } from '@merlionzone/merlionjs/dist/proto/merlion/maker/v1/maker'
+import { proto } from '@merlionzone/merlionjs'
 import { shortenDenom } from '@/utils'
 import { IndicatorTextBox } from '@/components/BackingCollateralTable/IndicatorBar'
 import config from '@/config'
@@ -33,7 +31,7 @@ export const CollateralPoolsTable = () => {
   const { data: allCollateralPools } = useAllCollateralPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
-  const collateralPoolsMap = new Map<string, PoolCollateral>()
+  const collateralPoolsMap = new Map<string, proto.maker.PoolCollateral>()
   allCollateralPools?.forEach((pool) => {
     if (pool.collateral) {
       collateralPoolsMap.set(pool.collateral.denom, pool)

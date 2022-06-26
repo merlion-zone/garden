@@ -1,6 +1,4 @@
-import { useTxs } from '@/hooks/query'
-import { useAccountAddress } from '@/hooks'
-import { cosmMsgDescComponents, parseCosmTxs } from '@/hooks/query/parseCosmTx'
+import { useState } from 'react'
 import {
   Box,
   Button,
@@ -18,7 +16,12 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState } from 'react'
+import { parseCosmTxs, getMsgDescComponent, useTxs } from '@/hooks/query'
+import { useAccountAddress } from '@/hooks'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.extend(relativeTime)
 
 export const TxList = () => {
   const isMobile = useBreakpointValue({ base: true, md: false })
@@ -50,33 +53,28 @@ export const TxList = () => {
               <Th borderColor="border">Date</Th>
               <Th borderColor="border">Action</Th>
               <Th borderColor="border">Status</Th>
+              <Th borderColor="border"></Th>
             </Tr>
           </Thead>
           <Tbody color={msgTypeColor} fontSize="sm">
             {cosmTxs?.map((cosmTx) => {
               return (
                 <Tr key={cosmTx.txhash}>
-                  <Td borderColor="border">{cosmTx.timestamp}</Td>
+                  <Td borderColor="border">
+                    <Text>{cosmTx.timestamp}</Text>
+                    <Text color="gray.500" fontSize="xs">
+                      {dayjs(cosmTx.timestamp).fromNow()}
+                    </Text>
+                  </Td>
                   <Td borderColor="border">
                     <Stack>
                       {cosmTx.msgs?.map((msg, i) => {
-                        const MsgDesc = cosmMsgDescComponents[msg.typeUrl]
+                        const MsgDesc = getMsgDescComponent(msg)
                         return (
                           <Box key={i}>
                             <Text fontWeight="500">{msg.type}</Text>
                             <Text color="gray.500" fontSize="xs">
-                              {MsgDesc && <MsgDesc msg={msg} />}
-                            </Text>
-                          </Box>
-                        )
-                      })}
-                      {cosmTx.msgs?.map((msg, i) => {
-                        const MsgDesc = cosmMsgDescComponents[msg.typeUrl]
-                        return (
-                          <Box key={i}>
-                            <Text fontWeight="500">{msg.type}</Text>
-                            <Text color="gray.500" fontSize="xs">
-                              {MsgDesc && <MsgDesc msg={msg} />}
+                              <MsgDesc msg={msg} />
                             </Text>
                           </Box>
                         )
@@ -86,6 +84,7 @@ export const TxList = () => {
                   <Td borderColor="border">
                     {!cosmTx.code ? 'Success' : 'Failure'}
                   </Td>
+                  <Td borderColor="border"></Td>
                 </Tr>
               )
             })}
@@ -119,7 +118,7 @@ export const TxList = () => {
               onClick={() => {
                 setPage(page + 1)
               }}
-              isDisabled={page === Math.ceil(total / limit)}
+              isDisabled={!total || page === Math.ceil(total / limit)}
             >
               Next
             </Button>

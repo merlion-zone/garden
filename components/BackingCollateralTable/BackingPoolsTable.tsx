@@ -20,7 +20,7 @@ import {
   useDenomsMetadataMap,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
-import { PoolBacking } from '@merlionzone/merlionjs/dist/proto/merlion/maker/v1/maker'
+import { proto } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { shortenDenom } from '@/utils'
 import { IndicatorTextBox } from '@/components/BackingCollateralTable/IndicatorBar'
@@ -29,8 +29,7 @@ export const BackingPoolsTable = () => {
   const { data: allBackingParams } = useAllBackingParams()
   const { data: allBackingPools } = useAllBackingPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
-
-  const backingPoolsMap = new Map<string, PoolBacking>()
+  const backingPoolsMap = new Map<string, proto.maker.PoolBacking>()
   allBackingPools?.forEach((pool) => {
     if (pool.backing) {
       backingPoolsMap.set(pool.backing.denom, pool)

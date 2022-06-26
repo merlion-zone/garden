@@ -254,7 +254,10 @@ function parseCoin(coin?: string): Coin | undefined {
   }
 }
 
-export function useFormatCoin(coin?: Coin | string): string | undefined {
+export function useFormatCoin(
+  coin?: Coin | string,
+  maximumFractionDigits?: number
+): string | undefined {
   const { data: denomsMetadata } = useDenomsMetadataMap()
 
   return useMemo(() => {
@@ -270,7 +273,8 @@ export function useFormatCoin(coin?: Coin | string): string | undefined {
       return
     }
     return `${formatNumber(
-      new Dec(parsed?.amount).divPow(metadata.displayExponent).toString()
+      new Dec(parsed?.amount).divPow(metadata.displayExponent).toString(),
+      maximumFractionDigits ?? metadata.displayExponent
     )} ${metadata.symbol}`
   }, [coin, denomsMetadata])
 }

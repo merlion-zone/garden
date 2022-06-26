@@ -5,13 +5,21 @@ import {
 } from 'cosmjs-types/cosmos/base/abci/v1beta1/abci'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { GetTxsEventResponse } from 'cosmjs-types/cosmos/tx/v1beta1/service'
-import { typeUrls } from '@merlionzone/merlionjs'
+import { Any } from 'cosmjs-types/google/protobuf/any'
+import { typeUrls, proto, Coin } from '@merlionzone/merlionjs'
 import { useFormatCoin } from '@/hooks/query/moduleQueries'
+import config from '@/config'
+import { shortenAddress } from '@/utils'
 
 export interface CosmMsg {
   type: string
   typeUrl: keyof typeof typeUrls
   events: StringEvent[]
+  msg: Any
+  evmTx?:
+    | proto.evmTx.LegacyTx
+    | proto.evmTx.AccessListTx
+    | proto.evmTx.DynamicFeeTx
 }
 
 interface CosmMsgProps {
@@ -30,14 +38,25 @@ export function parseCosmTxs(txsResponse: GetTxsEventResponse): CosmTx[] {
 
 export function parseCosmTx(tx: Tx, txResponse: TxResponse): CosmTx {
   const msgs = tx.body?.messages.map((msg, i) => {
-    const type =
-      cosmMsgTypes[msg.typeUrl] || msg.typeUrl.split('.').pop() || 'Unknown'
-    return {
-      type,
+    let cosmMsg = {
       typeUrl: msg.typeUrl as any,
       events: txResponse.logs[i].events,
+      msg,
+    } as CosmMsg
+
+    if (msg.typeUrl === typeUrls.MsgEthereumTx) {
+      const { type, evmTx } = parseMsgEthereumTx(msg)
+      cosmMsg.type = type
+      cosmMsg.evmTx = evmTx
+    } else {
+      cosmMsg.type =
+        cosmMsgDescComponents[msg.typeUrl]?.[0] ||
+        msg.typeUrl.split('.').pop() ||
+        'Unknown'
     }
+    return cosmMsg
   })
+
   return {
     msgs,
     ...txResponse,
@@ -62,16 +81,90 @@ function extractEventAttributes(
   return result
 }
 
-const cosmMsgTypes: { [typeUrl: string]: string } = {
-  [typeUrls.MsgMintBySwap]: 'Swap Mint',
-  [typeUrls.MsgBurnBySwap]: 'Swap Burn',
+const cosmMsgDescComponents: {
+  [typeUrl: string]: [string, FunctionComponent<CosmMsgProps>]
+} = {
+  [typeUrls.MsgEthereumTx]: ['', MsgEthereumTxDesc],
+  [typeUrls.MsgSend]: ['Transfer', MsgSendTx],
+  [typeUrls.MsgMintBySwap]: ['Swap Mint', MsgMintBySwapDesc],
+  [typeUrls.MsgBurnBySwap]: ['Swap Burn', MsgBurnBySwapDesc],
 }
 
-export const cosmMsgDescComponents: {
-  [typeUrl: string]: FunctionComponent<CosmMsgProps>
-} = {
-  [typeUrls.MsgMintBySwap]: MsgMintBySwapDesc,
-  [typeUrls.MsgBurnBySwap]: MsgBurnBySwapDesc,
+export function getMsgDescComponent(
+  msg: CosmMsg
+): FunctionComponent<CosmMsgProps> {
+  return cosmMsgDescComponents[msg.typeUrl]?.[1] || MsgEmptyDesc
+}
+
+function MsgEmptyDesc({ msg }: CosmMsgProps) {
+  return <></>
+}
+
+/****************************** Bank ******************************/
+
+function MsgSendTx({ msg }: CosmMsgProps) {
+  const attrs = extractEventAttributes(msg.events, 'transfer')
+  const amount = useFormatCoin(attrs?.get('amount'))
+  const recipient = attrs?.get('recipient')
+  const recipientShort = recipient && shortenAddress(recipient)[1]
+  return (
+    <>
+      Send {amount} to {recipientShort}
+    </>
+  )
+}
+
+/****************************** Evm ******************************/
+
+function parseMsgEthereumTx(msg: Any) {
+  const evmMsg = proto.evmTx.MsgEthereumTx.decode(msg.value)
+  let evmTx:
+    | proto.evmTx.LegacyTx
+    | proto.evmTx.AccessListTx
+    | proto.evmTx.DynamicFeeTx
+    | undefined = undefined
+  switch (evmMsg.data?.typeUrl) {
+    case typeUrls.EthereumLegacyTx:
+      evmTx = proto.evmTx.LegacyTx.decode(evmMsg.data.value)
+      break
+    case typeUrls.EthereumAccessListTx:
+      evmTx = proto.evmTx.AccessListTx.decode(evmMsg.data.value)
+      break
+    case typeUrls.EthereumDynamicFeeTx:
+      evmTx = proto.evmTx.DynamicFeeTx.decode(evmMsg.data.value)
+      break
+    default:
+      break
+  }
+
+  const type = !evmTx
+    ? evmMsg.data?.typeUrl.split('.').pop() || 'Unknown'
+    : !evmTx.to
+    ? 'Deploy contract'
+    : evmTx.data && evmTx.data.length
+    ? 'Execute contract'
+    : 'Transfer'
+
+  return {
+    type: `${type} (EVM Tx)`,
+    evmTx,
+  }
+}
+
+function MsgEthereumTxDesc({ msg }: CosmMsgProps) {
+  const value = useFormatCoin(new Coin(config.denom, msg.evmTx?.value || 0))
+  const to = msg.evmTx?.to && shortenAddress(msg.evmTx.to)
+  return (
+    <>
+      <span>Value: {value}</span>
+      {to && (
+        <>
+          <br />
+          <span>To: {to[0]}</span>
+        </>
+      )}
+    </>
+  )
 }
 
 /****************************** Maker ******************************/
