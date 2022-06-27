@@ -3,6 +3,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  InputGroup,
   InputRightElement,
   Link,
   Modal,
@@ -156,20 +157,22 @@ export function Redelegate() {
             </FormControl>
             <FormControl isInvalid={!!errors.amount}>
               <FormLabel>Amount</FormLabel>
-              <Controller
-                control={control}
-                name="amount"
-                render={({ field: { ref, ...restField } }) => (
-                  <NumberInput {...restField}>
-                    <NumberInputField id="amount" pr="4.5rem" ref={ref} />
-                    <InputRightElement w="4.5rem">
-                      <Button h="1.75rem" size="sm" onClick={onMax}>
-                        MAX
-                      </Button>
-                    </InputRightElement>
-                  </NumberInput>
-                )}
-              />
+              <InputGroup>
+                <Controller
+                  control={control}
+                  name="amount"
+                  render={({ field: { ref, ...restField } }) => (
+                    <NumberInput w="full" {...restField}>
+                      <NumberInputField id="amount" pr="4.5rem" ref={ref} />
+                      <InputRightElement w="4.5rem">
+                        <Button h="1.75rem" size="sm" onClick={onMax}>
+                          MAX
+                        </Button>
+                      </InputRightElement>
+                    </NumberInput>
+                  )}
+                />
+              </InputGroup>
               <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
             </FormControl>
           </ModalBody>
