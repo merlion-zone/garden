@@ -13,6 +13,7 @@ import {
   switchEthereumChainParams,
 } from '@/config/chainInfo'
 import config from '@/config'
+import { promiseOnce } from '@/utils'
 
 export type WalletType = 'metamask' | 'keplr'
 
@@ -145,7 +146,7 @@ export function useConnectWallet(): {
   })
 
   const [isSetupAvailable, setIsSetupAvailable] = useAtom(isSetupAvailableAtom)
-  const isPromiseQueueRef = useRef<(Function | undefined)[]>([])
+  const promiseResolverQueueRef = useRef<(Function | undefined)[]>([])
 
   const connect = useCallback(
     (newWalletType: WalletType | null) => {
@@ -275,28 +276,11 @@ export function useConnectWallet(): {
           throw new Error(`Wallet type ${newWalletType} not supported`)
       }
 
-      const readyPromise = () => {
-        if (!isSetupAvailable) {
-          let resolve = undefined
-          const promise = new Promise((r) => {
-            resolve = r
-          })
-          isPromiseQueueRef.current.push(resolve)
-          return promise
-        } else {
-          return Promise.resolve()
-        }
-      }
-
-      readyPromise().then(() => {
-        setIsSetupAvailable(false)
+      promiseOnce(
+        [isSetupAvailable, setIsSetupAvailable],
+        promiseResolverQueueRef,
         setup()
-          .catch(console.error)
-          .finally(() => {
-            setIsSetupAvailable(true)
-            isPromiseQueueRef.current.shift()?.()
-          })
-      })
+      ).catch(console.error)
     },
     [
       addOrRemoveListeners,

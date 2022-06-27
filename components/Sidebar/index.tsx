@@ -36,7 +36,7 @@ export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
         boxShadow={useColorModeValue('sm', 'sm-dark')}
         maxW={{ base: 'full', sm: '2xs' }}
         py={{ base: '4', sm: '6' }}
-        px={{ base: '4', sm: '6' }}
+        px="4"
       >
         <Stack justify="space-between" spacing="1" width="full">
           <Stack spacing="4" shouldWrapChildren>
