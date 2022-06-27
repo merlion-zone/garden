@@ -11,6 +11,7 @@ import { ProposalContent } from './Content'
 import { ProposalVotes } from './Votes'
 import { ProposalProgress } from './Progress'
 import { Deposit } from './Deposit'
+import { Vote } from './Vote'
 
 export default function ProposalDetail() {
   const { query } = useRouter()
@@ -36,9 +37,7 @@ export default function ProposalDetail() {
             Porposal detail
           </Heading>
           {data?.proposal!.status === 1 && <Deposit />}
-          {data?.proposal!.status === 2 && (
-            <Button variant="primary">Vote</Button>
-          )}
+          {data?.proposal!.status === 2 && <Vote />}
         </Stack>
       </Container>
       <ProposalContent proposal={data?.proposal} />

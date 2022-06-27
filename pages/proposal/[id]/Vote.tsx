@@ -7,8 +7,6 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  InputGroup,
-  InputRightElement,
   Link,
   Modal,
   ModalBody,
@@ -17,48 +15,33 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  NumberInput,
-  NumberInputField,
+  Select,
   Text,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react'
-import { MsgDepositEncodeObject } from '@cosmjs/stargate'
+import { MsgVoteEncodeObject } from '@cosmjs/stargate'
 import Long from 'long'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
+import { VoteOption } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 
 interface FormData {
-  amount: string
+  option: VoteOption
 }
 
-export function Deposit() {
+export function Vote() {
   const toast = useToast()
   const { query } = useRouter()
-
-  const address = useAccountAddress()
-  const { balance: lionBalance = '0' } = useBalance(
-    address?.mer(),
-    config.denom
-  )
-  const balance = useMemo(
-    () =>
-      lionBalance
-        ? formatCoin({ amount: lionBalance, denom: config.denom })
-        : null,
-    [lionBalance]
-  )
-
   const { connected, account } = useConnectWallet()
   const merlionClient = useMerlionClient()
+  const address = useAccountAddress()
 
   const {
-    control,
+    register,
     formState: { errors, isSubmitting },
     handleSubmit,
     reset,
-    setValue,
   } = useForm<FormData>()
 
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -67,11 +50,7 @@ export function Deposit() {
     setTimeout(reset, 100)
   }
 
-  const onMax = () => {
-    setValue('amount', balance?.amount ?? '0')
-  }
-
-  const onSubmit = async ({ amount }: FormData) => {
+  const onSubmit = async ({ option }: FormData) => {
     if (!connected || !account || !query.id) {
       toast({
         title: 'Please connect wallet first',
@@ -81,14 +60,12 @@ export function Deposit() {
       return
     }
 
-    const message: MsgDepositEncodeObject = {
-      typeUrl: '/cosmos.gov.v1beta1.MsgDeposit',
+    const message: MsgVoteEncodeObject = {
+      typeUrl: '/cosmos.gov.v1beta1.MsgVote',
       value: {
         proposalId: Long.fromString(query.id as string),
-        depositor: address!.mer(),
-        amount: [
-          parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
-        ],
+        voter: address!.mer(),
+        option: option,
       },
     }
 
@@ -99,7 +76,7 @@ export function Deposit() {
       )
 
       toast({
-        title: 'Deposit success',
+        title: 'Vote success',
         description: (
           <Text>
             View on explorer: <Link isExternal>{transactionHash}</Link>
@@ -110,7 +87,7 @@ export function Deposit() {
     } catch (error) {
       console.error(error)
       toast({
-        title: 'Deposit failed',
+        title: 'Vote failed',
         status: 'error',
       })
     }
@@ -121,33 +98,29 @@ export function Deposit() {
   return (
     <>
       <Button variant="primary" onClick={onOpen}>
-        Deposit
+        Vote
       </Button>
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Deposit</ModalHeader>
+          <ModalHeader>Vote</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl isInvalid={!!errors.amount}>
-              <FormLabel>Amount</FormLabel>
-              <InputGroup>
-                <Controller
-                  control={control}
-                  name="amount"
-                  render={({ field: { ref, ...restField } }) => (
-                    <NumberInput w="full" {...restField}>
-                      <NumberInputField id="amount" pr="4.5rem" ref={ref} />
-                      <InputRightElement w="4.5rem">
-                        <Button h="1.75rem" size="sm" onClick={onMax}>
-                          MAX
-                        </Button>
-                      </InputRightElement>
-                    </NumberInput>
-                  )}
-                />
-              </InputGroup>
-              <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
+            <FormControl isInvalid={!!errors.option}>
+              <FormLabel>Option</FormLabel>
+              <Select
+                {...register('option', {
+                  required: 'Please select a option',
+                })}
+              >
+                <option value={VoteOption.VOTE_OPTION_YES}>Yes</option>
+                <option value={VoteOption.VOTE_OPTION_NO}>No</option>
+                <option value={VoteOption.VOTE_OPTION_NO_WITH_VETO}>
+                  No with vote
+                </option>
+                <option value={VoteOption.VOTE_OPTION_ABSTAIN}>Abstain</option>
+              </Select>
+              <FormErrorMessage>{errors.option?.message}</FormErrorMessage>
             </FormControl>
           </ModalBody>
           <ModalFooter>
