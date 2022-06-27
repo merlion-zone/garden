@@ -42,7 +42,6 @@ export function getContent<T extends keyof ProposalContent>(
   type: T,
   value: ProposalContent[T]
 ) {
-  console.log(type, value)
   switch (type) {
     case ProposalType.TEXT:
       return {
@@ -50,7 +49,6 @@ export function getContent<T extends keyof ProposalContent>(
         value: TextProposal.encode(value).finish(),
       }
     case ProposalType.SPEND:
-      console.log(value)
       return {
         typeUrl: '/cosmos.distribution.v1beta1.CommunityPoolSpendProposal',
         value: CommunityPoolSpendProposal.encode(
