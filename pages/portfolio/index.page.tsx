@@ -22,11 +22,12 @@ import {
 import { useBalance, useDisplayCoinPrice } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
 import config from '@/config'
-import { AmountDisplay } from '@/components/NumberDisplay'
 import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
 import { Hint } from '@/components/Hint'
 import QRCodeSVG from 'qrcode.react'
 import { CopyAddressIcon } from '@/components/CopyAddress'
+import { useRouter } from 'next/router'
+import { formatNumberSuitable } from '@/utils'
 
 const Card = (props: BoxProps) => (
   <Box
@@ -40,6 +41,8 @@ const Card = (props: BoxProps) => (
 )
 
 export default function Portfolio() {
+  const router = useRouter()
+
   const address = useAccountAddress()
 
   const { displayPrice: lionDisplayPrice } = useDisplayCoinPrice(config.denom)
@@ -100,10 +103,7 @@ export default function Portfolio() {
               <Text>Balance</Text>
               <HStack align="baseline">
                 <Text fontSize="3xl">
-                  <AmountDisplay
-                    value={lionBalance}
-                    decimals={config.denomDecimals}
-                  ></AmountDisplay>
+                  {formatNumberSuitable(lionBalance, config.denomDecimals)}
                 </Text>
                 <Text fontSize="4xl">LION</Text>
               </HStack>
@@ -117,26 +117,21 @@ export default function Portfolio() {
                   borderRadius="4"
                 >
                   <chakra.span fontWeight="bold">
-                    <AmountDisplay
-                      value={
-                        lionBalance &&
+                    $
+                    {formatNumberSuitable(
+                      lionBalance &&
                         lionDisplayPrice &&
-                        lionDisplayPrice.mul(lionBalance)
-                      }
-                      decimals={config.denomDecimals}
-                      prefix="$"
-                    ></AmountDisplay>
+                        lionDisplayPrice.mul(lionBalance),
+                      config.denomDecimals,
+                      2
+                    )}
                   </chakra.span>
                   &nbsp;
                   <chakra.span>USD</chakra.span>
                 </Text>
                 <Text fontSize="md" color="gray.500">
                   <chakra.span fontWeight="bold">
-                    1 LION =&nbsp;
-                    <AmountDisplay
-                      value={lionDisplayPrice}
-                      prefix="$"
-                    ></AmountDisplay>
+                    1 LION = ${formatNumberSuitable(lionDisplayPrice)}
                   </chakra.span>
                   &nbsp;
                   <chakra.span>USD</chakra.span>
@@ -144,10 +139,7 @@ export default function Portfolio() {
               </HStack>
               <HStack align="baseline">
                 <Text fontSize="3xl">
-                  <AmountDisplay
-                    value={merBalance}
-                    decimals={config.merDenomDecimals}
-                  ></AmountDisplay>
+                  {formatNumberSuitable(merBalance, config.merDenomDecimals)}
                 </Text>
                 <Text fontSize="4xl">USM</Text>
                 <Hint
@@ -165,26 +157,21 @@ export default function Portfolio() {
                   borderRadius="4"
                 >
                   <chakra.span fontWeight="bold">
-                    <AmountDisplay
-                      value={
-                        merBalance &&
+                    $
+                    {formatNumberSuitable(
+                      merBalance &&
                         merDisplayPrice &&
-                        merDisplayPrice.mul(merBalance)
-                      }
-                      decimals={config.merDenomDecimals}
-                      prefix="$"
-                    ></AmountDisplay>
+                        merDisplayPrice.mul(merBalance),
+                      config.merDenomDecimals,
+                      2
+                    )}
                   </chakra.span>
                   &nbsp;
                   <chakra.span>USD</chakra.span>
                 </Text>
                 <Text fontSize="md" color="gray.500">
                   <chakra.span fontWeight="bold">
-                    1 USM =&nbsp;
-                    <AmountDisplay
-                      value={merDisplayPrice}
-                      prefix="$"
-                    ></AmountDisplay>
+                    1 USM = ${formatNumberSuitable(merDisplayPrice)}
                   </chakra.span>
                   <chakra.span>&nbsp;USD</chakra.span>
                 </Text>
@@ -203,7 +190,14 @@ export default function Portfolio() {
                 You have not staked any $LION amount.
               </Text>
               <Center height="full">
-                <Button variant="outline">Stake</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    router.push(`/stake`)
+                  }}
+                >
+                  Stake
+                </Button>
               </Center>
             </Card>
             <Card>

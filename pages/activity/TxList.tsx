@@ -18,10 +18,7 @@ import {
 } from '@chakra-ui/react'
 import { parseCosmTxs, getMsgDescComponent, useTxs } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-
-dayjs.extend(relativeTime)
+import { dayjs } from '@/utils'
 
 export const TxList = () => {
   const isMobile = useBreakpointValue({ base: true, md: false })

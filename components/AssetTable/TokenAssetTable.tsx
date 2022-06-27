@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import {
   Text,
   Table,
@@ -11,22 +12,74 @@ import {
   HStack,
   Center,
   Button,
+  useDisclosure,
 } from '@chakra-ui/react'
-import { useBalance, useDisplayCoinPrice } from '@/hooks/query'
+import {
+  DenomMetadata,
+  useBalance,
+  useDenomsMetadataMap,
+  useDisplayCoinPrice,
+} from '@/hooks/query'
 import config from '@/config'
-import { useAccountAddress } from '@/hooks'
-import { AmountDisplay } from '@/components/NumberDisplay'
 import { CgArrowsExchange } from 'react-icons/cg'
 import Avvvatars from 'avvvatars-react'
+import { formatNumberSuitable } from '@/utils'
+import { useAccountAddress } from '@/hooks'
+import { useCachedDenoms } from '@/hooks/useCachedDenoms'
+import { AddTokenModal } from '@/components/AssetTable/AddTokenModal'
+
+const TokenAssetRow = ({ denomMetadata }: { denomMetadata: DenomMetadata }) => {
+  const address = useAccountAddress()
+  const { displayPrice } = useDisplayCoinPrice(denomMetadata.base)
+  const { balance } = useBalance(address?.mer(), denomMetadata.base)
+
+  return (
+    <>
+      <Td borderColor="border">
+        <HStack>
+          <Avvvatars value={denomMetadata.base} style="shape" />
+          <Text>{denomMetadata.symbol}</Text>
+        </HStack>
+      </Td>
+      <Td borderColor="border" isNumeric>
+        <Text>
+          {formatNumberSuitable(balance, denomMetadata.displayExponent)}
+        </Text>
+        <Text fontSize="xs" color="subtle">
+          $
+          {formatNumberSuitable(
+            balance && displayPrice && displayPrice.mul(balance),
+            denomMetadata.displayExponent,
+            2
+          )}
+          &nbsp;USD
+        </Text>
+      </Td>
+      <Td borderColor="border" isNumeric>
+        <IconButton
+          variant="ghost"
+          icon={<CgArrowsExchange fontSize="2rem" />}
+          aria-label="Send"
+        />
+      </Td>
+    </>
+  )
+}
 
 export const TokenAssetTable = () => {
-  const address = useAccountAddress()
+  const {
+    isOpen: isAddTokenModalOpen,
+    onOpen: onAddTokenModalOpen,
+    onClose: onAddTokenModalClose,
+  } = useDisclosure()
+  const {
+    isOpen: isSendCoinModalOpen,
+    onOpen: onSendCoinModalOpen,
+    onClose: onSendCoinModalClose,
+  } = useDisclosure()
 
-  const { displayPrice: lionDisplayPrice } = useDisplayCoinPrice(config.denom)
-  const { displayPrice: merDisplayPrice } = useDisplayCoinPrice(config.merDenom)
-
-  const { balance: lionBalance } = useBalance(address?.mer(), config.denom)
-  const { balance: merBalance } = useBalance(address?.mer(), config.merDenom)
+  const { cachedDenoms } = useCachedDenoms()
+  const { data: denomsMetadata } = useDenomsMetadataMap()
 
   return (
     <>
@@ -44,82 +97,29 @@ export const TokenAssetTable = () => {
             </Tr>
           </Thead>
           <Tbody>
-            <Tr>
-              <Td borderColor="border">
-                <HStack>
-                  <Avvvatars value="LION" style="shape" />
-                  <Text>LION</Text>
-                </HStack>
-              </Td>
-              <Td borderColor="border" isNumeric>
-                <Text>
-                  <AmountDisplay
-                    value={lionBalance}
-                    decimals={config.denomDecimals}
-                  ></AmountDisplay>
-                </Text>
-                <Text fontSize="xs" color="subtle">
-                  <AmountDisplay
-                    value={
-                      lionBalance &&
-                      lionDisplayPrice &&
-                      lionDisplayPrice.mul(lionBalance)
-                    }
-                    decimals={config.denomDecimals}
-                    prefix="$"
-                    suffix=" USD"
-                  ></AmountDisplay>
-                </Text>
-              </Td>
-              <Td borderColor="border" isNumeric>
-                <IconButton
-                  variant="ghost"
-                  icon={<CgArrowsExchange fontSize="2rem" />}
-                  aria-label="Send"
-                />
-              </Td>
-            </Tr>
-            <Tr>
-              <Td borderColor="border">
-                <HStack>
-                  <Avvvatars value="USM" style="shape" />
-                  <Text>USM</Text>
-                </HStack>
-              </Td>
-              <Td borderColor="border" isNumeric>
-                <Text>
-                  <AmountDisplay
-                    value={merBalance}
-                    decimals={config.merDenomDecimals}
-                  ></AmountDisplay>
-                </Text>
-                <Text fontSize="xs" color="subtle">
-                  <AmountDisplay
-                    value={
-                      merBalance &&
-                      merDisplayPrice &&
-                      merDisplayPrice.mul(merBalance)
-                    }
-                    decimals={config.merDenomDecimals}
-                    prefix="$"
-                    suffix=" USD"
-                  ></AmountDisplay>
-                </Text>
-              </Td>
-              <Td borderColor="border" isNumeric>
-                <IconButton
-                  variant="ghost"
-                  icon={<CgArrowsExchange fontSize="2rem" />}
-                  aria-label="Send"
-                />
-              </Td>
-            </Tr>
+            {cachedDenoms.map((denom) => {
+              const denomMetadata = denomsMetadata?.get(denom)
+              return denomMetadata ? (
+                <Tr key={denom}>
+                  <TokenAssetRow denomMetadata={denomMetadata} />
+                </Tr>
+              ) : (
+                <Fragment key={denom} />
+              )
+            })}
           </Tbody>
         </Table>
       </TableContainer>
       <Center height="full" mt="12">
-        <Button variant="outline">Add Token</Button>
+        <Button variant="outline" onClick={onAddTokenModalOpen}>
+          Add Token
+        </Button>
       </Center>
+
+      <AddTokenModal
+        isOpen={isAddTokenModalOpen}
+        onClose={onAddTokenModalClose}
+      />
     </>
   )
 }

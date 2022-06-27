@@ -206,6 +206,7 @@ export function useDenomMetadata(denom?: string) {
   }, [data, denom, remain])
 }
 
+// TODO: pagination
 export function useDenomsMetadata() {
   const { data, ...remain } = useMerlionQuery('bank', 'denomsMetadata')
   const denomsMetadata = useMemo(() => {
@@ -223,6 +224,7 @@ export function useDenomsMetadata() {
   }
 }
 
+// TODO: limit denom list
 export function useDenomsMetadataMap() {
   const { data: denomsMetadata, ...rest } = useDenomsMetadata()
 
@@ -276,7 +278,7 @@ export function useFormatCoin(
       new Dec(parsed?.amount).divPow(metadata.displayExponent).toString(),
       maximumFractionDigits ?? metadata.displayExponent
     )} ${metadata.symbol}`
-  }, [coin, denomsMetadata])
+  }, [coin, denomsMetadata, maximumFractionDigits])
 }
 
 /****************************** Oracle ******************************/
@@ -285,7 +287,7 @@ export function useOracleParams() {
   return useMerlionQuery('oracle', 'params')
 }
 
-export function useCoinPrice(denom: string): { price?: Dec; error: any } {
+export function useCoinPrice(denom?: string): { price?: Dec; error: any } {
   const { data, error } = useMerlionQuery('oracle', 'exchangeRate', denom)
   return useMemo(() => {
     return {
@@ -310,11 +312,11 @@ function displayCoinPrice(metadata?: DenomMetadata, price?: Dec): Dec | null {
   return price.mulPow(metadata.displayExponent).div(1e6)
 }
 
-export function useDisplayCoinPrice(denom: string) {
+export function useDisplayCoinPrice(denom?: string) {
   const { data: denomsMetadata, error: err1 } = useDenomsMetadataMap()
   const { price, error: err2 } = useCoinPrice(denom)
   const displayPrice = useMemo(
-    () => displayCoinPrice(denomsMetadata?.get(denom), price),
+    () => displayCoinPrice(denomsMetadata?.get(denom || ''), price),
     [denom, denomsMetadata, price]
   )
   return {

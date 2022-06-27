@@ -1,7 +1,8 @@
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/constants/locales'
+import { Dec } from '@merlionzone/merlionjs'
 
 interface FormatLocaleNumberArgs {
-  number?: number | string | null
+  number?: number | string | Dec | null
   locale?: string
   options?: Intl.NumberFormatOptions
   sigFigs?: number
@@ -35,6 +36,8 @@ export function formatNumberWithOptions({
     num = 0
   } else if (typeof number === 'string') {
     num = Number(number)
+  } else if (number instanceof Dec) {
+    num = number.toNumber()
   } else {
     num = number
   }
@@ -51,7 +54,7 @@ export function formatNumberWithOptions({
 }
 
 export function formatCurrency(
-  number?: number | string | null,
+  number?: number | string | Dec | null,
   placeholder = '--'
 ): string {
   return formatNumberWithOptions({
@@ -65,7 +68,7 @@ export function formatCurrency(
 }
 
 export function formatNumber(
-  number?: number | string | null,
+  number?: number | string | Dec | null,
   maximumFractionDigits = 2,
   placeholder?: string
 ): string {
@@ -78,14 +81,36 @@ export function formatNumber(
   })
 }
 
-export function formatNumberCompact(number?: number | string | null): string {
+export function formatNumberCompact(
+  number?: number | string | Dec | null,
+  maximumFractionDigits = 2,
+  placeholder?: string
+): string {
   return formatNumberWithOptions({
     number,
     options: {
       notation: 'compact',
       compactDisplay: 'short',
-      minimumSignificantDigits: 1,
-      maximumSignificantDigits: 3,
+      // minimumSignificantDigits: 1,
+      // maximumSignificantDigits: 3,
+      maximumFractionDigits,
     },
+    placeholder,
   })
+}
+
+export function formatNumberSuitable(
+  number?: number | string | Dec | null,
+  negScale?: number,
+  maximumFractionDigits = 4,
+  placeholder = '--'
+): string {
+  if (number !== undefined && number !== null && negScale !== undefined) {
+    number = new Dec(number).divPow(negScale).toNumber()
+  }
+  const numStr = formatNumber(number, maximumFractionDigits, placeholder)
+  if (numStr.length <= 7 + maximumFractionDigits) {
+    return numStr
+  }
+  return formatNumberCompact(number, maximumFractionDigits, placeholder)
 }
