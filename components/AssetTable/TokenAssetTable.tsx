@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useCallback, useState } from 'react'
 import {
   Text,
   Table,
@@ -20,15 +20,21 @@ import {
   useDenomsMetadataMap,
   useDisplayCoinPrice,
 } from '@/hooks/query'
-import config from '@/config'
 import { CgArrowsExchange } from 'react-icons/cg'
 import Avvvatars from 'avvvatars-react'
 import { formatNumberSuitable } from '@/utils'
 import { useAccountAddress } from '@/hooks'
 import { useCachedDenoms } from '@/hooks/useCachedDenoms'
 import { AddTokenModal } from '@/components/AssetTable/AddTokenModal'
+import { SendTokenModal } from '@/components/TransactionModals'
 
-const TokenAssetRow = ({ denomMetadata }: { denomMetadata: DenomMetadata }) => {
+interface TokenAssetRowProps {
+  denomMetadata: DenomMetadata
+
+  onSend(denom: string): void
+}
+
+const TokenAssetRow = ({ denomMetadata, onSend }: TokenAssetRowProps) => {
   const address = useAccountAddress()
   const { displayPrice } = useDisplayCoinPrice(denomMetadata.base)
   const { balance } = useBalance(address?.mer(), denomMetadata.base)
@@ -60,6 +66,7 @@ const TokenAssetRow = ({ denomMetadata }: { denomMetadata: DenomMetadata }) => {
           variant="ghost"
           icon={<CgArrowsExchange fontSize="2rem" />}
           aria-label="Send"
+          onClick={() => onSend(denomMetadata.base)}
         />
       </Td>
     </>
@@ -73,13 +80,22 @@ export const TokenAssetTable = () => {
     onClose: onAddTokenModalClose,
   } = useDisclosure()
   const {
-    isOpen: isSendCoinModalOpen,
-    onOpen: onSendCoinModalOpen,
-    onClose: onSendCoinModalClose,
+    isOpen: isSendTokenModalOpen,
+    onOpen: onSendTokenModalOpen,
+    onClose: onSendTokenModalClose,
   } = useDisclosure()
 
   const { cachedDenoms } = useCachedDenoms()
   const { data: denomsMetadata } = useDenomsMetadataMap()
+
+  const [sendDenom, setSendDenom] = useState('')
+  const onSendToken = useCallback(
+    (denom: string) => {
+      setSendDenom(denom)
+      onSendTokenModalOpen()
+    },
+    [onSendTokenModalOpen]
+  )
 
   return (
     <>
@@ -101,7 +117,10 @@ export const TokenAssetTable = () => {
               const denomMetadata = denomsMetadata?.get(denom)
               return denomMetadata ? (
                 <Tr key={denom}>
-                  <TokenAssetRow denomMetadata={denomMetadata} />
+                  <TokenAssetRow
+                    denomMetadata={denomMetadata}
+                    onSend={onSendToken}
+                  />
                 </Tr>
               ) : (
                 <Fragment key={denom} />
@@ -115,6 +134,12 @@ export const TokenAssetTable = () => {
           Add Token
         </Button>
       </Center>
+
+      <SendTokenModal
+        denom={sendDenom}
+        isOpen={isSendTokenModalOpen}
+        onClose={onSendTokenModalClose}
+      />
 
       <AddTokenModal
         isOpen={isAddTokenModalOpen}

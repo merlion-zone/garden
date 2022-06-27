@@ -7,12 +7,15 @@ import {
   Text,
   Tooltip,
   useColorModeValue,
+  useToken,
 } from '@chakra-ui/react'
 import Avvvatars from 'avvvatars-react'
 import { ChevronDownIcon } from '@chakra-ui/icons'
 import { useAccountAddress } from '@/hooks'
 import { AmountDisplay } from '@/components/NumberDisplay'
 import { Dec } from '@merlionzone/merlionjs'
+import { SystemStyleObject } from '@chakra-ui/styled-system'
+import { TinyColor } from '@ctrl/tinycolor'
 
 export interface AmountMetadata {
   metadata?: DenomMetadata
@@ -22,21 +25,32 @@ export interface AmountMetadata {
 }
 
 interface AmountInputProps {
+  id?: string
   token: AmountMetadata
   value: string
   onSelectToken?: false | (() => void)
   onInput?: (name: string, value: string) => void
   isDisabled?: boolean
   noAnnotation?: boolean
+  bg?: string
+  border?: SystemStyleObject
+  hoverBorder?: boolean | SystemStyleObject
+  focusBorder?: boolean | SystemStyleObject
+  transition?: boolean
 }
 
 export const AmountInput = ({
+  id,
   token,
   value,
   onSelectToken,
   onInput,
   isDisabled,
   noAnnotation,
+  bg,
+  border = {},
+  hoverBorder,
+  focusBorder,
 }: AmountInputProps) => {
   const account = useAccountAddress()
   const { balance } = useBalance(account?.mer(), token.metadata?.base)
@@ -46,20 +60,51 @@ export const AmountInput = ({
 
   const amountValue = value && token.price && new Dec(value).mul(token.price)
 
-  const borderColor = useColorModeValue('gray.300', 'gray.700')
+  const bgDefault = useColorModeValue('gray.50', 'gray.800')
+
+  const borderColor = useColorModeValue('gray.300', 'gray.600')
+  const focusBorderColor = useColorModeValue('brand.500', 'brand.200')
+
+  const [brand500, brand200] = useToken('colors', ['brand.500', 'brand.200'])
+  const focusBoxShadow = useColorModeValue(
+    `0px 0px 0px 1px ${new TinyColor(brand500).setAlpha(1.0).toRgbString()}`,
+    `0px 0px 0px 1px ${new TinyColor(brand200).setAlpha(1.0).toRgbString()}`
+  )
 
   return (
     <Box
       w="full"
       h={!noAnnotation ? '28' : '16'}
-      bg={useColorModeValue('gray.50', 'gray.800')}
-      borderRadius="3xl"
-      border="1px"
-      borderColor={!noAnnotation ? 'transparent' : borderColor}
-      _hover={{ borderColor }}
+      bg={bg || bgDefault}
+      sx={{
+        borderColor: hoverBorder ? 'transparent' : borderColor,
+        borderRadius: '3xl',
+        borderWidth: '1px',
+        ...border,
+      }}
+      _hover={
+        hoverBorder === true
+          ? { borderColor }
+          : hoverBorder
+          ? hoverBorder
+          : undefined
+      }
+      _focusWithin={
+        focusBorder === true
+          ? {
+              borderColor: focusBorderColor,
+              boxShadow: focusBoxShadow,
+            }
+          : focusBorder
+          ? focusBorder
+          : undefined
+      }
+      transitionProperty="common"
+      transitionDuration="normal"
     >
       <HStack px="4" py={!noAnnotation ? '4' : '3'}>
         <Input
+          id={id}
           variant="unstyled"
           fontSize={!noAnnotation ? '3xl' : 'xl'}
           fontWeight="550"

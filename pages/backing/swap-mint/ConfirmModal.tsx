@@ -1,6 +1,5 @@
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -8,13 +7,9 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import {
-  AmountInput,
-  AmountMetadata,
-} from '@/pages/backing/swap-mint/AmountInput'
+import { AmountInput, AmountMetadata } from '@/components/AmountInput'
 import { OperatorIcon } from '@/pages/backing/swap-mint/OperatorIcon'
 import { ArrowDownIcon, SmallAddIcon } from '@chakra-ui/icons'
-import React from 'react'
 import { Explain } from '@/pages/backing/swap-mint/Explain'
 
 interface ConfirmModalProps {

@@ -48,19 +48,24 @@ export const AddTokenModal = ({ isOpen, onClose }: AddTokenModalProps) => {
     [denomInput]
   )
 
+  const onCloseClean = useCallback(() => {
+    setDenomInput('')
+    onClose()
+  }, [onClose])
+
   const onAdd = useCallback(() => {
     if (!denomMetadata) {
       return
     }
     addDenom(denomMetadata.base)
     setDenomInput('')
-    onClose()
-  }, [addDenom, denomMetadata, onClose])
+    onCloseClean()
+  }, [addDenom, denomMetadata, onCloseClean])
 
   const borderColor = useColorModeValue('gray.300', 'gray.700')
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOpen} onClose={onCloseClean} isCentered>
       <ModalOverlay />
       <ModalContent bg="bg-surface">
         <ModalHeader>Add Token</ModalHeader>

@@ -17,6 +17,8 @@ export const errors = {
   collateralInsufficientBalance: 'Insufficient collateral asset balance',
   lionInsufficientBalance: 'Insufficient LION balance',
   usmInsufficientBalance: 'Insufficient USM balance',
+  insufficientBalance: (denom?: string) => `Insufficient ${denom} balance`,
+  invalidReceiverAddress: 'Invalid receiver address',
 }
 
 const moduleErrors = {

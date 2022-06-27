@@ -90,7 +90,7 @@ export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
               </Text>
               <Stack spacing="1">
                 <NavButton
-                  href="/ve-nft"
+                  href="/venft"
                   label="veNFT"
                   icon={GiVote}
                   onClick={onButtonClick}

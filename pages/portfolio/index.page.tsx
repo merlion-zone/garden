@@ -181,7 +181,14 @@ export default function Portfolio() {
               <Text>veNFT</Text>
               <Text color="gray.500">You have no voting escrowed NFT yet.</Text>
               <Center height="full">
-                <Button variant="outline">Deposit</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    router.push('/venft')
+                  }}
+                >
+                  Deposit
+                </Button>
               </Center>
             </Card>
             <Card>

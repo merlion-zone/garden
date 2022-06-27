@@ -32,7 +32,7 @@ import { Coin, Dec } from '@merlionzone/merlionjs'
 import { Coin as CosmCoin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 import config from '@/config'
 import { useDebounce } from 'react-use'
-import { AmountInput } from './AmountInput'
+import { AmountInput } from '@/components/AmountInput'
 import { OperatorIcon } from './OperatorIcon'
 import { SelectTokenModal } from './SelectTokenModal'
 import { Settings } from '@/pages/backing/swap-mint/Settings'
@@ -386,6 +386,7 @@ export default function SwapMint() {
           onSelectToken={isMint && onSelectTokenModalOpen}
           onInput={onInput}
           isDisabled={disabled}
+          hoverBorder
         ></AmountInput>
         <OperatorIcon
           icon={isMint ? <SmallAddIcon /> : <ArrowDownIcon />}
@@ -397,6 +398,7 @@ export default function SwapMint() {
           onSelectToken={!isMint && onSelectTokenModalOpen}
           onInput={onInput}
           isDisabled={disabled}
+          hoverBorder
         ></AmountInput>
         <OperatorIcon
           icon={isMint ? <ArrowDownIcon /> : <SmallAddIcon />}
@@ -407,6 +409,7 @@ export default function SwapMint() {
           value={isMint ? usmAmt : lionAmt}
           onInput={onInput}
           isDisabled={disabled}
+          hoverBorder
         ></AmountInput>
 
         {backingToken.metadata && estimated && (
