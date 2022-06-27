@@ -195,7 +195,7 @@ export default function NewProposal() {
             <FormControl>
               <FormLabel>Proposal type</FormLabel>
               <Select {...register('type')}>
-                <option value={ProposalType.TEXT}>Text proposal</option>
+                <option value={ProposalType.TEXT}>{ProposalType.TEXT}</option>
                 <option value={ProposalType.SPEND}>{ProposalType.SPEND}</option>
                 <option value={ProposalType.PARAMS}>
                   {ProposalType.PARAMS}
