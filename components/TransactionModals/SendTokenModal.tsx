@@ -40,7 +40,6 @@ export const SendTokenModal = ({
   isOpen,
   onClose,
 }: SendTokenModalProps) => {
-  const { isSendReady } = useSendCosmTx()
   const account = useAccountAddress()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
   const { displayPrice } = useDisplayCoinPrice(denom)
@@ -58,9 +57,11 @@ export const SendTokenModal = ({
   )
 
   const amountId = useId()
-  const toAddrId = useId()
+  const receiverId = useId()
+  const memoId = useId()
   const [amount, setAmount] = useState('')
   const [receiver, setReceiver] = useState('')
+  const [memo, setMemo] = useState('')
   const [isDisabled, setIsDisabled] = useState(true)
   const [title, setTitle] = useState('')
 
@@ -92,15 +93,17 @@ export const SendTokenModal = ({
     setAmount(value)
   }, [])
 
-  const { sendTx } = useSendCosmTx()
+  const { sendTx, isSendReady } = useSendCosmTx()
   const toast = useToast()
 
   const onCloseClean = useCallback(() => {
     setAmount('')
     setReceiver('')
+    setMemo('')
     onClose()
   }, [onClose])
 
+  // TODO: confirmation modal
   const onSend = useCallback(() => {
     if (!account || !amountMedata.metadata) {
       return
@@ -118,7 +121,7 @@ export const SendTokenModal = ({
       },
     }
 
-    const receiptPromise = sendTx(msgSend)
+    const receiptPromise = sendTx(msgSend, memo.trim())
 
     const title = `Send ${formatNumber(
       amount,
@@ -147,6 +150,7 @@ export const SendTokenModal = ({
     amount,
     denom,
     sendTx,
+    memo,
     toast,
     onCloseClean,
   ])
@@ -178,14 +182,24 @@ export const SendTokenModal = ({
               </Box>
 
               <Box>
-                <FormLabel htmlFor={toAddrId}>Receiver</FormLabel>
+                <FormLabel htmlFor={receiverId}>Receiver</FormLabel>
                 <Input
-                  id={toAddrId}
+                  id={receiverId}
                   placeholder="Cosm address or ERC20 address"
                   size="lg"
-                  fontWeight="550"
                   value={receiver}
                   onChange={(event) => setReceiver(event.target.value.trim())}
+                />
+              </Box>
+
+              <Box>
+                <FormLabel htmlFor={memoId}>Memo</FormLabel>
+                <Input
+                  id={memoId}
+                  placeholder="Memo text"
+                  size="lg"
+                  value={memo}
+                  onChange={(event) => setMemo(event.target.value)}
                 />
               </Box>
 

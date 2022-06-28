@@ -10,7 +10,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { MdLanguage } from 'react-icons/md'
+// import { MdLanguage } from 'react-icons/md'
 import { FaMoon, FaSun } from 'react-icons/fa'
 import { useConnectWallet } from '@/hooks'
 import { useEffectOnce } from 'react-use'
@@ -79,10 +79,10 @@ export const Toolbar = () => {
       <Flex justify="end" align="center">
         <HStack spacing="4">
           <ButtonGroup variant="ghost" spacing="1">
-            <IconButton
-              icon={<MdLanguage fontSize="1.25rem" />}
-              aria-label="Language"
-            />
+            {/*<IconButton*/}
+            {/*  icon={<MdLanguage fontSize="1.25rem" />}*/}
+            {/*  aria-label="Language"*/}
+            {/*/>*/}
             {colorMode === 'light' ? (
               <IconButton
                 icon={<FaMoon fontSize="1.25rem" />}

@@ -9,7 +9,10 @@ import { promiseOnce } from '@/utils'
 const isSendCosmTxReadyAtom = atom<boolean>(true)
 
 export function useSendCosmTx(): {
-  sendTx: (msg: EncodeObject) => Promise<DeliverTxResponse> | undefined
+  sendTx: (
+    msg: EncodeObject,
+    memo?: string
+  ) => Promise<DeliverTxResponse> | undefined
   isSendReady: boolean
 } {
   const client = useMerlionClient()
@@ -19,7 +22,10 @@ export function useSendCosmTx(): {
   const promiseResolverQueueRef = useRef<(Function | undefined)[]>([])
 
   const sendTx = useCallback(
-    (msg: EncodeObject): Promise<DeliverTxResponse> | undefined => {
+    (
+      msg: EncodeObject,
+      memo?: string
+    ): Promise<DeliverTxResponse> | undefined => {
       if (!client || !account) {
         return
       }
@@ -28,7 +34,7 @@ export function useSendCosmTx(): {
       return promiseOnce(
         [isSendReady, setIsSendReady],
         promiseResolverQueueRef,
-        client.signAndBroadcast(account.mer(), [msg])
+        client.signAndBroadcast(account.mer(), [msg], 'auto', memo)
       )
     },
     [account, client, isSendReady, setIsSendReady]

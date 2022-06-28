@@ -44,6 +44,7 @@ export function swapMint({
         typeUrl: typeUrls.MsgMintBySwap,
         value: {
           sender: account.mer(),
+          to: '',
           mintOutMin: new Coin(
             config.merDenom,
             new Dec(usmAmt)
@@ -69,6 +70,7 @@ export function swapMint({
         typeUrl: typeUrls.MsgBurnBySwap,
         value: {
           sender: account.mer(),
+          to: '',
           burnIn: new Coin(
             config.merDenom,
             new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()

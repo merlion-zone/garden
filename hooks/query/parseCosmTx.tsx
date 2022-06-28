@@ -88,6 +88,8 @@ const cosmMsgDescComponents: {
   [typeUrls.MsgSend]: ['Transfer', MsgSendTx],
   [typeUrls.MsgMintBySwap]: ['Swap Mint', MsgMintBySwapDesc],
   [typeUrls.MsgBurnBySwap]: ['Swap Burn', MsgBurnBySwapDesc],
+  [typeUrls.MsgSubmitProposal]: ['Submit Proposal', MsgSubmitProposalDesc],
+  [typeUrls.MsgVote]: ['Vote on Proposal', MsgVoteDesc],
 }
 
 export function getMsgDescComponent(
@@ -181,4 +183,25 @@ function MsgBurnBySwapDesc({ msg }: CosmMsgProps) {
   const coinIn = useFormatCoin(attrs?.get('coin_in'))
   const coinOut = useFormatCoin(attrs?.get('coin_out'))
   return <>{`Swap ${coinIn} for ${coinOut}`}</>
+}
+
+function MsgSubmitProposalDesc({ msg }: CosmMsgProps) {
+  let attrs = extractEventAttributes(msg.events, 'submit_proposal')
+  const proposalId = attrs?.get('proposal_id')
+  const proposalType = attrs?.get('proposal_type')
+  attrs = extractEventAttributes(msg.events, 'proposal_deposit')
+  const deposit = useFormatCoin(attrs?.get('amount'))
+  return (
+    <>
+      <span>ID: {proposalId}</span>
+      <br />
+      <span>Type: {proposalType}</span>
+      <br />
+      <span>Deposit: {deposit}</span>
+    </>
+  )
+}
+
+function MsgVoteDesc({ msg }: CosmMsgProps) {
+  return <></>
 }
