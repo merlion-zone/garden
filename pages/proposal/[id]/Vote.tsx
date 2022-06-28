@@ -1,7 +1,4 @@
-import config from '@/config'
 import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
-import { useBalance } from '@/hooks/query'
-import { formatCoin, parseCoin } from '@/utils'
 import {
   Button,
   FormControl,
