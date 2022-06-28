@@ -35,6 +35,23 @@ export function ProposalContent({ proposal }: ProposalContentProps) {
     [content]
   )
 
+  const status = useMemo(() => {
+    if (!proposal) return 'Loading'
+
+    switch (proposal.status) {
+      case 1:
+        return 'Deposit'
+      case 2:
+        return 'Voting'
+      case 3:
+        return 'Passed'
+      case 4:
+        return 'Rejected'
+      case 5:
+        return 'Faliled'
+    }
+  }, [proposal])
+
   return (
     <>
       <Container
@@ -65,7 +82,7 @@ export function ProposalContent({ proposal }: ProposalContentProps) {
                 </Text>
               </Stack>
               <Tag rounded="full" variant="solid" colorScheme="brand">
-                Deposit
+                {status}
               </Tag>
             </HStack>
             <Text fontSize="sm">{content?.description}</Text>

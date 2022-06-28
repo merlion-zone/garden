@@ -416,6 +416,10 @@ export function useQueryProposal(id: string) {
   return useMerlionQuery('gov', 'proposal', id)
 }
 
+export function useQueryProposalTallyResult(id?: string) {
+  return useMerlionQuery('gov', 'tally', id)
+}
+
 /***************************** Txs ******************************/
 
 export function useTxs(events?: Events, page: number = 1, limit: number = 10) {
