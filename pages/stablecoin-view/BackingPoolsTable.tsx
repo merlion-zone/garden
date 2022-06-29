@@ -23,9 +23,11 @@ import Avvvatars from 'avvvatars-react'
 import { proto } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { shortenDenom } from '@/utils'
-import { IndicatorTextBox } from '@/components/BackingCollateralTable/IndicatorBar'
+import { IndicatorTextBox } from './IndicatorBar'
+import { useRouter } from 'next/router'
 
 export const BackingPoolsTable = () => {
+  const router = useRouter()
   const { data: allBackingParams } = useAllBackingParams()
   const { data: allBackingPools } = useAllBackingPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
@@ -179,7 +181,12 @@ export const BackingPoolsTable = () => {
               No backing pool exists in the network.
             </Text>
             <Center pt="4">
-              <Button variant="outline">Propose to Register Backing</Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/governance')}
+              >
+                Propose to Register Backing
+              </Button>
             </Center>
           </Stack>
         </Center>

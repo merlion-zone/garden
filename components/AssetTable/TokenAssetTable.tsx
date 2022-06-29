@@ -18,7 +18,7 @@ import {
   DenomMetadata,
   useBalance,
   useDenomsMetadataMap,
-  useDisplayCoinPrice,
+  useDisplayPrice,
 } from '@/hooks/query'
 import { CgArrowsExchange } from 'react-icons/cg'
 import Avvvatars from 'avvvatars-react'
@@ -36,7 +36,7 @@ interface TokenAssetRowProps {
 
 const TokenAssetRow = ({ denomMetadata, onSend }: TokenAssetRowProps) => {
   const address = useAccountAddress()
-  const { displayPrice } = useDisplayCoinPrice(denomMetadata.base)
+  const { data } = useDisplayPrice(denomMetadata.base)
   const { balance } = useBalance(address?.mer(), denomMetadata.base)
 
   return (
@@ -54,7 +54,7 @@ const TokenAssetRow = ({ denomMetadata, onSend }: TokenAssetRowProps) => {
         <Text fontSize="xs" color="subtle">
           $
           {formatNumberSuitable(
-            balance && displayPrice && displayPrice.mul(balance),
+            balance && data && data.mul(balance),
             denomMetadata.displayExponent,
             2
           )}

@@ -72,12 +72,15 @@ export function useMerlionQueryMultiple<
   Params extends QueryExtensions[Module][Method] extends (...args: any[]) => any
     ? Parameters<QueryExtensions[Module][Method]>
     : never,
+  ParamsWithUndefined extends Params extends (infer Param)[]
+    ? (Param | undefined)[]
+    : never,
   Response extends QueryExtensions[Module][Method] extends (
     ...args: any[]
   ) => any
     ? Awaited<ReturnType<QueryExtensions[Module][Method]>>
     : never
->(module: Module, method: Method, params: Params[]) {
+>(module: Module, method: Method, params: ParamsWithUndefined[] | undefined) {
   const client = useMerlionQueryClient()
 
   const querier = useCallback(
@@ -107,7 +110,8 @@ export function useMerlionQueryMultiple<
   )
 
   return useSWR(
-    client && params.every((p) => p.every((p) => p !== undefined && p !== null))
+    client &&
+      params?.every((p) => p.every((p) => p !== undefined && p !== null))
       ? [module, method, ...params]
       : null,
     querier as Fetcher<Response[], any>
@@ -287,21 +291,25 @@ export function useOracleParams() {
   return useMerlionQuery('oracle', 'params')
 }
 
-export function useCoinPrice(denom?: string): { price?: Dec; error: any } {
-  const { data, error } = useMerlionQuery('oracle', 'exchangeRate', denom)
+export function useCoinPrice(denom?: string) {
+  const { data, ...rest } = useMerlionQuery('oracle', 'exchangeRate', denom)
   return useMemo(() => {
     return {
-      price: data ? Dec.fromProto(data) : undefined,
-      error,
+      data: data ? Dec.fromProto(data) : undefined,
+      ...rest,
     }
-  }, [data, error])
+  }, [data, rest])
 }
 
-export function useLionPrice(): { price?: Dec; error: any } {
+export function usePrices(denoms?: [string?][]) {
+  return useMerlionQueryMultiple('oracle', 'exchangeRate', denoms)
+}
+
+export function useLionPrice() {
   return useCoinPrice(config.denom)
 }
 
-export function useMerPrice(): { price?: Dec; error: any } {
+export function useMerPrice() {
   return useCoinPrice(config.merDenom)
 }
 
@@ -312,15 +320,34 @@ function displayCoinPrice(metadata?: DenomMetadata, price?: Dec): Dec | null {
   return price.mulPow(metadata.displayExponent).div(1e6)
 }
 
-export function useDisplayCoinPrice(denom?: string) {
+export function useDisplayPrice(denom?: string) {
   const { data: denomsMetadata, error: err1 } = useDenomsMetadataMap()
-  const { price, error: err2 } = useCoinPrice(denom)
-  const displayPrice = useMemo(
+  const { data: price, error: err2 } = useCoinPrice(denom)
+  const data = useMemo(
     () => displayCoinPrice(denomsMetadata?.get(denom || ''), price),
     [denom, denomsMetadata, price]
   )
   return {
-    displayPrice,
+    data,
+    error: err1 || err2,
+  }
+}
+
+export function useDisplayPrices(denoms?: [string?][]) {
+  const { data: denomsMetadata, error: err1 } = useDenomsMetadataMap()
+  const { data: prices, error: err2 } = usePrices(denoms)
+  const data = useMemo(
+    () =>
+      prices?.map((price, i) =>
+        displayCoinPrice(
+          denomsMetadata?.get(denoms?.[i][0] || ''),
+          Dec.fromProto(price)
+        )
+      ),
+    [denoms, denomsMetadata, prices]
+  )
+  return {
+    data,
     error: err1 || err2,
   }
 }
@@ -331,7 +358,7 @@ export function useMerTargetPrice(): { price?: Dec; error: any } {
   // TODO: get on-chain
   return useMemo(() => {
     return {
-      price: new Dec(1),
+      data: new Dec(1),
       error: null,
     }
   }, [])

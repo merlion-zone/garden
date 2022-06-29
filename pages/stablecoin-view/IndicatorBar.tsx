@@ -41,7 +41,6 @@ interface IndicatorTextProps {
 export const IndicatorText = ({
   name,
   content,
-  hint,
   decimals,
   percentage,
 }: IndicatorTextProps) => {

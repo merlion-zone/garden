@@ -23,10 +23,12 @@ import Avvvatars from 'avvvatars-react'
 import { Coin } from '@merlionzone/merlionjs'
 import { proto } from '@merlionzone/merlionjs'
 import { shortenDenom } from '@/utils'
-import { IndicatorTextBox } from '@/components/BackingCollateralTable/IndicatorBar'
+import { IndicatorTextBox } from './IndicatorBar'
 import config from '@/config'
+import { useRouter } from 'next/router'
 
 export const CollateralPoolsTable = () => {
+  const router = useRouter()
   const { data: allCollateralParams } = useAllCollateralParams()
   const { data: allCollateralPools } = useAllCollateralPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
@@ -231,7 +233,12 @@ export const CollateralPoolsTable = () => {
               No collateral pool exists in the network.
             </Text>
             <Center pt="4">
-              <Button variant="outline">Propose to Register Collateral</Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/governance')}
+              >
+                Propose to Register Collateral
+              </Button>
             </Center>
           </Stack>
         </Center>

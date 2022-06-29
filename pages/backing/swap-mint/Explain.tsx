@@ -12,7 +12,7 @@ import {
 import { useSwapMintSettings } from '@/hooks/useSetting'
 import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
 import { Dec } from '@merlionzone/merlionjs'
-import { DenomMetadata, useDisplayCoinPrice } from '@/hooks/query'
+import { DenomMetadata, useDisplayPrice } from '@/hooks/query'
 import config from '@/config'
 import React, { useState } from 'react'
 import { ChevronDownIcon, InfoOutlineIcon } from '@chakra-ui/icons'
@@ -62,7 +62,7 @@ export const Explain = ({
   )
   const [ratesIndex, setRatesIndex] = useState(0)
 
-  const { displayPrice: usmPrice } = useDisplayCoinPrice(config.merDenom)
+  const { data: usmPrice } = useDisplayPrice(config.merDenom)
   const fee = usmPrice && feeAmt && usmPrice?.mul(feeAmt)
 
   const { slippageTolerance: slippage } = useSwapMintSettings()

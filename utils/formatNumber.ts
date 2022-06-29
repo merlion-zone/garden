@@ -103,13 +103,14 @@ export function formatNumberSuitable(
   number?: number | string | Dec | null,
   negScale?: number,
   maximumFractionDigits = 4,
+  maximumIntegerDigits = 7,
   placeholder = '--'
 ): string {
   if (number !== undefined && number !== null && negScale !== undefined) {
     number = new Dec(number).divPow(negScale).toNumber()
   }
   const numStr = formatNumber(number, maximumFractionDigits, placeholder)
-  if (numStr.length <= 7 + maximumFractionDigits) {
+  if (numStr.length <= maximumIntegerDigits + maximumFractionDigits) {
     return numStr
   }
   return formatNumberCompact(number, maximumFractionDigits, placeholder)

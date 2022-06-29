@@ -23,7 +23,7 @@ import {
   useBackingRatio,
   useBalance,
   useDenomsMetadataMap,
-  useDisplayCoinPrice,
+  useDisplayPrice,
   useMakerParams,
   useMerTargetPrice,
 } from '@/hooks/query'
@@ -68,15 +68,15 @@ export default function SwapMint() {
     }
   }, [allBackingParams])
 
-  const { displayPrice: backingPrice } = useDisplayCoinPrice(backingDenom)
-  const { displayPrice: lionPrice } = useDisplayCoinPrice(config.denom)
-  const { displayPrice: merPrice } = useDisplayCoinPrice(config.merDenom)
+  const { data: backingPrice } = useDisplayPrice(backingDenom)
+  const { data: lionPrice } = useDisplayPrice(config.denom)
+  const { data: merPrice } = useDisplayPrice(config.merDenom)
   const { price: merTargetPrice } = useMerTargetPrice()
 
   const backingToken = useMemo(() => {
     return {
       metadata: denomsMetadataMap?.get(backingDenom),
-      price: backingPrice,
+      data: backingPrice,
       proportion: backingRatioPercentage && `${backingRatioPercentage}%`,
       proportionHint: 'Current system backing ratio (BR)',
     }
@@ -85,7 +85,7 @@ export default function SwapMint() {
   const lionToken = useMemo(
     () => ({
       metadata: denomsMetadataMap?.get(config.denom),
-      price: lionPrice,
+      data: lionPrice,
       proportion:
         backingRatioPercentage &&
         `${new Dec(100).sub(backingRatioPercentage)}%`,
@@ -96,7 +96,7 @@ export default function SwapMint() {
   const usmToken = useMemo(
     () => ({
       metadata: denomsMetadataMap?.get(config.merDenom),
-      price: merPrice,
+      data: merPrice,
     }),
     [denomsMetadataMap, merPrice]
   )

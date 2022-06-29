@@ -24,7 +24,7 @@ import {
   errors,
   useBalance,
   useDenomsMetadataMap,
-  useDisplayCoinPrice,
+  useDisplayPrice,
 } from '@/hooks/query'
 import { formatNumber } from '@/utils'
 
@@ -42,14 +42,14 @@ export const SendTokenModal = ({
 }: SendTokenModalProps) => {
   const account = useAccountAddress()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
-  const { displayPrice } = useDisplayCoinPrice(denom)
+  const { data } = useDisplayPrice(denom)
 
   const amountMedata = useMemo(() => {
     return {
       metadata: denomsMetadataMap?.get(denom),
-      price: displayPrice,
+      data: data,
     }
-  }, [denom, denomsMetadataMap, displayPrice])
+  }, [denom, denomsMetadataMap, data])
 
   const { balance } = useBalance(account?.mer(), amountMedata.metadata?.base)
   const balanceDisplay = new Dec(balance).divPow(

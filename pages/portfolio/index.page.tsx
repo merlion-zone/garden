@@ -19,7 +19,7 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useBalance, useDisplayCoinPrice } from '@/hooks/query'
+import { useBalance, useDisplayPrice } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
 import config from '@/config'
 import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
@@ -45,8 +45,8 @@ export default function Portfolio() {
 
   const address = useAccountAddress()
 
-  const { displayPrice: lionDisplayPrice } = useDisplayCoinPrice(config.denom)
-  const { displayPrice: merDisplayPrice } = useDisplayCoinPrice(config.merDenom)
+  const { data: lionDisplayPrice } = useDisplayPrice(config.denom)
+  const { data: merDisplayPrice } = useDisplayPrice(config.merDenom)
 
   const { balance: lionBalance } = useBalance(address?.mer(), config.denom)
   const { balance: merBalance } = useBalance(address?.mer(), config.merDenom)
