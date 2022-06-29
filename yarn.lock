@@ -1963,8 +1963,8 @@ __metadata:
   linkType: hard
 
 "@merlionzone/merlionjs@npm:^0.1.12":
-  version: 0.1.12
-  resolution: "@merlionzone/merlionjs@npm:0.1.12"
+  version: 0.1.13
+  resolution: "@merlionzone/merlionjs@npm:0.1.13"
   dependencies:
     "@cosmjs/amino": ^0.28.9
     "@cosmjs/crypto": ^0.28.9
@@ -1984,7 +1984,7 @@ __metadata:
     long: ^4.0.0
     protobufjs: ~6.11.2
     utf-8-validate: ^5.0.9
-  checksum: e401ed4b1d8327e5e2bdf1f13eb185a5358fc9f8c9cbc3ef2d623505bfd28d44ff85f3a7f564acd79881f7dd8515eab70ca8766f6ac6b910f9038a647e20d2cb
+  checksum: 4fcc6ca28ec1225e24b0b01d04347abb1b9c3b299d94f15534b12c59bfceb37be01240ac7c9461ede4dd7ce4af77907b55e607dd9545bf5bea381cf964488161
   languageName: node
   linkType: hard
 
