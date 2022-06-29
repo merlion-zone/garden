@@ -86,6 +86,7 @@ export function ProposalContent({ proposal }: ProposalContentProps) {
               </Tag>
             </HStack>
             <Text fontSize="sm">{content?.description}</Text>
+            <Text fontSize="sm">{content?.value}</Text>
           </Box>
           {content?.type === ProposalType.SPEND && (
             <Box
