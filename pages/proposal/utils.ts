@@ -34,8 +34,16 @@ export function decodeContent(content: Any) {
         type: ProposalType.PARAMS,
         ...ParameterChangeProposal.decode(content.value),
       }
+
+    default:
+      const path = content.typeUrl.split('.')
+      return {
+        type: path[path.length - 1],
+        title: 'Unknown',
+        description: '',
+        value: content.value.toString(), // TODO
+      }
   }
-  throw new Error(`Not support proposal type ${content.typeUrl}`)
 }
 
 export function getContent<T extends keyof ProposalContent>(
