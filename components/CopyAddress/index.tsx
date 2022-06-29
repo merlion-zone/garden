@@ -1,5 +1,6 @@
-import { Button, IconButton, Tooltip, useClipboard } from '@chakra-ui/react'
+import { Button, useClipboard } from '@chakra-ui/react'
 import { FiCheckCircle, FiCopy } from 'react-icons/fi'
+import { HintButton } from '@/components/Hint'
 
 export const CopyAddressButton = ({ addr }: { addr: string }) => {
   const { hasCopied, onCopy } = useClipboard(addr)
@@ -18,15 +19,10 @@ export const CopyAddressIcon = ({ addr }: { addr: string }) => {
   const { hasCopied, onCopy } = useClipboard(addr)
   const label = !hasCopied ? 'Copy Address' : 'Copied'
   return (
-    <Tooltip hasArrow placement="top" label={label}>
-      <IconButton
-        variant="ghost"
-        size="xs"
-        color="subtle"
-        icon={!hasCopied ? <FiCopy /> : <FiCheckCircle />}
-        aria-label={label}
-        onClick={!hasCopied ? onCopy : () => {}}
-      ></IconButton>
-    </Tooltip>
+    <HintButton
+      hint={label}
+      icon={!hasCopied ? <FiCopy /> : <FiCheckCircle />}
+      onClick={!hasCopied ? onCopy : () => {}}
+    />
   )
 }

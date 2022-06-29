@@ -14,7 +14,7 @@ import { useSwapMintSettings } from '@/hooks/useSetting'
 import { WarningTwoIcon } from '@chakra-ui/icons'
 import { Dec } from '@merlionzone/merlionjs'
 import { useEffect, useState } from 'react'
-import { Hint } from '@/components/Hint'
+import { HintButton } from '@/components/Hint'
 
 export const Settings = () => {
   const {
@@ -66,7 +66,7 @@ export const Settings = () => {
         </Text>
         <HStack>
           <Text>Slippage tolerance</Text>
-          <Hint
+          <HintButton
             hint="Your transaction will revert if the price changes unfavorably by more than this percentage."
             ariaLabel="Slippage Tolerance Tooltip"
             outlineQuestionIcon
@@ -142,7 +142,7 @@ export const Settings = () => {
         <HStack justify="space-between">
           <HStack>
             <Text>Expert Mode</Text>
-            <Hint
+            <HintButton
               hint="Allow high price impact trades and skip the confirm screen. Use at your own risk."
               ariaLabel="Expert Mode Tooltip"
               outlineQuestionIcon

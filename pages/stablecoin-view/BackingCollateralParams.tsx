@@ -3,6 +3,7 @@ import {
   Icon,
   IconButton,
   Popover,
+  PopoverArrow,
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
@@ -14,7 +15,7 @@ import {
 import { Dec } from '@merlionzone/merlionjs'
 import { BiExtension } from 'react-icons/bi'
 import { useBackingRatio, useMakerParams } from '@/hooks/query'
-import { Hint } from '@/components/Hint'
+import { HintButton } from '@/components/Hint'
 import { Card } from '@/components/Card'
 import { DecDisplay } from '@/components/NumberDisplay'
 
@@ -30,11 +31,11 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Backing Ratio:</Text>
-            <Hint
+            <HintButton
               hint="Backing Ratio"
               ariaLabel="Backing Ratio Tooltip"
               placement="bottom"
-            ></Hint>
+            ></HintButton>
           </HStack>
           <Text>
             <DecDisplay
@@ -46,22 +47,22 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Updated at:</Text>
-            <Hint
+            <HintButton
               hint="Backing Ratio"
               ariaLabel="Backing Ratio Updated Time Tooltip"
               placement="bottom"
-            ></Hint>
+            ></HintButton>
           </HStack>
           <Text>{backingRatio?.lastUpdateBlock.toString() || 0}</Text>
         </HStack>
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Adjusting Step:</Text>
-            <Hint
+            <HintButton
               hint="Backing Ratio"
               ariaLabel="Backing Ratio Adjusting Step Tooltip"
               placement="bottom"
-            ></Hint>
+            ></HintButton>
           </HStack>
           <Text>
             <DecDisplay
@@ -73,11 +74,11 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Price Band:</Text>
-            <Hint
+            <HintButton
               hint="Backing Ratio"
               ariaLabel="Backing Ratio Price Band Tooltip"
               placement="bottom"
-            ></Hint>
+            ></HintButton>
           </HStack>
           <Text>
             <DecDisplay
@@ -90,11 +91,11 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Cooldown Period:</Text>
-            <Hint
+            <HintButton
               hint="Backing Ratio"
               ariaLabel="Backing Ratio Cooldown Period Tooltip"
               placement="bottom"
-            ></Hint>
+            ></HintButton>
           </HStack>
           <Text>{makerParams?.backingRatioCooldownPeriod.toString() || 0}</Text>
         </HStack>
@@ -107,11 +108,11 @@ export const BackingCollateralParams = () => {
       <Card>
         <HStack align="baseline">
           <Text>Backing Parameters</Text>
-          <Hint
+          <HintButton
             hint="FBA (fractional-backing-algorithmic) with parts of backing assets and parts of the algorithmic supply"
             ariaLabel="Backing Tooltip"
             placement="bottom"
-          ></Hint>
+          ></HintButton>
         </HStack>
 
         <Stack py="2" align="center">
@@ -133,6 +134,7 @@ export const BackingCollateralParams = () => {
               </PopoverTrigger>
               <Portal>
                 <PopoverContent>
+                  <PopoverArrow />
                   <PopoverBody>
                     <BackingRatioDetails />
                   </PopoverBody>
@@ -177,11 +179,11 @@ export const BackingCollateralParams = () => {
       <Card>
         <HStack align="baseline">
           <Text>Collateral Parameters</Text>
-          <Hint
+          <HintButton
             hint="OCC (over-collateralized-catalytic) over collateralized for interest-bearing lending, and loan-to-value maximized by catalytic Lion"
             ariaLabel="Collateral Tooltip"
             placement="bottom"
-          ></Hint>
+          ></HintButton>
         </HStack>
 
         <Stack py="2" align="center">

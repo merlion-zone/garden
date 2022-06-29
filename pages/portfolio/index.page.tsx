@@ -23,7 +23,7 @@ import { useBalance, useDisplayPrice } from '@/hooks/query'
 import { useAccountAddress } from '@/hooks'
 import config from '@/config'
 import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
-import { Hint } from '@/components/Hint'
+import { HintButton } from '@/components/Hint'
 import QRCodeSVG from 'qrcode.react'
 import { CopyAddressIcon } from '@/components/CopyAddress'
 import { useRouter } from 'next/router'
@@ -88,7 +88,7 @@ export default function Portfolio() {
 
   return (
     <Container maxW="9xl" py="8" height="full">
-      <Stack spacing={{ base: '8', lg: '6' }} height="full">
+      <Stack spacing={{ base: '8', lg: '6' }}>
         <Stack>
           <Heading
             size={useBreakpointValue({ base: 'xs', lg: 'sm' })}
@@ -97,7 +97,7 @@ export default function Portfolio() {
             Portfolio
           </Heading>
         </Stack>
-        <Stack spacing={{ base: '5', lg: '6' }} height="full">
+        <Stack spacing={{ base: '5', lg: '6' }}>
           <SimpleGrid columns={{ base: 1, md: 4 }} gap="6">
             <Card>
               <Text>Balance</Text>
@@ -142,10 +142,10 @@ export default function Portfolio() {
                   {formatNumberSuitable(merBalance, config.merDenomDecimals)}
                 </Text>
                 <Text fontSize="4xl">USM</Text>
-                <Hint
+                <HintButton
                   hint="USM is the stablecoin pegged to $USD"
                   ariaLabel="Stablecoin Tooltip"
-                ></Hint>
+                ></HintButton>
               </HStack>
               <HStack gap="4">
                 <Text
@@ -210,11 +210,11 @@ export default function Portfolio() {
             <Card>
               <Text>
                 Address
-                <Hint
+                <HintButton
                   hint={
                     'EVM address and Cosmos address are both derived from the same wallet of yours. You can use either of them seamlessly in different scenarios.'
                   }
-                ></Hint>
+                ></HintButton>
               </Text>
               <Stack mt="6">
                 <Tabs
@@ -247,7 +247,7 @@ export default function Portfolio() {
             </Card>
           </SimpleGrid>
 
-          <SimpleGrid columns={1} height="full">
+          <SimpleGrid columns={1} minHeight="full" pb={{ base: '0', lg: '8' }}>
             <Card minH="2xs">
               <HStack gap="4">
                 <Text fontSize="3xl">Assets</Text>

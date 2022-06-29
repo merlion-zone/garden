@@ -5,7 +5,6 @@ import {
   HStack,
   Input,
   Text,
-  Tooltip,
   useColorModeValue,
   useToken,
 } from '@chakra-ui/react'
@@ -16,6 +15,7 @@ import { AmountDisplay } from '@/components/NumberDisplay'
 import { Dec } from '@merlionzone/merlionjs'
 import { SystemStyleObject } from '@chakra-ui/styled-system'
 import { TinyColor } from '@ctrl/tinycolor'
+import { HintButton, WithHint } from '@/components/Hint'
 
 export interface AmountMetadata {
   metadata?: DenomMetadata
@@ -158,13 +158,9 @@ export const AmountInput = ({
           <HStack fontSize="sm" color="subtle">
             {token.proportion && (
               <Text>
-                <Tooltip
-                  hasArrow
-                  placement="right"
-                  label={token.proportionHint}
-                >
+                <WithHint placement="right" hint={token.proportionHint}>
                   {token.proportion}
-                </Tooltip>
+                </WithHint>
               </Text>
             )}
             <Text>

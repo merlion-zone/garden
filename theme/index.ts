@@ -10,15 +10,19 @@ import {
   cssVar,
   mode,
   StyleFunctionProps,
+  SystemStyleFunction,
   transparentize,
 } from '@chakra-ui/theme-tools'
 
 export const theme: Record<string, any> = extendTheme(
   {
     styles: {
-      global: {
+      global: (props: StyleFunctionProps) => ({
         'html, body': {
           fontSize: 'md',
+        },
+        '*, *::before, &::after': {
+          borderColor: mode('gray.300', 'gray.700')(props),
         },
         '*::-webkit-scrollbar': {
           display: 'none',
@@ -27,7 +31,7 @@ export const theme: Record<string, any> = extendTheme(
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
         },
-      },
+      }),
     },
     colors: {
       ...proTheme.colors,
@@ -101,6 +105,49 @@ export const theme: Record<string, any> = extendTheme(
               },
             }
           },
+        },
+      },
+      Popover: {
+        ...baseTheme.components.Popover,
+        baseStyle: (props: StyleFunctionProps) => {
+          const $popperBg = cssVar('popper-bg')
+
+          const $arrowBg = cssVar('popper-arrow-bg')
+          const $arrowShadowColor = cssVar('popper-arrow-shadow-color')
+
+          const baseStyleContent: SystemStyleFunction = (props) => {
+            const bg = mode('white', 'gray.800')(props)
+            const shadowColor = mode('gray.300', 'whiteAlpha.300')(props)
+
+            return {
+              [$popperBg.variable]: `colors.${bg}`,
+              bg: $popperBg.reference,
+              [$arrowBg.variable]: $popperBg.reference,
+              [$arrowShadowColor.variable]: `colors.${shadowColor}`,
+              maxWidth: 'xs',
+              border: '1px solid',
+              borderColor: 'inherit',
+              borderRadius: 'md',
+              boxShadow: 'sm',
+              zIndex: 'inherit',
+              _focusVisible: {
+                outline: 0,
+                boxShadow: 'outline',
+              },
+            }
+          }
+
+          return {
+            ...baseTheme.components.Popover.baseStyle(props),
+            content: {
+              ...baseStyleContent(props),
+              borderWidth: '1px',
+              boxShadow: mode('lg', 'lg-dark')(props),
+              borderRadius: 'lg',
+              background: 'bg-surface',
+              // overflow: 'hidden',
+            },
+          }
         },
       },
       Tooltip: {

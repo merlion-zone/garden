@@ -13,7 +13,7 @@ import {
   TabPanels,
   TabPanel,
 } from '@chakra-ui/react'
-import { Hint } from '@/components/Hint'
+import { HintButton } from '@/components/Hint'
 import {
   useAllBackingPools,
   useAllCollateralPools,
@@ -33,13 +33,6 @@ import { BackingCollateralStatistics } from '@/pages/stablecoin-view/BackingColl
 import { BackingCollateralParams } from '@/pages/stablecoin-view/BackingCollateralParams'
 
 export default function StablecoinView() {
-  const { data: makerParams } = useMakerParams()
-  const { data: totalBacking } = useTotalBacking()
-  const { data: totalCollateral } = useTotalCollateral()
-  const { data: allBackingPools } = useAllBackingPools()
-  const { data: allCollateralPools } = useAllCollateralPools()
-  const { data: backingRatio } = useBackingRatio()
-
   const [poolsTabIndex, setPoolsTabIndex] = useState(0)
 
   return (
