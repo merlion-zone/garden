@@ -434,9 +434,23 @@ export function useQueryDelegatorDelegations(address?: string | null) {
 export function useQueryProposals(
   proposalStatus: ProposalStatus,
   depositor: string,
-  voter: string
+  voter: string,
+  pagination: {
+    key?: Uint8Array | undefined
+    offset?: string | number | undefined
+    limit?: string | number | undefined
+    countTotal?: boolean | undefined
+    reverse?: boolean | undefined
+  } = {}
 ) {
-  return useMerlionQuery('gov', 'proposals', proposalStatus, depositor, voter)
+  return useMerlionQuery(
+    'gov',
+    'proposals',
+    proposalStatus,
+    depositor,
+    voter,
+    pagination
+  )
 }
 
 export function useQueryProposal(id: string) {
@@ -445,6 +459,10 @@ export function useQueryProposal(id: string) {
 
 export function useQueryProposalTallyResult(id?: string) {
   return useMerlionQuery('gov', 'tally', id)
+}
+
+export function useQueryGovParams() {
+  return useMerlionQuery('gov', 'params')
 }
 
 /***************************** Txs ******************************/
