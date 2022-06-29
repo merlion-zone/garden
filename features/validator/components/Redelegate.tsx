@@ -48,7 +48,7 @@ export function Redelegate() {
   const merlionClient = useMerlionClient()
   const toast = useToast()
   const { data: delegationData } = useDelegation(
-    account,
+    address?.mer(),
     query.address as string
   )
   const balance = useMemo(
