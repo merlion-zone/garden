@@ -15,7 +15,7 @@ import { AmountDisplay } from '@/components/NumberDisplay'
 import { Dec } from '@merlionzone/merlionjs'
 import { SystemStyleObject } from '@chakra-ui/styled-system'
 import { TinyColor } from '@ctrl/tinycolor'
-import { HintButton, WithHint } from '@/components/Hint'
+import { WithHint } from '@/components/Hint'
 
 export interface AmountMetadata {
   metadata?: DenomMetadata

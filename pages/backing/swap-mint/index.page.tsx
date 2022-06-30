@@ -76,7 +76,7 @@ export default function SwapMint() {
   const backingToken = useMemo(() => {
     return {
       metadata: denomsMetadataMap?.get(backingDenom),
-      data: backingPrice,
+      price: backingPrice,
       proportion: backingRatioPercentage && `${backingRatioPercentage}%`,
       proportionHint: 'Current system backing ratio (BR)',
     }
@@ -85,7 +85,7 @@ export default function SwapMint() {
   const lionToken = useMemo(
     () => ({
       metadata: denomsMetadataMap?.get(config.denom),
-      data: lionPrice,
+      price: lionPrice,
       proportion:
         backingRatioPercentage &&
         `${new Dec(100).sub(backingRatioPercentage)}%`,
@@ -96,7 +96,7 @@ export default function SwapMint() {
   const usmToken = useMemo(
     () => ({
       metadata: denomsMetadataMap?.get(config.merDenom),
-      data: merPrice,
+      price: merPrice,
     }),
     [denomsMetadataMap, merPrice]
   )

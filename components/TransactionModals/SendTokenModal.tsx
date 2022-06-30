@@ -47,7 +47,7 @@ export const SendTokenModal = ({
   const amountMedata = useMemo(() => {
     return {
       metadata: denomsMetadataMap?.get(denom),
-      data: data,
+      price: data,
     }
   }, [denom, denomsMetadataMap, data])
 

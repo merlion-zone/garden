@@ -16,7 +16,7 @@ import { RiGovernmentLine, RiCurrencyFill } from 'react-icons/ri'
 import { TbGauge } from 'react-icons/tb'
 import { NavButton } from '@/components/Sidebar/NavButton'
 import { Logo } from '@/components/Logo'
-import { Social } from '@/components/Sidebar/Social'
+import { Links } from '@/components/Sidebar/Links'
 
 interface SidebarProps {
   onButtonClick?: () => void
@@ -150,10 +150,10 @@ export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
             </Stack>
             <Stack>
               <Text fontSize="sm" color={textColor} fontWeight="medium">
-                Social
+                Links
               </Text>
               <Stack spacing="1">
-                <Social />
+                <Links />
               </Stack>
             </Stack>
           </Stack>
