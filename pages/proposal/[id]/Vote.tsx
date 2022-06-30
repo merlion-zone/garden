@@ -108,6 +108,7 @@ export function Vote() {
               <Select
                 {...register('option', {
                   required: 'Please select a option',
+                  valueAsNumber: true,
                 })}
               >
                 <option value={VoteOption.VOTE_OPTION_YES}>Yes</option>
