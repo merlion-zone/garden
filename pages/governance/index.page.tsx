@@ -2,6 +2,7 @@ import {
   Button,
   Container,
   Heading,
+  HStack,
   List,
   ListItem,
   Stack,
@@ -16,14 +17,45 @@ import {
   useBreakpointValue,
 } from '@chakra-ui/react'
 import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import NextLink from 'next/link'
-import { useQueryProposals } from '@/hooks/query'
+import { useQueryGovParams, useQueryProposals } from '@/hooks/query'
 import { ProposalItem } from './ProposalItem'
+import { AmountDisplay } from '@/components/NumberDisplay'
+import config from '@/config'
+import { dayjs } from '@/utils'
+import { getTime } from '../proposal/utils'
+
+const limit = 30
 
 export default function Governance() {
+  const { data: paramsData } = useQueryGovParams()
   const [status, setStatus] = useState<ProposalStatus>(0)
-  const { data } = useQueryProposals(status, '', '')
+  const [pageIndex, setPageIndex] = useState(0)
+  const { data } = useQueryProposals(status, '', '', {
+    reverse: true,
+    offset: limit * pageIndex,
+    limit,
+    countTotal: true,
+  })
+
+  const hasPrev = useMemo(() => limit * pageIndex > 0, [pageIndex])
+
+  const hasNext = useMemo(() => {
+    const total = data?.pagination?.total.toNumber() ?? 0
+    return total > limit * (pageIndex + 1)
+  }, [data, pageIndex])
+
+  const handlePrevPage = () => {
+    if (!hasPrev) return
+    setPageIndex((prev) => prev - 1)
+  }
+
+  const handleNextPage = () => {
+    if (!hasNext) return
+    setPageIndex((prev) => prev + 1)
+  }
+
   return (
     <>
       <Container
@@ -57,15 +89,32 @@ export default function Governance() {
         <StatGroup bg="bg-surface" rounded="lg">
           <Stat p="6">
             <StatLabel>Minimum deposit</StatLabel>
-            <StatNumber>500</StatNumber>
+            <StatNumber>
+              <AmountDisplay
+                value={paramsData?.depositParams?.minDeposit[0].amount ?? 0}
+                decimals={config.denomDecimals}
+              />
+            </StatNumber>
           </Stat>
           <Stat p="6">
             <StatLabel>Maximum deposit period</StatLabel>
-            <StatNumber>7 days</StatNumber>
+            <StatNumber>
+              {dayjs
+                .duration(getTime(paramsData?.depositParams?.maxDepositPeriod))
+                .asDays()
+                .toFixed(0)}{' '}
+              days
+            </StatNumber>
           </Stat>
           <Stat p="6">
             <StatLabel>Voting period</StatLabel>
-            <StatNumber>7 days</StatNumber>
+            <StatNumber>
+              {dayjs
+                .duration(getTime(paramsData?.depositParams?.maxDepositPeriod))
+                .asDays()
+                .toFixed(0)}{' '}
+              days
+            </StatNumber>
           </Stat>
         </StatGroup>
       </Container>
@@ -100,6 +149,24 @@ export default function Governance() {
             </ListItem>
           ))}
         </List>
+        <HStack mt="8" justifyContent="end" spacing="4">
+          <Text>
+            Showing {limit * pageIndex + 1} to{' '}
+            {Math.min(
+              limit * pageIndex + limit,
+              data?.pagination?.total.toNumber() ?? 0
+            )}{' '}
+            of {data?.pagination?.total.toNumber()} proposals
+          </Text>
+          <HStack justifyContent="end">
+            <Button size="sm" disabled={!hasPrev} onClick={handlePrevPage}>
+              Prev
+            </Button>
+            <Button size="sm" disabled={!hasNext} onClick={handleNextPage}>
+              Next
+            </Button>
+          </HStack>
+        </HStack>
       </Container>
     </>
   )

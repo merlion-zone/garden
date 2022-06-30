@@ -74,7 +74,9 @@ export function getContent<T extends keyof ProposalContent>(
   throw new Error(`Not support proposal type ${type}`)
 }
 
-export function getTime(timestamp: Timestamp) {
+export function getTime(timestamp?: Timestamp) {
+  if (!timestamp) return 0
+
   return (
     Number(timestamp!.seconds) * 1000 + Number(timestamp!.nanos) / 1_000_000
   )
