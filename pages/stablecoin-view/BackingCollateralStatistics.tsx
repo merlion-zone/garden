@@ -25,7 +25,7 @@ export const BackingCollateralStatistics = () => {
     <>
       <Card>
         <HStack align="baseline">
-          <Text>Backing</Text>
+          <Text>Backing Stats</Text>
           <HintButton
             hint="FBA (fractional-backing-algorithmic) with parts of backing assets and parts of the algorithmic supply"
             ariaLabel="Backing Tooltip"
@@ -63,7 +63,7 @@ export const BackingCollateralStatistics = () => {
 
       <Card>
         <HStack align="baseline">
-          <Text>Collateral</Text>
+          <Text>Collateral Stats</Text>
           <HintButton
             hint="OCC (over-collateralized-catalytic) over collateralized for interest-bearing lending, and loan-to-value maximized by catalytic Lion"
             ariaLabel="Collateral Tooltip"

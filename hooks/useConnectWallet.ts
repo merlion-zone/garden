@@ -75,6 +75,7 @@ export function useConnectWallet(): {
       }
       if (!accounts.length) {
         console.warn('Please connect to MetaMask')
+        // TODO: when MetaMask locked
         disconnect(true)
       } else {
         setAccount(accounts[0])

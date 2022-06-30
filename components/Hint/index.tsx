@@ -16,10 +16,21 @@ interface WithHintProps {
   children: ReactNode
   hint: ReactNode
   placement?: PlacementWithLogical
+  clickTrigger?: boolean
 }
 
-export const WithHint = ({ hint, placement, children }: WithHintProps) => (
-  <Popover placement={placement ?? 'top'} trigger="hover" preventOverflow flip>
+export const WithHint = ({
+  hint,
+  placement,
+  clickTrigger,
+  children,
+}: WithHintProps) => (
+  <Popover
+    placement={placement ?? 'top'}
+    trigger={clickTrigger ? 'click' : 'hover'}
+    preventOverflow
+    flip
+  >
     <PopoverTrigger>
       {isValidElement(children) ? children : <span>{children}</span>}
     </PopoverTrigger>
@@ -34,8 +45,9 @@ export const WithHint = ({ hint, placement, children }: WithHintProps) => (
 
 interface HintButtonProps {
   hint: string
-  ariaLabel?: string
   placement?: PlacementWithLogical
+  clickTrigger?: boolean
+  ariaLabel?: string
   outlineQuestionIcon?: boolean
   icon?: ReactElement
   onClick?: () => void
@@ -43,13 +55,14 @@ interface HintButtonProps {
 
 export const HintButton = ({
   hint,
-  ariaLabel,
   placement,
+  clickTrigger,
+  ariaLabel,
   outlineQuestionIcon,
   icon,
   onClick,
 }: HintButtonProps) => (
-  <WithHint hint={hint} placement={placement}>
+  <WithHint hint={hint} placement={placement} clickTrigger={clickTrigger}>
     <IconButton
       variant="ghost"
       size="xs"

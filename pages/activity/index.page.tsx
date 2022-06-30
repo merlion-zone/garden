@@ -1,8 +1,6 @@
 import {
   Box,
   BoxProps,
-  Button,
-  ButtonGroup,
   Container,
   HStack,
   SimpleGrid,
@@ -13,7 +11,6 @@ import {
   TabPanels,
   Tabs,
   Text,
-  useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useState } from 'react'
@@ -48,9 +45,9 @@ export default function Activity() {
                   <Tab pb="3" px="4">
                     All
                   </Tab>
-                  <Tab pb="3" px="4">
-                    Local
-                  </Tab>
+                  {/*<Tab pb="3" px="4">*/}
+                  {/*  Local*/}
+                  {/*</Tab>*/}
                 </TabList>
               </Tabs>
             </HStack>

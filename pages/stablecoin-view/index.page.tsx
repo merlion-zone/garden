@@ -1,34 +1,20 @@
 import { useState } from 'react'
 import {
-  Box,
   Container,
   SimpleGrid,
   Stack,
   HStack,
   Text,
-  useColorModeValue,
   Tabs,
   TabList,
   Tab,
   TabPanels,
   TabPanel,
 } from '@chakra-ui/react'
-import { HintButton } from '@/components/Hint'
-import {
-  useAllBackingPools,
-  useAllCollateralPools,
-  useBackingRatio,
-  useMakerParams,
-  useTotalBacking,
-  useTotalCollateral,
-} from '@/hooks/query'
-import { Dec } from '@merlionzone/merlionjs'
-import config from '@/config'
-import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
+import { Card } from '@/components/Card'
 import { BackingPoolsTable } from './BackingPoolsTable'
 import { CollateralPoolsTable } from './CollateralPoolsTable'
 import { BackingPoolsBarChart, CollateralPoolsBarChart } from './PoolsBarChart'
-import { Card } from '@/components/Card'
 import { BackingCollateralStatistics } from '@/pages/stablecoin-view/BackingCollateralStatistics'
 import { BackingCollateralParams } from '@/pages/stablecoin-view/BackingCollateralParams'
 

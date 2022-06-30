@@ -41,16 +41,16 @@ export const Sidebar = ({ onButtonClick = () => {} }: SidebarProps) => {
         <Stack justify="space-between" spacing="1" width="full">
           <Stack spacing="4" shouldWrapChildren>
             <Logo />
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FiSearch} color={inputColor} boxSize="5" />
-              </InputLeftElement>
-              <Input
-                placeholder="Search"
-                color={inputColor}
-                _placeholder={{ color: inputColor }}
-              />
-            </InputGroup>
+            {/*<InputGroup>*/}
+            {/*  <InputLeftElement pointerEvents="none">*/}
+            {/*    <Icon as={FiSearch} color={inputColor} boxSize="5" />*/}
+            {/*  </InputLeftElement>*/}
+            {/*  <Input*/}
+            {/*    placeholder="Search"*/}
+            {/*    color={inputColor}*/}
+            {/*    _placeholder={{ color: inputColor }}*/}
+            {/*  />*/}
+            {/*</InputGroup>*/}
             <Stack spacing="1">
               <NavButton
                 href="/portfolio"

@@ -2,12 +2,6 @@ import {
   HStack,
   Icon,
   IconButton,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Portal,
   Stack,
   Text,
   useColorModeValue,
@@ -15,7 +9,7 @@ import {
 import { Dec } from '@merlionzone/merlionjs'
 import { BiExtension } from 'react-icons/bi'
 import { useBackingRatio, useMakerParams } from '@/hooks/query'
-import { HintButton } from '@/components/Hint'
+import { HintButton, WithHint } from '@/components/Hint'
 import { Card } from '@/components/Card'
 import { DecDisplay } from '@/components/NumberDisplay'
 
@@ -31,11 +25,7 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Backing Ratio:</Text>
-            <HintButton
-              hint="Backing Ratio"
-              ariaLabel="Backing Ratio Tooltip"
-              placement="bottom"
-            ></HintButton>
+            <HintButton hint="(BR) The ratio of backing and LION depends on the market's pricing of the USM stablecoin"></HintButton>
           </HStack>
           <Text>
             <DecDisplay
@@ -47,22 +37,14 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Updated at:</Text>
-            <HintButton
-              hint="Backing Ratio"
-              ariaLabel="Backing Ratio Updated Time Tooltip"
-              placement="bottom"
-            ></HintButton>
+            <HintButton hint="The last block at which backing ratio was adjusted"></HintButton>
           </HStack>
           <Text>{backingRatio?.lastUpdateBlock.toString() || 0}</Text>
         </HStack>
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Adjusting Step:</Text>
-            <HintButton
-              hint="Backing Ratio"
-              ariaLabel="Backing Ratio Adjusting Step Tooltip"
-              placement="bottom"
-            ></HintButton>
+            <HintButton hint="Step of adjusting backing ratio"></HintButton>
           </HStack>
           <Text>
             <DecDisplay
@@ -74,11 +56,7 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Price Band:</Text>
-            <HintButton
-              hint="Backing Ratio"
-              ariaLabel="Backing Ratio Price Band Tooltip"
-              placement="bottom"
-            ></HintButton>
+            <HintButton hint="Price band for adjusting backing ratio"></HintButton>
           </HStack>
           <Text>
             <DecDisplay
@@ -91,11 +69,7 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline" justify="space-between">
           <HStack align="baseline">
             <Text>Cooldown Period:</Text>
-            <HintButton
-              hint="Backing Ratio"
-              ariaLabel="Backing Ratio Cooldown Period Tooltip"
-              placement="bottom"
-            ></HintButton>
+            <HintButton hint="Cooldown period blocks for adjusting backing ratio"></HintButton>
           </HStack>
           <Text>{makerParams?.backingRatioCooldownPeriod.toString() || 0}</Text>
         </HStack>
@@ -109,41 +83,43 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline">
           <Text>Backing Parameters</Text>
           <HintButton
-            hint="FBA (fractional-backing-algorithmic) with parts of backing assets and parts of the algorithmic supply"
-            ariaLabel="Backing Tooltip"
+            hint="FBA system parameters"
             placement="bottom"
           ></HintButton>
         </HStack>
 
         <Stack py="2" align="center">
           <HStack align="baseline">
-            <Text color={gray}>Backing Ratio</Text>
+            <WithHint
+              hint={
+                "(BR) The ratio of backing and LION depends on the market's pricing of the USM stablecoin"
+              }
+            >
+              <Text color={gray}>Backing Ratio</Text>
+            </WithHint>
             <Text fontSize="3xl">
               <DecDisplay
                 value={backingRatio?.backingRatio || 0}
                 percentage
               ></DecDisplay>
             </Text>
-            <Popover placement="bottom">
-              <PopoverTrigger>
-                <IconButton
-                  variant="ghost"
-                  aria-label="Setting"
-                  icon={<Icon as={BiExtension} />}
-                ></IconButton>
-              </PopoverTrigger>
-              <Portal>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverBody>
-                    <BackingRatioDetails />
-                  </PopoverBody>
-                </PopoverContent>
-              </Portal>
-            </Popover>
+
+            <WithHint hint={<BackingRatioDetails />} clickTrigger>
+              <IconButton
+                variant="ghost"
+                aria-label="Backing Ration Details"
+                icon={<Icon as={BiExtension} />}
+              ></IconButton>
+            </WithHint>
           </HStack>
           <HStack align="baseline">
-            <Text color={gray}>Mint/Burn Price Limit</Text>
+            <WithHint
+              hint={
+                'The upper limit of USM price (against $USD) allowing mint and the lower limit of USM price allowing burn'
+              }
+            >
+              <Text color={gray}>Mint/Burn Price Limit</Text>
+            </WithHint>
             <Text fontSize="3xl">
               <DecDisplay
                 value={
@@ -165,7 +141,13 @@ export const BackingCollateralParams = () => {
             </Text>
           </HStack>
           <HStack align="baseline">
-            <Text color={gray}>Reback Bonus</Text>
+            <WithHint
+              hint={
+                'When actual backing ratio is less than system BR, arbitrager can swap backing assets for LION * (1 + bonus)'
+              }
+            >
+              <Text color={gray}>Reback Bonus</Text>
+            </WithHint>
             <Text fontSize="3xl">
               <DecDisplay
                 value={makerParams?.rebackBonus || 0}
@@ -180,15 +162,20 @@ export const BackingCollateralParams = () => {
         <HStack align="baseline">
           <Text>Collateral Parameters</Text>
           <HintButton
-            hint="OCC (over-collateralized-catalytic) over collateralized for interest-bearing lending, and loan-to-value maximized by catalytic Lion"
-            ariaLabel="Collateral Tooltip"
+            hint="OCC system parameters"
             placement="bottom"
           ></HintButton>
         </HStack>
 
         <Stack py="2" align="center">
           <HStack align="baseline">
-            <Text color={gray}>Liquidation Commission Fee</Text>
+            <WithHint
+              hint={
+                'The commission fee comes from liquidation bonus/penalty and it will be paid to the network'
+              }
+            >
+              <Text color={gray}>Liquidation Commission Fee</Text>
+            </WithHint>
             <Text fontSize="3xl">
               <DecDisplay
                 value={makerParams?.liquidationCommissionFee || 0}
