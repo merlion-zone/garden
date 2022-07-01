@@ -32,6 +32,7 @@ interface AmountInputProps {
   onInput?: (name: string, value: string) => void
   isDisabled?: boolean
   noAnnotation?: boolean
+  noMaxButton?: boolean
   bg?: string
   border?: SystemStyleObject
   hoverBorder?: boolean | SystemStyleObject
@@ -47,6 +48,7 @@ export const AmountInput = ({
   onInput,
   isDisabled,
   noAnnotation,
+  noMaxButton,
   bg,
   border = {},
   hoverBorder,
@@ -176,7 +178,10 @@ export const AmountInput = ({
             color="subtle"
             cursor="pointer"
             onClick={() => {
-              balanceDisplay.isPositive() &&
+              if (noMaxButton) {
+                return
+              }
+              balanceDisplay.greaterThan(0) &&
                 onInput?.(token.metadata?.base || '', balanceDisplay.toString())
             }}
           >
@@ -185,7 +190,7 @@ export const AmountInput = ({
               value={balance}
               decimals={token.metadata?.displayExponent}
             />
-            {balanceDisplay.isPositive() && (
+            {!noMaxButton && balanceDisplay.greaterThan(0) && (
               <Button variant="ghost" size="xs">
                 Max
               </Button>

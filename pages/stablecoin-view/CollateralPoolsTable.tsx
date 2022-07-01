@@ -18,27 +18,39 @@ import {
   useAllCollateralParams,
   useAllCollateralPools,
   useDenomsMetadataMap,
+  useDisplayPrices,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
-import { Coin } from '@merlionzone/merlionjs'
+import { Coin, Dec } from '@merlionzone/merlionjs'
 import { proto } from '@merlionzone/merlionjs'
-import { shortenDenom } from '@/utils'
+import { formatNumberSuitable, shortenDenom } from '@/utils'
 import { IndicatorTextBox } from './IndicatorBar'
 import config from '@/config'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+import { WithHint } from '@/components/Hint'
 
 export const CollateralPoolsTable = () => {
   const router = useRouter()
   const { data: allCollateralParams } = useAllCollateralParams()
   const { data: allCollateralPools } = useAllCollateralPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
+  const { data: prices } = useDisplayPrices(
+    allCollateralPools?.map((pool) => [pool.collateral?.denom])
+  )
 
-  const collateralPoolsMap = new Map<string, proto.maker.PoolCollateral>()
-  allCollateralPools?.forEach((pool) => {
-    if (pool.collateral) {
-      collateralPoolsMap.set(pool.collateral.denom, pool)
-    }
-  })
+  const collateralPoolsMap = useMemo(() => {
+    const map = new Map<string, proto.maker.PoolCollateral & { price?: Dec }>()
+    allCollateralPools?.forEach((pool, i) => {
+      if (pool.collateral) {
+        map.set(pool.collateral.denom, {
+          ...pool,
+          price: prices?.[i],
+        })
+      }
+    })
+    return map
+  }, [allCollateralPools, prices])
 
   const hoverRowBg = useColorModeValue('gray.50', 'gray.900')
 
@@ -51,50 +63,75 @@ export const CollateralPoolsTable = () => {
               <Th borderColor="border">Asset</Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Current</Text>
-                  <IndicatorTextBox
-                    items={[
-                      { name: 'USM' },
-                      { name: 'Collateral' },
-                      { name: 'LION' },
-                    ]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[
+                          { name: 'USM' },
+                          { name: 'Collateral' },
+                          { name: 'LION' },
+                        ]}
+                      />
+                    }
+                  >
+                    <Text>Current</Text>
+                  </WithHint>
                 </HStack>
               </Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Max</Text>
-                  <IndicatorTextBox
-                    items={[{ name: 'USM' }, { name: 'Collateral' }]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[{ name: 'USM' }, { name: 'Collateral' }]}
+                      />
+                    }
+                  >
+                    <Text>Max</Text>
+                  </WithHint>
                 </HStack>
               </Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Fee</Text>
-                  <IndicatorTextBox
-                    items={[{ name: 'Mint' }, { name: 'Interest' }]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[{ name: 'Mint' }, { name: 'Interest' }]}
+                      />
+                    }
+                  >
+                    <Text>Fee</Text>
+                  </WithHint>
                 </HStack>
               </Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>LTV</Text>
-                  <IndicatorTextBox
-                    items={[
-                      { name: 'Basic' },
-                      { name: 'Max' },
-                      { name: 'Catalytic' },
-                    ]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[
+                          { name: 'Basic' },
+                          { name: 'Max' },
+                          { name: 'Catalytic' },
+                        ]}
+                      />
+                    }
+                  >
+                    <Text>LTV</Text>
+                  </WithHint>
                 </HStack>
               </Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Liquidation</Text>
-                  <IndicatorTextBox
-                    items={[{ name: 'Fee' }, { name: 'Threshold' }]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[{ name: 'Fee' }, { name: 'Threshold' }]}
+                      />
+                    }
+                  >
+                    <Text>Liquidation</Text>
+                  </WithHint>
                 </HStack>
               </Th>
             </Tr>
@@ -132,6 +169,9 @@ export const CollateralPoolsTable = () => {
                         </Text>
                       </Box>
                     </HStack>
+                    <Text ps="10" pt="1" color="gray.500" fontSize="xs">
+                      Price: ${formatNumberSuitable(collateralPool?.price)}
+                    </Text>
                   </Td>
                   <Td borderColor="border">
                     <IndicatorTextBox
@@ -144,6 +184,7 @@ export const CollateralPoolsTable = () => {
                         {
                           name: 'Collateral',
                           content: collateralPool?.collateral?.amount,
+                          decorator: collateralMetadata?.symbol,
                           decimals: collateralMetadata?.displayExponent,
                         },
                         {
@@ -165,6 +206,7 @@ export const CollateralPoolsTable = () => {
                         {
                           name: 'Collateral',
                           content: params.maxCollateral,
+                          decorator: collateralMetadata?.symbol,
                           decimals: collateralMetadata?.displayExponent,
                         },
                       ]}

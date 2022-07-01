@@ -129,14 +129,11 @@ export function useStatus() {
 export function useBalance(
   address?: string,
   denom?: string
-): {
-  balance?: string
-  error?: any
-} {
-  const { data, error } = useMerlionQuery('bank', 'balance', address, denom)
+) {
+  const { data, ...rest } = useMerlionQuery('bank', 'balance', address, denom)
   return {
     balance: data && data.amount,
-    error,
+    ...rest
   }
 }
 
@@ -313,10 +310,14 @@ export function useMerPrice() {
   return useCoinPrice(config.merDenom)
 }
 
-function displayCoinPrice(metadata?: DenomMetadata, price?: Dec): Dec | null {
+function displayCoinPrice(
+  metadata?: DenomMetadata,
+  price?: Dec
+): Dec | undefined {
   if (!metadata || !price || metadata.displayExponent === undefined) {
-    return null
+    return undefined
   }
+  // TODO: 1e6
   return price.mulPow(metadata.displayExponent).div(1e6)
 }
 
@@ -393,7 +394,16 @@ export function useAllCollateralPools() {
 }
 
 export function useBackingRatio() {
-  return useMerlionQuery('maker', 'backingRatio')
+  const { data, ...rest } = useMerlionQuery('maker', 'backingRatio')
+  return useMemo(() => {
+    return {
+      data: data && {
+        ...data,
+        backingRatio: Dec.fromProto(data.backingRatio),
+      },
+      ...rest,
+    }
+  }, [data, rest])
 }
 
 /***************************** Staking ******************************/

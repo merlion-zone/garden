@@ -33,68 +33,66 @@ export function swapMint({
   sendTx,
   toast,
 }: SwapMintArgs) {
-  let receiptPromise: Promise<DeliverTxResponse> | undefined
-  let title = ''
+  if (!account || !backingMetadata?.displayExponent) {
+    return
+  }
+
   const tolerance = new Dec(1).sub(slippageTolerance)
 
-  if (account && backingMetadata?.displayExponent) {
-    let msg: EncodeObject
-    if (isMint) {
-      const msgMintBySwap: MsgMintBySwapEncodeObject = {
-        typeUrl: typeUrls.MsgMintBySwap,
-        value: {
-          sender: account.mer(),
-          to: '',
-          mintOutMin: new Coin(
-            config.merDenom,
-            new Dec(usmAmt)
-              .mul(tolerance)
-              .mulPow(config.merDenomDecimals)
-              .toInt()
-          ).toProto(),
-          backingInMax: new Coin(
-            backingMetadata.base,
-            new Dec(backingAmt).mulPow(backingMetadata.displayExponent).toInt()
-          ).toProto(),
-          lionInMax: new Coin(
-            config.denom,
-            new Dec(lionAmt).mulPow(config.denomDecimals).toInt()
-          ).toProto(),
-          fullBacking: false, // TODO
-        },
-      }
-      msg = msgMintBySwap
-      title = `Swap ${backingAmt} ${backingMetadata.display} + ${lionAmt} ${config.displayDenom} for ${usmAmt} ${config.merDisplayDenom}`
-    } else {
-      const msgBurnBySwap: MsgBurnBySwapEncodeObject = {
-        typeUrl: typeUrls.MsgBurnBySwap,
-        value: {
-          sender: account.mer(),
-          to: '',
-          burnIn: new Coin(
-            config.merDenom,
-            new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()
-          ).toProto(),
-          backingOutMin: new Coin(
-            backingMetadata.base,
-            new Dec(backingAmt)
-              .mul(tolerance)
-              .mulPow(backingMetadata.displayExponent)
-              .toInt()
-          ).toProto(),
-          lionOutMin: new Coin(
-            config.denom,
-            new Dec(lionAmt).mul(tolerance).mulPow(config.denomDecimals).toInt()
-          ).toProto(),
-        },
-      }
-      msg = msgBurnBySwap
-      title = `Swap ${usmAmt} ${config.merDisplayDenom} for ${backingAmt} ${backingMetadata.display} + ${lionAmt} ${config.displayDenom}`
+  let msg: EncodeObject
+  let title = ''
+  if (isMint) {
+    const msgMintBySwap: MsgMintBySwapEncodeObject = {
+      typeUrl: typeUrls.MsgMintBySwap,
+      value: {
+        sender: account.mer(),
+        to: '',
+        mintOutMin: new Coin(
+          config.merDenom,
+          new Dec(usmAmt).mul(tolerance).mulPow(config.merDenomDecimals).toInt()
+        ).toProto(),
+        backingInMax: new Coin(
+          backingMetadata.base,
+          new Dec(backingAmt).mulPow(backingMetadata.displayExponent).toInt()
+        ).toProto(),
+        lionInMax: new Coin(
+          config.denom,
+          new Dec(lionAmt).mulPow(config.denomDecimals).toInt()
+        ).toProto(),
+        fullBacking: false, // TODO
+      },
     }
-
-    console.debug(`${JSON.stringify(msg)}`)
-    receiptPromise = sendTx(msg)
+    msg = msgMintBySwap
+    title = `Swap ${backingAmt} ${backingMetadata.display} + ${lionAmt} ${config.displayDenom} for ${usmAmt} ${config.merDisplayDenom}`
+  } else {
+    const msgBurnBySwap: MsgBurnBySwapEncodeObject = {
+      typeUrl: typeUrls.MsgBurnBySwap,
+      value: {
+        sender: account.mer(),
+        to: '',
+        burnIn: new Coin(
+          config.merDenom,
+          new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()
+        ).toProto(),
+        backingOutMin: new Coin(
+          backingMetadata.base,
+          new Dec(backingAmt)
+            .mul(tolerance)
+            .mulPow(backingMetadata.displayExponent)
+            .toInt()
+        ).toProto(),
+        lionOutMin: new Coin(
+          config.denom,
+          new Dec(lionAmt).mul(tolerance).mulPow(config.denomDecimals).toInt()
+        ).toProto(),
+      },
+    }
+    msg = msgBurnBySwap
+    title = `Swap ${usmAmt} ${config.merDisplayDenom} for ${backingAmt} ${backingMetadata.display} + ${lionAmt} ${config.displayDenom}`
   }
+
+  console.debug(`${JSON.stringify(msg)}`)
+  const receiptPromise = sendTx(msg)
 
   toast({
     render: ({ onClose }) => {

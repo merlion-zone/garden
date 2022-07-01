@@ -19,6 +19,8 @@ export const errors = {
   usmInsufficientBalance: 'Insufficient USM balance',
   insufficientBalance: (denom?: string) => `Insufficient ${denom} balance`,
   invalidReceiverAddress: 'Invalid receiver address',
+  noExcessBackingValue: 'No excess value allows buyback',
+  noLackingBackingValue: 'No lacking value allows reback',
 }
 
 const moduleErrors = {

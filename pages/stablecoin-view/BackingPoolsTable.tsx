@@ -18,25 +18,38 @@ import {
   useAllBackingParams,
   useAllBackingPools,
   useDenomsMetadataMap,
+  useDisplayPrices,
 } from '@/hooks/query'
 import Avvvatars from 'avvvatars-react'
-import { proto } from '@merlionzone/merlionjs'
+import { Dec, proto } from '@merlionzone/merlionjs'
 import config from '@/config'
-import { shortenDenom } from '@/utils'
+import { formatNumberSuitable, shortenDenom } from '@/utils'
 import { IndicatorTextBox } from './IndicatorBar'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+import { WithHint } from '@/components/Hint'
 
 export const BackingPoolsTable = () => {
   const router = useRouter()
   const { data: allBackingParams } = useAllBackingParams()
   const { data: allBackingPools } = useAllBackingPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
-  const backingPoolsMap = new Map<string, proto.maker.PoolBacking>()
-  allBackingPools?.forEach((pool) => {
-    if (pool.backing) {
-      backingPoolsMap.set(pool.backing.denom, pool)
-    }
-  })
+  const { data: prices } = useDisplayPrices(
+    allBackingPools?.map((pool) => [pool.backing?.denom])
+  )
+
+  const backingPoolsMap = useMemo(() => {
+    const map = new Map<string, proto.maker.PoolBacking & { price?: Dec }>()
+    allBackingPools?.forEach((pool, i) => {
+      if (pool.backing) {
+        map.set(pool.backing.denom, {
+          ...pool,
+          price: prices?.[i],
+        })
+      }
+    })
+    return map
+  }, [allBackingPools, prices])
 
   const hoverRowBg = useColorModeValue('gray.50', 'gray.900')
 
@@ -49,35 +62,50 @@ export const BackingPoolsTable = () => {
               <Th borderColor="border">Asset</Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Current</Text>
-                  <IndicatorTextBox
-                    items={[
-                      { name: 'USM' },
-                      { name: 'Backing' },
-                      { name: 'LION' },
-                    ]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[
+                          { name: 'USM' },
+                          { name: 'Backing' },
+                          { name: 'LION' },
+                        ]}
+                      />
+                    }
+                  >
+                    <Text>Current</Text>
+                  </WithHint>
                 </HStack>
               </Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Max</Text>
-                  <IndicatorTextBox
-                    items={[{ name: 'USM' }, { name: 'Backing' }]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[{ name: 'USM' }, { name: 'Backing' }]}
+                      />
+                    }
+                  >
+                    <Text>Max</Text>
+                  </WithHint>
                 </HStack>
               </Th>
               <Th borderColor="border">
                 <HStack>
-                  <Text>Fee</Text>
-                  <IndicatorTextBox
-                    items={[
-                      { name: 'Mint' },
-                      { name: 'Burn' },
-                      { name: 'Buyback' },
-                      { name: 'Reback' },
-                    ]}
-                  />
+                  <WithHint
+                    hint={
+                      <IndicatorTextBox
+                        items={[
+                          { name: 'Mint' },
+                          { name: 'Burn' },
+                          { name: 'Buyback' },
+                          { name: 'Reback' },
+                        ]}
+                      />
+                    }
+                  >
+                    <Text>Fee</Text>
+                  </WithHint>
                 </HStack>
               </Th>
             </Tr>
@@ -106,6 +134,9 @@ export const BackingPoolsTable = () => {
                         </Text>
                       </Box>
                     </HStack>
+                    <Text ps="10" pt="1" color="gray.500" fontSize="xs">
+                      Price: ${formatNumberSuitable(backingPool?.price)}
+                    </Text>
                   </Td>
                   <Td borderColor="border">
                     <IndicatorTextBox
@@ -118,6 +149,7 @@ export const BackingPoolsTable = () => {
                         {
                           name: 'Backing',
                           content: backingPool?.backing?.amount,
+                          decorator: backingMetadata?.symbol,
                           decimals: backingMetadata?.displayExponent,
                         },
                         {
@@ -139,6 +171,7 @@ export const BackingPoolsTable = () => {
                         {
                           name: 'Backing',
                           content: params.maxBacking,
+                          decorator: backingMetadata?.symbol,
                           decimals: backingMetadata?.displayExponent,
                         },
                       ]}

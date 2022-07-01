@@ -1,5 +1,6 @@
-import { Box, HStack, Text } from '@chakra-ui/react'
-import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
+import { chakra, Box, HStack, Text, useColorModeValue } from '@chakra-ui/react'
+import { DecDisplay } from '@/components/NumberDisplay'
+import { formatNumberSuitable } from '@/utils'
 
 interface IndicatorBarProps {
   color?: string
@@ -33,25 +34,38 @@ const indicatorColors = {
 interface IndicatorTextProps {
   name: keyof typeof indicatorColors
   content?: any
-  hint?: string
+  decorator?: string
   decimals?: number
   percentage?: boolean
+  hint?: string
 }
 
 export const IndicatorText = ({
   name,
   content,
+  decorator,
   decimals,
   percentage,
 }: IndicatorTextProps) => {
+  const decoratorColor = useColorModeValue('gray.600', 'gray.200')
   return (
     <HStack key={name}>
       <IndicatorBar color={indicatorColors[name]} />
       <Text>
         {percentage ? (
-          <DecDisplay value={content} percentage />
+          <>
+            <chakra.span color={decoratorColor} fontSize="sm">
+              {decorator || name}&nbsp;
+            </chakra.span>
+            <DecDisplay value={content} percentage />
+          </>
         ) : typeof decimals === 'number' ? (
-          <AmountDisplay value={content} decimals={decimals}></AmountDisplay>
+          <>
+            <chakra.span>{formatNumberSuitable(content, decimals)}</chakra.span>
+            <chakra.span color={decoratorColor} fontSize="sm">
+              &nbsp;{decorator || name}
+            </chakra.span>
+          </>
         ) : (
           content ?? name
         )}

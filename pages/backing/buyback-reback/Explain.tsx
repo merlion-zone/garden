@@ -20,11 +20,10 @@ import { WithHint } from '@/components/Hint'
 
 interface ExplainProps {
   loading: boolean
-  isMint: boolean
+  isBuyback: boolean
   backingMetadata: DenomMetadata
   backingAmt: string
   lionAmt: string
-  usmAmt: string
   feeAmt: string
   noCollapse?: boolean
 }
@@ -45,11 +44,10 @@ function exchangeRates(...amounts: [Dec, string][]) {
 
 export const Explain = ({
   loading,
-  isMint,
+  isBuyback,
   backingMetadata,
   backingAmt,
   lionAmt,
-  usmAmt,
   feeAmt,
   noCollapse,
 }: ExplainProps) => {
@@ -57,46 +55,32 @@ export const Explain = ({
 
   const rates = exchangeRates(
     [new Dec(backingAmt || 0), backingMetadata.symbol],
-    [new Dec(lionAmt || 0), config.displayDenom],
-    [new Dec(usmAmt || 0), config.merDisplayDenom]
+    [new Dec(lionAmt || 0), config.displayDenom]
   )
   const [ratesIndex, setRatesIndex] = useState(0)
 
-  const { data: usmPrice } = useDisplayPrice(config.merDenom)
-  const fee = usmPrice && feeAmt && usmPrice?.mul(feeAmt)
+  const { data: backingPrice } = useDisplayPrice(backingMetadata.base)
+  const { data: lionPrice } = useDisplayPrice(config.denom)
+  const fee = isBuyback ? backingPrice?.mul(feeAmt) : lionPrice?.mul(feeAmt)
 
   const { slippageTolerance: slippage } = useSwapMintSettings()
   const tolerance = new Dec(1).sub(slippage)
 
-  let [backingAmtMin, lionAmtMin, usmAmtMin] = [
-    new Dec(0),
-    new Dec(0),
-    new Dec(0),
-  ]
-  if (isMint) {
-    usmAmtMin = new Dec(usmAmt || 0).mul(tolerance)
-  } else {
+  let [backingAmtMin, lionAmtMin] = [new Dec(0), new Dec(0)]
+  if (isBuyback) {
     backingAmtMin = new Dec(backingAmt || 0).mul(tolerance)
+  } else {
     lionAmtMin = new Dec(lionAmt || 0).mul(tolerance)
   }
 
   const MinReceived = () => {
-    return isMint ? (
-      <>
-        <AmountDisplay
-          value={usmAmtMin}
-          suffix={' ' + config.merDisplayDenom}
-        />
-      </>
+    return isBuyback ? (
+      <AmountDisplay
+        value={backingAmtMin}
+        suffix={' ' + backingMetadata.symbol}
+      />
     ) : (
-      <>
-        <AmountDisplay
-          value={backingAmtMin}
-          suffix={' ' + backingMetadata.symbol}
-        />
-        <span> + </span>
-        <AmountDisplay value={lionAmtMin} suffix={' ' + config.displayDenom} />
-      </>
+      <AmountDisplay value={lionAmtMin} suffix={' ' + config.displayDenom} />
     )
   }
 
@@ -113,25 +97,16 @@ export const Explain = ({
             <Text>Expected Output</Text>
           </WithHint>
           <Text textAlign="end">
-            {isMint ? (
-              <>
-                <AmountDisplay
-                  value={usmAmt || 0}
-                  suffix={' ' + config.merDisplayDenom}
-                />
-              </>
+            {isBuyback ? (
+              <AmountDisplay
+                value={backingAmt || 0}
+                suffix={' ' + backingMetadata.symbol}
+              />
             ) : (
-              <>
-                <AmountDisplay
-                  value={backingAmt || 0}
-                  suffix={' ' + backingMetadata.symbol}
-                />
-                <span> + </span>
-                <AmountDisplay
-                  value={lionAmt || 0}
-                  suffix={' ' + config.displayDenom}
-                />
-              </>
+              <AmountDisplay
+                value={lionAmt || 0}
+                suffix={' ' + config.displayDenom}
+              />
             )}
           </Text>
         </HStack>
@@ -154,7 +129,7 @@ export const Explain = ({
           </Text>
         </HStack>
         <HStack justify="space-between" color="gray.500">
-          <Text>{isMint ? 'Mint' : 'Burn'} Fee</Text>
+          <Text>{isBuyback ? 'Buyback' : 'Reback'} Fee</Text>
           <Text textAlign="end">
             <AmountDisplay value={fee} prefix="$" />
           </Text>
@@ -206,15 +181,10 @@ export const Explain = ({
                   value={rates[ratesIndex][0][0]}
                   suffix={' ' + rates[ratesIndex][0][1]}
                 />
-                <span> + </span>
+                <span> = </span>
                 <AmountDisplay
                   value={rates[ratesIndex][1][0]}
                   suffix={' ' + rates[ratesIndex][1][1]}
-                />
-                <span> = </span>
-                <AmountDisplay
-                  value={rates[ratesIndex][2][0]}
-                  suffix={' ' + rates[ratesIndex][2][1]}
                 />
               </Box>
             </>
