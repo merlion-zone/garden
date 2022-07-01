@@ -40,7 +40,7 @@ export function Rewards() {
     return reward && formatCoin(reward)
   }, [data])
 
-  const onSubmit = () => {
+  const onWithdraw = () => {
     if (!address || !query.address) {
       toast({
         title: 'Please connect wallet first',
@@ -60,7 +60,10 @@ export function Rewards() {
     toast({
       render: ({ onClose }) => (
         <TransactionToast
-          title={`Withdraw validator(${query.id}) Reward`}
+          title={`Withdraw validator(${query.address?.slice(
+            0,
+            14
+          )}...${query.address?.slice(-4)}) Reward`}
           receiptPromise={receiptPromise}
           onClose={onClose}
         />
@@ -83,7 +86,7 @@ export function Rewards() {
           rounded="full"
           colorScheme="brand"
           disabled={Number(balance?.amount ?? 0) <= 0}
-          onClick={onSubmit}
+          onClick={onWithdraw}
         >
           Withdraw rewards
         </Button>
