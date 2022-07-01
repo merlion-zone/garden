@@ -414,7 +414,7 @@ export function useQueryValidators(status: BondStatusString) {
   return useMerlionQuery('staking', 'validators', status)
 }
 
-export function useQueryDelegatorValidators(address: string) {
+export function useQueryDelegatorValidators(address?: string) {
   return useMerlionQuery('staking', 'delegatorValidators', address)
 }
 

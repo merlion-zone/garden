@@ -81,7 +81,7 @@ export function useValidatorsData(status: BondStatusString) {
 
         const missCounter = missCounters[index].data
         const uptime =
-          slashWindow && missCounter
+          slashWindow !== undefined && missCounter !== undefined
             ? 1 -
               new BigNumber(missCounter.toString())
                 .div(slashWindow.toString())

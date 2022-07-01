@@ -1,3 +1,6 @@
+import { typeUrls } from '@merlionzone/merlionjs/dist'
+import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useQueryDelegatorValidators } from '@/hooks/query'
 import {
   Box,
   Button,
@@ -12,13 +15,57 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import { Stats } from './Stats'
 import { ValidatorTable } from './Table'
+import { useToast } from '@/hooks/useToast'
+import { TransactionToast } from '@/components/TransactionToast'
 
 export const Staking = () => {
+  const toast = useToast()
+  const merlionClient = useMerlionClient()
   const [keyword, setKeyword] = useState('')
+  const { connected, walletType } = useConnectWallet()
+  const address = useAccountAddress()
+  const { data } = useQueryDelegatorValidators(address?.mer())
+  const isMetaMask = useMemo(() => walletType === 'metamask', [walletType])
+  const hasValidators = useMemo(
+    () => data && data.validators.length > 0,
+    [data]
+  )
+
+  const onWithdraw = () => {
+    if (!connected) {
+      toast({
+        title: 'Please connect wallet first',
+        status: 'warning',
+      })
+      return
+    }
+
+    if (isMetaMask || !hasValidators) return
+
+    const msgs = data!.validators.map(({ operatorAddress }) => ({
+      typeUrl: typeUrls.MsgWithdrawDelegatorReward,
+      value: {
+        delegatorAddress: address!.mer(),
+        validatorAddress: operatorAddress,
+      },
+    }))
+
+    const receiptPromise = merlionClient!.signAndBroadcast(address!.mer(), msgs)
+
+    toast({
+      render: ({ onClose }) => (
+        <TransactionToast
+          title="Withdraw all rewards"
+          receiptPromise={receiptPromise}
+          onClose={onClose}
+        />
+      ),
+    })
+  }
 
   return (
     <>
@@ -42,7 +89,13 @@ export const Staking = () => {
             </Heading>
             <Text color="muted">{/*  */}</Text>
           </Stack>
-          <Button variant="primary" rounded="full">
+          <Button
+            variant="primary"
+            rounded="full"
+            display={isMetaMask ? 'none' : 'unset'}
+            disabled={isMetaMask || !hasValidators}
+            onClick={onWithdraw}
+          >
             Withdraw all rewards
           </Button>
         </Stack>
