@@ -2,7 +2,6 @@ import config from '@/config'
 import { useAccountAddress, useConnectWallet } from '@/hooks'
 import { formatCoin } from '@/utils'
 import { HStack, Stack, Text } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { useDelegation } from '../hooks'
 import { Card } from './Card'
@@ -10,10 +9,13 @@ import { Delegate } from './Delegate'
 import { Redelegate } from './Redelegate'
 import { Undelegate } from './Undelegate'
 
-export function Delegation() {
-  const { query } = useRouter()
+export interface DelegationProps {
+  validatorAddress?: string
+}
+
+export function Delegation({ validatorAddress }: DelegationProps) {
   const address = useAccountAddress()
-  const { data } = useDelegation(address?.mer(), query.address as string)
+  const { data } = useDelegation(address?.mer(), validatorAddress)
   const balance = useMemo(
     () => (data && data.balance ? formatCoin(data.balance) : null),
     [data]

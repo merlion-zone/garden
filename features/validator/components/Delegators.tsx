@@ -18,13 +18,20 @@ import { HiOutlineQuestionMarkCircle } from 'react-icons/hi'
 import { useDelegations } from '../hooks'
 import { Card } from './Card'
 
-export function Delegators() {
-  const { query } = useRouter()
-  const { data } = useDelegations(query.address as string)
-  const walletAddress = useMemo(
-    () => query.address && validatorToDelegatorAddress(query.address as string),
-    [query]
-  )
+export interface DelegatorsProps {
+  validatorAddress?: string
+}
+
+export function Delegators({ validatorAddress }: DelegatorsProps) {
+  const { data } = useDelegations(validatorAddress)
+  const walletAddress = useMemo(() => {
+    try {
+      return (
+        validatorAddress &&
+        validatorToDelegatorAddress(validatorAddress as string)
+      )
+    } catch (error) {}
+  }, [validatorAddress])
 
   return (
     <Card>

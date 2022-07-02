@@ -19,11 +19,11 @@ import { useValidator } from '../hooks'
 import { Card, UserAvatar } from './Card'
 
 export interface InfoProps {
-  address?: string
+  validatorAddress?: string
 }
 
-export function Info({ address }: InfoProps) {
-  const { data } = useValidator(address)
+export function Info({ validatorAddress }: InfoProps) {
+  const { data } = useValidator(validatorAddress)
 
   return (
     <Card>
