@@ -46,8 +46,11 @@ import {
 } from '@/pages/backing/swap-mint/estimateSwapMint'
 import { ConfirmModal } from '@/pages/backing/swap-mint/ConfirmModal'
 import { useSwapMintSettings } from '@/hooks/useSetting'
+import { Navbar } from '@/pages/backing/Navbar'
+import { useRouter } from 'next/router'
 
 export default function SwapMint() {
+  const router = useRouter()
   const account = useAccountAddress()
 
   const { data: makerParams } = useMakerParams()
@@ -342,6 +345,16 @@ export default function SwapMint() {
 
   return (
     <Container centerContent>
+      <Navbar
+        value={'mint-burn'}
+        onChange={(value) => {
+          if (value === 'buyback-reback') {
+            router.push('/backing/buyback-reback')
+            return
+          }
+        }}
+      />
+
       <Box
         w={{ base: 'full', md: 'lg' }}
         mt="16"

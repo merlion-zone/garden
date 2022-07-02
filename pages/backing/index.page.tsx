@@ -5,7 +5,7 @@ export default function Backing() {
   const router = useRouter()
 
   useEffect(() => {
-    void router.replace(`/backing/swap-mint`)
+    void router.replace('/backing/swap-mint')
   }, [router])
 
   return null

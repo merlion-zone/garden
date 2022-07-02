@@ -126,14 +126,11 @@ export function useStatus() {
 
 /****************************** Bank ******************************/
 
-export function useBalance(
-  address?: string,
-  denom?: string
-) {
+export function useBalance(address?: string, denom?: string) {
   const { data, ...rest } = useMerlionQuery('bank', 'balance', address, denom)
   return {
     balance: data && data.amount,
-    ...rest
+    ...rest,
   }
 }
 

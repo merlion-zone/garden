@@ -19,7 +19,7 @@ import { ChevronDownIcon, InfoOutlineIcon } from '@chakra-ui/icons'
 import { WithHint } from '@/components/Hint'
 
 interface ExplainProps {
-  loading: boolean
+  loading?: boolean
   isBuyback: boolean
   backingMetadata: DenomMetadata
   backingAmt: string
@@ -61,7 +61,9 @@ export const Explain = ({
 
   const { data: backingPrice } = useDisplayPrice(backingMetadata.base)
   const { data: lionPrice } = useDisplayPrice(config.denom)
-  const fee = isBuyback ? backingPrice?.mul(feeAmt) : lionPrice?.mul(feeAmt)
+  const fee = isBuyback
+    ? backingPrice?.mul(feeAmt || 0)
+    : lionPrice?.mul(feeAmt || 0)
 
   const { slippageTolerance: slippage } = useSwapMintSettings()
   const tolerance = new Dec(1).sub(slippage)

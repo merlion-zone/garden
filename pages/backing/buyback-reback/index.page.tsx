@@ -16,6 +16,7 @@ import {
   useColorModeValue,
   useDisclosure,
   Divider,
+  useBreakpointValue,
 } from '@chakra-ui/react'
 import { ArrowDownIcon, SettingsIcon } from '@chakra-ui/icons'
 import { Settings } from '@/pages/backing/swap-mint/Settings'
@@ -56,8 +57,11 @@ import { ConfirmModal } from './ConfirmModal'
 import { formatNumberSuitable } from '@/utils'
 import { FaGift } from 'react-icons/fa'
 import { estimateBuybackReback } from '@/pages/backing/buyback-reback/estimateBuybackReback'
+import { Navbar } from '@/pages/backing/Navbar'
+import { useRouter } from 'next/router'
 
 export default function BuybackReback() {
+  const router = useRouter()
   const account = useAccountAddress()
 
   const { data: makerParams } = useMakerParams()
@@ -115,7 +119,6 @@ export default function BuybackReback() {
 
   const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
   const [estimated, setEstimated] = useState(false)
-  const [inEstimate, setInEstimate] = useState(false)
 
   const { sendTx, isSendReady } = useSendCosmTx()
   const { expertMode, slippageTolerance } = useSwapMintSettings()
@@ -253,9 +256,11 @@ export default function BuybackReback() {
       setFeeAmt(resolvedFeeAmt.toString())
 
       if (estimated) {
+        setEstimated(true)
         setSendTitle(isBuyback ? 'Swap Buyback' : 'Swap Reback')
         setSendEnabled(true)
       } else {
+        setEstimated(false)
         setSendTitle('Enter an amount')
         setSendEnabled(false)
         return
@@ -362,12 +367,18 @@ export default function BuybackReback() {
     console.debug(`${JSON.stringify(msg)}`)
     const receiptPromise = sendTx(msg)
 
-    receiptPromise?.then(() => {
-      mutateTotalBacking()
-      mutateAllBackingPools()
-      mutateBackingBalance()
-      mutateLionBalance()
-    }).catch(() => {})
+    receiptPromise
+      ?.then(() => {
+        setBackingAmt('')
+        setLionAmt('')
+        setFeeAmt('')
+
+        mutateTotalBacking()
+        mutateAllBackingPools()
+        mutateBackingBalance()
+        mutateLionBalance()
+      })
+      .catch(() => {})
 
     toast({
       render: ({ onClose }) => {
@@ -406,8 +417,20 @@ export default function BuybackReback() {
     onClose: onConfirmModalClose,
   } = useDisclosure()
 
+  const centerTitle = useBreakpointValue({ base: false, md: true })
+
   return (
     <Container centerContent>
+      <Navbar
+        value={'buyback-reback'}
+        onChange={(value) => {
+          if (value === 'mint-burn') {
+            router.push('/backing/swap-mint')
+            return
+          }
+        }}
+      />
+
       <Box
         w={{ base: 'full', md: '4xl' }}
         m="16"
@@ -417,7 +440,7 @@ export default function BuybackReback() {
         borderRadius="3xl"
       >
         <HStack justify="space-between" pt="2" pb="4">
-          <Box></Box>
+          {centerTitle && <Box></Box>}
           <Button
             variant="ghost"
             fontSize="lg"
@@ -426,6 +449,7 @@ export default function BuybackReback() {
           >
             {isBuyback ? 'Buyback' : 'Reback'}
           </Button>
+          {!centerTitle && <Box></Box>}
           <Popover placement="bottom-end">
             <PopoverTrigger>
               <IconButton
@@ -559,7 +583,6 @@ export default function BuybackReback() {
 
               {backingToken.metadata && estimated && (
                 <Explain
-                  loading={inEstimate}
                   isBuyback={isBuyback}
                   backingMetadata={backingToken.metadata}
                   backingAmt={backingAmt}
