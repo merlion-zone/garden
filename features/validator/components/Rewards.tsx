@@ -1,25 +1,28 @@
 import { typeUrls } from '@merlionzone/merlionjs'
 import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
-import { useAccountAddress } from '@/hooks'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
 import { useMerlionQuery } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 import { formatCoin } from '@/utils'
 import { Button, HStack, Stack, Text } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Card } from './Card'
 import { useDelegation } from '../hooks'
 
-export function Rewards() {
+export interface RewardsProps {
+  validatorAddress?: string
+}
+
+export function Rewards({ validatorAddress }: RewardsProps) {
   const toast = useToast()
-  const { query } = useRouter()
   const { sendTx } = useSendCosmTx()
   const address = useAccountAddress()
+  const { connected } = useConnectWallet()
   const { data: delegationData } = useDelegation(
     address?.mer(),
-    query.address as string
+    validatorAddress
   )
   const balance = useMemo(
     () =>
@@ -33,7 +36,7 @@ export function Rewards() {
     'distribution',
     'delegationRewards',
     address?.mer(),
-    query.address as string
+    validatorAddress
   )
   const reward = useMemo(() => {
     const reward = data?.rewards.find((r) => r.denom === config.denom)
@@ -41,17 +44,23 @@ export function Rewards() {
   }, [data])
 
   const onWithdraw = () => {
-    if (!address || !query.address) {
+    if (!connected) {
       toast({
         title: 'Please connect wallet first',
         status: 'warning',
       })
+      return
     }
+
+    if (!address || !validatorAddress) {
+      return
+    }
+
     const msg = {
       typeUrl: typeUrls.MsgWithdrawDelegatorReward,
       value: {
         delegatorAddress: address?.mer(),
-        validatorAddress: query.address,
+        validatorAddress: validatorAddress,
       },
     }
 
@@ -60,10 +69,10 @@ export function Rewards() {
     toast({
       render: ({ onClose }) => (
         <TransactionToast
-          title={`Withdraw validator(${query.address?.slice(
+          title={`Withdraw validator(${validatorAddress?.slice(
             0,
             14
-          )}...${query.address?.slice(-4)}) Reward`}
+          )}...${validatorAddress?.slice(-4)}) Reward`}
           receiptPromise={receiptPromise}
           onClose={onClose}
         />

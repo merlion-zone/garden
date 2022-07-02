@@ -13,9 +13,12 @@ import { formatDistanceToNow } from 'date-fns'
 import { useCommission } from '../hooks'
 import { Card } from './Card'
 
-export function Commission() {
-  const { query } = useRouter()
-  const { data } = useCommission(query.address as string)
+export interface CommissionProps {
+  validatorAddress?: string
+}
+
+export function Commission({ validatorAddress }: CommissionProps) {
+  const { data } = useCommission(validatorAddress)
 
   return (
     <Card>
