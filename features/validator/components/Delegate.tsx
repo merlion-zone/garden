@@ -5,7 +5,6 @@ import {
   FormLabel,
   InputGroup,
   InputRightElement,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,18 +14,19 @@ import {
   ModalOverlay,
   NumberInput,
   NumberInputField,
-  Text,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
+import { useMemo } from 'react'
+import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
 import { useBalance } from '@/hooks/query'
 import config from '@/config'
-import { useMemo } from 'react'
 import { formatCoin, parseCoin } from '@/utils'
 import { MsgDelegateEncodeObject } from '@cosmjs/stargate'
-import { useRouter } from 'next/router'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { TransactionToast } from '@/components/TransactionToast'
+import { useToast } from '@/hooks/useToast'
 
 interface FormData {
   amount: string
@@ -48,8 +48,8 @@ export function Delegate() {
     [lionBalance]
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const merlionClient = useMerlionClient()
   const toast = useToast()
+  const { sendTx } = useSendCosmTx()
 
   const {
     control,
@@ -69,6 +69,7 @@ export function Delegate() {
       toast({
         title: 'Please connect wallet first',
         status: 'warning',
+        isClosable: true,
       })
       return
     }
@@ -80,29 +81,22 @@ export function Delegate() {
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },
     }
-    try {
-      const { transactionHash } = await merlionClient!.signAndBroadcast(
-        account!,
-        [message]
-      )
-      toast({
-        title: 'Delegate success',
-        description: (
-          <Text>
-            View on explorer: <Link isExternal>{transactionHash}</Link>
-          </Text>
-        ),
-        status: 'success',
-      })
-    } catch (error) {
-      console.log(error)
-      toast({
-        title: 'Delegate failed',
-        status: 'error',
-      })
-    }
+    const receiptPromise = sendTx(message)
+    toast({
+      render: ({ onClose }) => {
+        return (
+          <TransactionToast
+            title="Delegate success"
+            receiptPromise={receiptPromise}
+            onClose={onClose}
+          />
+        )
+      },
+    })
 
-    closeModal()
+    receiptPromise?.finally(() => {
+      closeModal()
+    })
   }
 
   const onMax = () => {
@@ -148,7 +142,7 @@ export function Delegate() {
               type="submit"
               rounded="full"
               colorScheme="brand"
-              isLoading={isSubmitting}
+              isLoading={!isSubmitting}
             >
               Submit
             </Button>
