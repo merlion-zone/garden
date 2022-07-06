@@ -254,6 +254,28 @@ function parseCoin(coin?: string): Coin | undefined {
   }
 }
 
+function formatCoin(
+  denomsMetadata?: Map<string, DenomMetadata>,
+  coin?: Coin | string,
+  maximumFractionDigits?: number
+): string | undefined {
+  let parsed = coin
+  if (typeof parsed === 'string') {
+    parsed = parseCoin(parsed)
+  }
+  if (!parsed) {
+    return
+  }
+  const metadata = denomsMetadata?.get(parsed.denom)
+  if (!metadata) {
+    return
+  }
+  return `${formatNumber(
+    new Dec(parsed?.amount).divPow(metadata.displayExponent).toString(),
+    maximumFractionDigits ?? metadata.displayExponent
+  )} ${metadata.symbol}`
+}
+
 export function useFormatCoin(
   coin?: Coin | string,
   maximumFractionDigits?: number
@@ -261,22 +283,20 @@ export function useFormatCoin(
   const { data: denomsMetadata } = useDenomsMetadataMap()
 
   return useMemo(() => {
-    let parsed = coin
-    if (typeof parsed === 'string') {
-      parsed = parseCoin(parsed)
-    }
-    if (!parsed) {
-      return
-    }
-    const metadata = denomsMetadata?.get(parsed.denom)
-    if (!metadata) {
-      return
-    }
-    return `${formatNumber(
-      new Dec(parsed?.amount).divPow(metadata.displayExponent).toString(),
-      maximumFractionDigits ?? metadata.displayExponent
-    )} ${metadata.symbol}`
+    return formatCoin(denomsMetadata, coin, maximumFractionDigits)
   }, [coin, denomsMetadata, maximumFractionDigits])
+}
+
+export function useFormatCoins(
+  coins?: (Coin | string)[],
+  maximumFractionDigits?: number
+): (string | undefined)[] | undefined {
+  const { data: denomsMetadata } = useDenomsMetadataMap()
+  return useMemo(() => {
+    return coins?.map((coin) =>
+      formatCoin(denomsMetadata, coin, maximumFractionDigits)
+    )
+  }, [coins, denomsMetadata, maximumFractionDigits])
 }
 
 /****************************** Oracle ******************************/

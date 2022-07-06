@@ -7,7 +7,7 @@ import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { GetTxsEventResponse } from 'cosmjs-types/cosmos/tx/v1beta1/service'
 import { Any } from 'cosmjs-types/google/protobuf/any'
 import { typeUrls, proto, Coin } from '@merlionzone/merlionjs'
-import { useFormatCoin } from '@/hooks/query/moduleQueries'
+import { useFormatCoin, useFormatCoins } from '@/hooks/query/moduleQueries'
 import config from '@/config'
 import { shortenAddress } from '@/utils'
 
@@ -88,6 +88,8 @@ const cosmMsgDescComponents: {
   [typeUrls.MsgSend]: ['Transfer', MsgSendTx],
   [typeUrls.MsgMintBySwap]: ['Swap Mint', MsgMintBySwapDesc],
   [typeUrls.MsgBurnBySwap]: ['Swap Burn', MsgBurnBySwapDesc],
+  [typeUrls.MsgBuyBacking]: ['Buy Backing', MsgBuyBackingDesc],
+  [typeUrls.MsgSellBacking]: ['Sell Backing', MsgSellBackingDesc],
   [typeUrls.MsgSubmitProposal]: ['Submit Proposal', MsgSubmitProposalDesc],
   [typeUrls.MsgVote]: ['Vote on Proposal', MsgVoteDesc],
 }
@@ -173,13 +175,27 @@ function MsgEthereumTxDesc({ msg }: CosmMsgProps) {
 
 function MsgMintBySwapDesc({ msg }: CosmMsgProps) {
   const attrs = extractEventAttributes(msg.events, 'mint_by_swap')
+  const coinIn = useFormatCoins(attrs?.get('coin_in')?.split(','))
+  const coinOut = useFormatCoin(attrs?.get('coin_out'))
+  return <>{`Swap ${coinIn?.join(' + ')} for ${coinOut}`}</>
+}
+
+function MsgBurnBySwapDesc({ msg }: CosmMsgProps) {
+  const attrs = extractEventAttributes(msg.events, 'burn_by_swap')
+  const coinIn = useFormatCoin(attrs?.get('coin_in'))
+  const coinOut = useFormatCoins(attrs?.get('coin_out')?.split(','))
+  return <>{`Swap ${coinIn} for ${coinOut?.join(' + ')}`}</>
+}
+
+function MsgBuyBackingDesc({ msg }: CosmMsgProps) {
+  const attrs = extractEventAttributes(msg.events, 'buy_backing')
   const coinIn = useFormatCoin(attrs?.get('coin_in'))
   const coinOut = useFormatCoin(attrs?.get('coin_out'))
   return <>{`Swap ${coinIn} for ${coinOut}`}</>
 }
 
-function MsgBurnBySwapDesc({ msg }: CosmMsgProps) {
-  const attrs = extractEventAttributes(msg.events, 'burn_by_swap')
+function MsgSellBackingDesc({ msg }: CosmMsgProps) {
+  const attrs = extractEventAttributes(msg.events, 'sell_backing')
   const coinIn = useFormatCoin(attrs?.get('coin_in'))
   const coinOut = useFormatCoin(attrs?.get('coin_out'))
   return <>{`Swap ${coinIn} for ${coinOut}`}</>
