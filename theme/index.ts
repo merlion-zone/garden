@@ -54,7 +54,10 @@ export const theme: Record<string, any> = extendTheme(
       useSystemColorMode: false,
     } as ThemeConfig,
   },
-  withDefaultColorScheme({ colorScheme: 'brand' }),
+  withDefaultColorScheme({
+    colorScheme: 'brand',
+    components: ['Button'],
+  }),
   // Last extension as base theme
   {
     ...proTheme,
