@@ -68,7 +68,7 @@ export default function SwapMint() {
   const { data: backingPrice } = useDisplayPrice(backingDenom)
   const { data: lionPrice } = useDisplayPrice(config.denom)
   const { data: merPrice } = useDisplayPrice(config.merDenom)
-  const { price: merTargetPrice } = useMerTargetPrice()
+  const { data: merTargetPrice } = useMerTargetPrice()
 
   const { balance: backingBalance } = useBalance(account?.mer(), backingDenom)
   const { balance: lionBalance } = useBalance(account?.mer(), config.denom)
@@ -79,7 +79,7 @@ export default function SwapMint() {
   const [disabled, setDisabled] = useState(false)
   const [sendEnabled, setSendEnabled] = useState(false)
   const [sendTitle, setSendTitle] = useState<string | null>('Enter an amount')
-  const [merPriceBound, setMerPriceBound] = useState('')
+  const [alert, setAlert] = useState('')
 
   const [backingAmt, setBackingAmt] = useState('')
   const [lionAmt, setLionAmt] = useState('')
@@ -127,13 +127,15 @@ export default function SwapMint() {
   // initial states
   useEffect(() => {
     setEstimated(false)
+    setDisabled(false)
+    setSendTitle('Enter an amount')
+    setAlert('')
 
     setTimeout(() => {
       setBackingAmt('')
       setLionAmt('')
       setUsmAmt('')
       setSendEnabled(false)
-      setSendTitle('Enter an amount')
     }, 500)
   }, [isMint])
 
@@ -151,22 +153,30 @@ export default function SwapMint() {
       setSendTitle(errors.backingDisabled)
       return
     }
-    const merPriceLowerBound = merTargetPrice.mul(
-      new Dec(1).sub(Dec.fromProto(makerParams.mintPriceBias))
+    const mintPriceLowerBound = merTargetPrice.mul(
+      new Dec(1).add(Dec.fromProto(makerParams.mintPriceBias))
     )
-    const merPriceUpperBound = merTargetPrice.mul(
-      new Dec(1).add(Dec.fromProto(makerParams.burnPriceBias))
+    const burnPriceUpperBound = merTargetPrice.mul(
+      new Dec(1).sub(Dec.fromProto(makerParams.burnPriceBias))
     )
-    if (isMint && merPrice.lessThan(merPriceLowerBound)) {
+    if (isMint && merPrice.lessThan(mintPriceLowerBound)) {
       setDisabled(true)
       setSendEnabled(false)
       setSendTitle(errors.usmPriceTooLow)
-      setMerPriceBound(merPriceLowerBound.toSignificantDigits(4).toString())
-    } else if (!isMint && merPrice.greaterThan(merPriceUpperBound)) {
+      setAlert(
+        moduleAlerts.usmPriceTooLow(
+          `$${mintPriceLowerBound.toSignificantDigits(4).toString()}`
+        )
+      )
+    } else if (!isMint && merPrice.greaterThan(burnPriceUpperBound)) {
       setDisabled(true)
       setSendEnabled(false)
       setSendTitle(errors.usmPriceTooHigh)
-      setMerPriceBound(merPriceUpperBound.toSignificantDigits(4).toString())
+      setAlert(
+        moduleAlerts.usmPriceTooHigh(
+          `$${burnPriceUpperBound.toSignificantDigits(4).toString()}`
+        )
+      )
     }
   }, [
     allBackingParams,
@@ -451,12 +461,10 @@ export default function SwapMint() {
           {sendTitle}
         </Button>
 
-        {disabled && (
+        {alert && (
           <Alert status="warning" mt="8" mb="2" borderRadius="xl">
             <AlertIcon />
-            {isMint
-              ? moduleAlerts.usmPriceTooLow(`$${merPriceBound}`)
-              : moduleAlerts.usmPriceTooHigh(`$${merPriceBound}`)}
+            {alert}
           </Alert>
         )}
       </Box>

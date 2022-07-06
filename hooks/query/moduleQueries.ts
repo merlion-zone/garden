@@ -352,12 +352,11 @@ export function useDisplayPrices(denoms?: [string?][]) {
 
 /****************************** Maker ******************************/
 
-export function useMerTargetPrice(): { price?: Dec; error: any } {
+export function useMerTargetPrice() {
   // TODO: get on-chain
   return useMemo(() => {
     return {
       data: new Dec(1),
-      error: null,
     }
   }, [])
 }

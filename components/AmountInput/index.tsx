@@ -73,6 +73,10 @@ export const AmountInput = ({
     `0px 0px 0px 1px ${new TinyColor(brand200).setAlpha(1.0).toRgbString()}`
   )
 
+  const selectTokenBtnBoxShadow = useColorModeValue('md', 'md-dark')
+  const selectTokenBtnBg = useColorModeValue('gray.200', 'gray.800')
+  const selectTokenBtnHoverBg = useColorModeValue('gray.300', 'gray.700')
+
   return (
     <Box
       w="full"
@@ -130,13 +134,13 @@ export const AmountInput = ({
           }}
           isDisabled={isDisabled || !onInput}
         ></Input>
-        <Box borderRadius="2xl" boxShadow={useColorModeValue('md', 'md-dark')}>
+        <Box borderRadius="2xl" boxShadow={selectTokenBtnBoxShadow}>
           <Button
             variant="ghost"
             colorScheme="gray"
-            bg={useColorModeValue('gray.200', 'gray.800')}
-            _hover={{ bg: useColorModeValue('gray.300', 'gray.700') }}
-            _active={{ bg: useColorModeValue('gray.300', 'gray.700') }}
+            bg={selectTokenBtnBg}
+            _hover={{ bg: onSelectToken ? selectTokenBtnHoverBg : undefined }}
+            _active={{ bg: onSelectToken ? selectTokenBtnHoverBg : undefined }}
             borderRadius="2xl"
             leftIcon={
               <Avvvatars
@@ -149,7 +153,6 @@ export const AmountInput = ({
               <ChevronDownIcon color={!onSelectToken ? 'transparent' : ''} />
             }
             onClick={onSelectToken || (() => {})}
-            isDisabled={isDisabled}
           >
             {token.metadata?.symbol}
           </Button>

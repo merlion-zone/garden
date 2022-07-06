@@ -29,7 +29,7 @@ export const config: Config = {
   denom: 'alion',
   denomDecimals: 18,
   displayDenom: 'LION',
-  merDenom: 'uusd',
+  merDenom: 'uusm',
   merDenomDecimals: 6,
   merDisplayDenom: 'USM',
 } as Config

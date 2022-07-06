@@ -149,8 +149,8 @@ export default function BuybackReback() {
       totalBackingValue
         .sub(requiredBackingValue)
         .divPow(6) // uUSD -> USD
-        .truncated()
-    ) // truncated
+        .truncated() // truncated
+    )
   }, [backingRatio, totalBacking])
 
   const [excessValueAvailable, excessAvailable] = useMemo(() => {
@@ -167,15 +167,15 @@ export default function BuybackReback() {
 
   // initial states
   useEffect(() => {
-    setEstimated(false)
     setDisabled(false)
+    setSendEnabled(false)
     setSendTitle('Enter an amount')
 
-    setTimeout(() => {
-      setBackingAmt('')
-      setLionAmt('')
-      setSendEnabled(false)
-    }, 500)
+    setBackingAmt('')
+    setLionAmt('')
+    setFeeAmt('')
+
+    setEstimated(false)
   }, [isBuyback])
 
   // check buyback/reback availability
@@ -266,6 +266,7 @@ export default function BuybackReback() {
         return
       }
 
+      // check balance
       if (isBuyback) {
         if (
           new Dec(resolvedLionAmt || 0).greaterThan(
@@ -313,7 +314,7 @@ export default function BuybackReback() {
 
   // on tx submit
   const onSubmit = useCallback(() => {
-    if (!account || !backingToken.metadata) {
+    if (!account || !backingToken.metadata || !backingAmt || !lionAmt) {
       return
     }
 
@@ -367,18 +368,20 @@ export default function BuybackReback() {
     console.debug(`${JSON.stringify(msg)}`)
     const receiptPromise = sendTx(msg)
 
-    receiptPromise
-      ?.then(() => {
-        setBackingAmt('')
-        setLionAmt('')
-        setFeeAmt('')
+    receiptPromise?.finally(() => {
+      setDisabled(false)
+      setSendTitle('Enter an amount')
+      setSendEnabled(false)
+      setBackingAmt('')
+      setLionAmt('')
+      setFeeAmt('')
+      setEstimated(false)
 
-        mutateTotalBacking()
-        mutateAllBackingPools()
-        mutateBackingBalance()
-        mutateLionBalance()
-      })
-      .catch(() => {})
+      mutateTotalBacking()
+      mutateAllBackingPools()
+      mutateBackingBalance()
+      mutateLionBalance()
+    })
 
     toast({
       render: ({ onClose }) => {

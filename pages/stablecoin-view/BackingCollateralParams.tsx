@@ -124,16 +124,16 @@ export const BackingCollateralParams = () => {
               <DecDisplay
                 value={
                   (makerParams &&
-                    new Dec(1).sub(Dec.fromProto(makerParams.mintPriceBias))) ||
+                    new Dec(1).add(Dec.fromProto(makerParams.mintPriceBias))) ||
                   0
                 }
                 percentage
               ></DecDisplay>
-              ~
+              /
               <DecDisplay
                 value={
                   (makerParams &&
-                    new Dec(1).add(Dec.fromProto(makerParams.burnPriceBias))) ||
+                    new Dec(1).sub(Dec.fromProto(makerParams.burnPriceBias))) ||
                   0
                 }
                 percentage
