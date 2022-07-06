@@ -4688,7 +4688,6 @@ __metadata:
     jotai: ^1.7.1
     localtunnel: ^2.0.2
     next: 12.1.6
-    numeral: ^2.0.6
     prettier: ^2.6.2
     qrcode.react: ^3.0.2
     react: ^18.2.0
@@ -6032,13 +6031,6 @@ __metadata:
     gauge: ^4.0.3
     set-blocking: ^2.0.0
   checksum: ae238cd264a1c3f22091cdd9e2b106f684297d3c184f1146984ecbe18aaa86343953f26b9520dedd1b1372bc0316905b736c1932d778dbeb1fcf5a1001390e2a
-  languageName: node
-  linkType: hard
-
-"numeral@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "numeral@npm:2.0.6"
-  checksum: 89f011116539692bf53fde380adeb0579623d00f782703c71c0062d4a8686770c404a041ff4eef454de53925a9f75bba1fa52726057b13d40473f707730b07c2
   languageName: node
   linkType: hard
 

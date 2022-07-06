@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { useQueries, useQuery } from 'react-query'
-import BigNumber from 'bignumber.js'
 
 import { LION } from '@/constants'
 import { BondStatusString, useMerlionQueryClient, useValidators } from '@/hooks'
+import { Dec } from '@merlionzone/merlionjs'
+import config from '@/config'
 
 export interface Validator {
   operatorAddress: string
@@ -70,12 +71,12 @@ export function useValidatorsData(status: BondStatusString) {
     return (
       validatorsData?.validators.map((validator, index) => {
         const votingPower = bondedTokens
-          ? new BigNumber(validator.tokens).div(bondedTokens).toNumber()
+          ? new Dec(validator.tokens).div(bondedTokens).toNumber()
           : null
 
         const commission = validator.commission?.commissionRates?.rate
-          ? new BigNumber(validator.commission.commissionRates.rate)
-              .div('1000000000000000000')
+          ? new Dec(validator.commission.commissionRates.rate)
+              .divPow(18)
               .toNumber()
           : null
 
@@ -83,7 +84,7 @@ export function useValidatorsData(status: BondStatusString) {
         const uptime =
           slashWindow !== undefined && missCounter !== undefined
             ? 1 -
-              new BigNumber(missCounter.toString())
+              new Dec(missCounter.toString())
                 .div(slashWindow.toString())
                 .toNumber()
             : null
@@ -95,9 +96,9 @@ export function useValidatorsData(status: BondStatusString) {
         )?.amount
 
         const amount: number | null = rewardsAmount
-          ? new BigNumber(rewardsAmount)
+          ? new Dec(rewardsAmount)
               .div(validator.tokens)
-              .div('1000000000000000000')
+              .divPow(config.denomDecimals)
               .times(100)
               .toNumber()
           : null

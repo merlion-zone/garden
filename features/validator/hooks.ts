@@ -1,6 +1,7 @@
 import { useQuery } from 'react-query'
-import BigNumber from 'bignumber.js'
+import { Dec } from '@merlionzone/merlionjs'
 import { useMerlionQueryClient } from '@/hooks'
+import { getTime } from '@/pages/proposal/utils'
 
 export function useValidator(address?: string) {
   const queryClient = useMerlionQueryClient()
@@ -19,28 +20,19 @@ export function useCommission(address?: string) {
   const { data: validator, ...reset } = useValidator(address)
 
   const rate = validator
-    ? new BigNumber(validator.commission!.commissionRates!.rate).div(
-        '1000000000000000000'
-      )
+    ? new Dec(validator.commission!.commissionRates!.rate).divPow(18)
     : null
 
   const maxRate = validator
-    ? new BigNumber(validator.commission!.commissionRates!.maxRate).div(
-        '1000000000000000000'
-      )
+    ? new Dec(validator.commission!.commissionRates!.maxRate).divPow(18)
     : null
 
   const maxChangeRate = validator
-    ? new BigNumber(validator.commission!.commissionRates!.maxChangeRate).div(
-        '1000000000000000000'
-      )
+    ? new Dec(validator.commission!.commissionRates!.maxChangeRate).divPow(18)
     : null
 
   const updateTime = validator
-    ? new Date(
-        validator.commission!.updateTime!.seconds.toNumber() * 1000 +
-          validator.commission!.updateTime!.nanos
-      )
+    ? getTime(validator.commission!.updateTime)
     : null
 
   return {
