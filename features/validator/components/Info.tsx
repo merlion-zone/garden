@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Flex,
@@ -32,8 +31,8 @@ export function Info({ validatorAddress }: InfoProps) {
         spacing={{ base: '3', md: '10' }}
         align="flex-start"
       >
-        <Box>
-          <Flex alignItems="center">
+        <Box w="full">
+          <Flex w="full" alignItems="center">
             <UserAvatar
               mr="4"
               name={data?.description!.moniker}
@@ -64,7 +63,8 @@ export function Info({ validatorAddress }: InfoProps) {
               Learn more
             </Button>
           </Flex>
-          <Text mt="2">Slogan Slogan Slogan Slogan</Text>
+          {/* TODO */}
+          <Text mt="2"></Text>
           <Wrap shouldWrapChildren my="4" spacing="4">
             <Link as={HStack} href={data?.description!.website || undefined}>
               <Icon as={FaLink} color="gray.400" />
@@ -73,7 +73,7 @@ export function Info({ validatorAddress }: InfoProps) {
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                {data?.description!.website || 'No website'}
+                {data?.description!.website || ''}
               </Text>
             </Link>
             <Link as={HStack} spacing="1">
@@ -83,7 +83,7 @@ export function Info({ validatorAddress }: InfoProps) {
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                Merlion
+                {/* TODO */}
               </Text>
             </Link>
             <Link as={HStack} spacing="1">
@@ -93,7 +93,7 @@ export function Info({ validatorAddress }: InfoProps) {
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                Merlion
+                {/* TODO */}
               </Text>
             </Link>
             <Link as={HStack} spacing="1">
@@ -103,14 +103,12 @@ export function Info({ validatorAddress }: InfoProps) {
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                Merlion
+                {/* TODO */}
               </Text>
             </Link>
           </Wrap>
           <Box fontSize="sm" noOfLines={2}>
-            Description description description description description
-            description description description description description
-            description.
+            {/* TODO */}
           </Box>
         </Box>
       </Stack>
