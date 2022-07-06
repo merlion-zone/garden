@@ -1,6 +1,3 @@
-import config from '@/config'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
-import { formatCoin, parseCoin } from '@/utils'
 import {
   Button,
   FormControl,
@@ -8,7 +5,6 @@ import {
   FormLabel,
   InputGroup,
   InputRightElement,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -18,14 +14,18 @@ import {
   ModalOverlay,
   NumberInput,
   NumberInputField,
-  Text,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
 import { MsgUndelegateEncodeObject } from '@cosmjs/stargate'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { TransactionToast } from '@/components/TransactionToast'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { useToast } from '@/hooks/useToast'
+import { formatCoin, parseCoin } from '@/utils'
+import config from '@/config'
 import { useDelegation } from '../hooks'
 
 interface FormData {
@@ -37,7 +37,6 @@ export function Undelegate() {
   const { query } = useRouter()
   const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
-  const merlionClient = useMerlionClient()
   const toast = useToast()
   const { data: delegationData } = useDelegation(
     address?.mer(),
@@ -50,6 +49,7 @@ export function Undelegate() {
         : null,
     [delegationData]
   )
+  const { sendTx } = useSendCosmTx()
 
   const {
     control,
@@ -69,6 +69,7 @@ export function Undelegate() {
       toast({
         title: 'Please connect wallet first',
         status: 'warning',
+        isClosable: true,
       })
       return
     }
@@ -80,29 +81,24 @@ export function Undelegate() {
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },
     }
-    try {
-      const { transactionHash } = await merlionClient!.signAndBroadcast(
-        account!,
-        [message]
-      )
-      toast({
-        title: 'Undelegate success',
-        description: (
-          <Text>
-            View on explorer: <Link isExternal>{transactionHash}</Link>
-          </Text>
-        ),
-        status: 'success',
-      })
-    } catch (error) {
-      console.log(error)
-      toast({
-        title: 'Undelegate failed',
-        status: 'error',
-      })
-    }
 
-    closeModal()
+    const receiptPromise = sendTx(message)
+
+    toast({
+      render: ({ onClose }) => {
+        return (
+          <TransactionToast
+            title="Redelegate success"
+            receiptPromise={receiptPromise}
+            onClose={onClose}
+          />
+        )
+      },
+    })
+
+    receiptPromise?.finally(() => {
+      closeModal()
+    })
   }
 
   const onMax = () => {

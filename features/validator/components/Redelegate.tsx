@@ -5,7 +5,6 @@ import {
   FormLabel,
   InputGroup,
   InputRightElement,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,9 +15,7 @@ import {
   NumberInput,
   NumberInputField,
   Select,
-  Text,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
 import { Controller, useForm } from 'react-hook-form'
 import { useDelegation } from '../hooks'
@@ -27,12 +24,10 @@ import { useMemo } from 'react'
 import { MsgBeginRedelegateEncodeObject } from '@merlionzone/merlionjs'
 import config from '@/config'
 import { formatCoin, parseCoin } from '@/utils'
-import {
-  useAccountAddress,
-  useConnectWallet,
-  useMerlionClient,
-  useValidators,
-} from '@/hooks'
+import { useAccountAddress, useConnectWallet, useValidators } from '@/hooks'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { TransactionToast } from '@/components/TransactionToast'
+import { useToast } from '@/hooks/useToast'
 
 interface FormData {
   validator: string
@@ -45,7 +40,6 @@ export function Redelegate() {
   const { data } = useValidators()
   const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
-  const merlionClient = useMerlionClient()
   const toast = useToast()
   const { data: delegationData } = useDelegation(
     address?.mer(),
@@ -58,6 +52,7 @@ export function Redelegate() {
         : null,
     [delegationData]
   )
+  const { sendTx } = useSendCosmTx()
 
   const {
     control,
@@ -78,6 +73,7 @@ export function Redelegate() {
       toast({
         title: 'Please connect wallet first',
         status: 'warning',
+        isClosable: true,
       })
       return
     }
@@ -91,29 +87,24 @@ export function Redelegate() {
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },
     }
-    try {
-      const { transactionHash } = await merlionClient!.signAndBroadcast(
-        account!,
-        [message]
-      )
-      toast({
-        title: 'Redelegate success',
-        description: (
-          <Text>
-            View on explorer: <Link isExternal>{transactionHash}</Link>
-          </Text>
-        ),
-        status: 'success',
-      })
-    } catch (error) {
-      console.log(error)
-      toast({
-        title: 'Redelegate failed',
-        status: 'error',
-      })
-    }
 
-    closeModal()
+    const receiptPromise = sendTx(message)
+
+    toast({
+      render: ({ onClose }) => {
+        return (
+          <TransactionToast
+            title="Redelegate success"
+            receiptPromise={receiptPromise}
+            onClose={onClose}
+          />
+        )
+      },
+    })
+
+    receiptPromise?.finally(() => {
+      closeModal()
+    })
   }
 
   const onMax = () => {
