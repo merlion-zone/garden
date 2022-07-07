@@ -8,8 +8,8 @@ import { formatCoin } from '@/utils'
 import config from '@/config'
 import { Coin } from '@cosmjs/stargate'
 import type { Validator as ValidatorPB } from 'cosmjs-types/cosmos/staking/v1beta1/staking'
-import BigNumber from 'bignumber.js'
 import { useMemo } from 'react'
+import { Dec } from '@merlionzone/merlionjs'
 
 export interface Validator
   extends Pick<ValidatorPB, 'description' | 'operatorAddress'> {
@@ -46,7 +46,7 @@ export function useValidators(address: string | null) {
       validatorsData?.validators.map(
         ({ description, operatorAddress, tokens }, index) => {
           const votingPower = bondedTokens
-            ? new BigNumber(tokens).div(bondedTokens).toNumber()
+            ? new Dec(tokens).div(bondedTokens).toNumber()
             : null
 
           const balance = delegationsData?.delegationResponses.find(

@@ -1,8 +1,8 @@
-import config from '@/config'
-import { useAccountAddress, useConnectWallet } from '@/hooks'
-import { formatCoin } from '@/utils'
-import { HStack, Stack, Text } from '@chakra-ui/react'
 import { useMemo } from 'react'
+import { HStack, Stack, Text } from '@chakra-ui/react'
+import { DecDisplay } from '@/components/NumberDisplay'
+import { useAccountAddress } from '@/hooks'
+import { formatCoin } from '@/utils'
 import { useDelegation } from '../hooks'
 import { Card } from './Card'
 import { Delegate } from './Delegate'
@@ -28,8 +28,12 @@ export function Delegation({ validatorAddress }: DelegationProps) {
           My delegation
         </Text>
         <HStack alignItems="baseline" mb="4">
-          <Text fontSize="4xl">{balance?.amount ?? 0}</Text>
-          <Text>{balance?.denom.toUpperCase() ?? config.displayDenom}</Text>
+          <Text fontSize="4xl">
+            <DecDisplay
+              value={balance?.amount}
+              suffix={` ${balance?.denom.toUpperCase()}`}
+            />
+          </Text>
         </HStack>
         <Delegate />
         <HStack>

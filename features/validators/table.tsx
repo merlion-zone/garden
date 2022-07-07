@@ -30,21 +30,19 @@ import {
   useTableInstance,
 } from '@tanstack/react-table'
 import NextLink from 'next/link'
-import numeral from 'numeral'
 import Fuse from 'fuse.js'
 import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { useMemo } from 'react'
 import { BondStatusString } from '@/hooks'
 import { useValidatorsData, Validator } from './hooks'
 import { FiSearch } from 'react-icons/fi'
+import { DecDisplay } from '@/components/NumberDisplay'
 
 export interface ValidatorTableProps {
   status: BondStatusString
 }
 
 const table = createTable().setRowType<Validator>()
-
-numeral.nullFormat('N/A')
 
 export function ValidatorTable({ status }: ValidatorTableProps) {
   const {
@@ -111,7 +109,7 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
         cell: ({ getValue }) => (
           <Skeleton isLoaded={!isPoolLoading && !isValidatorsLoading}>
             <Text color="muted" textAlign="end">
-              {numeral(getValue()).format('0.00%')}
+              <DecDisplay value={getValue()} precision={2} percentage />
             </Text>
           </Skeleton>
         ),
@@ -121,7 +119,7 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
         cell: ({ getValue, row }) => (
           <Skeleton isLoaded={!isValidatorsLoading}>
             <Text color="muted" textAlign="end">
-              {numeral(getValue()).format('0.00%')}
+              <DecDisplay value={getValue()} precision={2} percentage />
             </Text>
           </Skeleton>
         ),
@@ -135,7 +133,7 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
             }
           >
             <Text color="muted" textAlign="end">
-              {numeral(getValue()).format('0.00%')}
+              <DecDisplay value={getValue()} precision={2} percentage />
             </Text>
           </Skeleton>
         ),
@@ -149,11 +147,8 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
             }
           >
             <Text color="muted" textAlign="end">
-              {`${
-                getValue().amount ?? 0 < 1000
-                  ? numeral(getValue().amount).format('0.000000')
-                  : numeral(getValue().amount).format('0.00a').toUpperCase()
-              } ${getValue().denom.toUpperCase()}`}
+              <DecDisplay value={getValue().amount} />{' '}
+              {getValue().denom.toUpperCase()}
             </Text>
           </Skeleton>
         ),

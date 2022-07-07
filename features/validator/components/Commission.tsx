@@ -7,9 +7,8 @@ import {
   StatNumber,
   Text,
 } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
-import numeral from 'numeral'
 import { formatDistanceToNow } from 'date-fns'
+import { DecDisplay } from '@/components/NumberDisplay'
 import { useCommission } from '../hooks'
 import { Card } from './Card'
 
@@ -32,7 +31,13 @@ export function Commission({ validatorAddress }: CommissionProps) {
         <SimpleGrid columns={2} gap={{ base: '5', md: '6' }}>
           <Stat>
             <StatLabel>Current rate</StatLabel>
-            <StatNumber>{numeral(data.rate).format('0.00%')}</StatNumber>
+            <StatNumber>
+              <DecDisplay
+                value={data.rate?.toNumber()}
+                precision={2}
+                percentage
+              />
+            </StatNumber>
           </Stat>
           <Stat>
             <StatLabel>Last changed</StatLabel>
@@ -44,12 +49,22 @@ export function Commission({ validatorAddress }: CommissionProps) {
           </Stat>
           <Stat>
             <StatLabel>Max rate</StatLabel>
-            <StatNumber>{numeral(data.maxRate).format('0.00%')}</StatNumber>
+            <StatNumber>
+              <DecDisplay
+                value={data.maxRate?.toNumber()}
+                precision={2}
+                percentage
+              />
+            </StatNumber>
           </Stat>
           <Stat>
             <StatLabel>Max daily change</StatLabel>
             <StatNumber>
-              {numeral(data.maxChangeRate).format('0.00%')}
+              <DecDisplay
+                value={data.maxChangeRate?.toNumber()}
+                precision={2}
+                percentage
+              />
             </StatNumber>
           </Stat>
         </SimpleGrid>

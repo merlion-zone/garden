@@ -9,10 +9,10 @@ import {
 import { Dec } from '@merlionzone/merlionjs'
 import { Proposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import { useRouter } from 'next/router'
-import numeral from 'numeral'
 import { useMemo } from 'react'
 import config from '@/config'
 import { useQueryProposalTallyResult } from '@/hooks/query'
+import { DecDisplay } from '@/components/NumberDisplay'
 
 export interface ProposalVotesProps {
   proposal?: Proposal
@@ -66,9 +66,13 @@ export function ProposalVotes({ proposal }: ProposalVotesProps) {
               <Box w="4" h="4" rounded="full" bgColor="green" />
               <Text fontWeight="medium">Yes</Text>
             </HStack>
-            <Text>{numeral(sum && yes / sum).format('0.00%')}</Text>
+            <Text>
+              <DecDisplay value={sum && yes / sum} precision={2} percentage />
+            </Text>
           </HStack>
-          <Text>{numeral(yes).format('0.00')} LION</Text>
+          <Text>
+            <DecDisplay value={yes} suffix={` ${config.displayDenom}`} />
+          </Text>
         </Stack>
         <Stack
           px={{ base: '2', md: '4' }}
@@ -81,9 +85,13 @@ export function ProposalVotes({ proposal }: ProposalVotesProps) {
               <Box w="4" h="4" rounded="full" bgColor="red" />
               <Text fontWeight="medium">No</Text>
             </HStack>
-            <Text>{numeral(sum && no / sum).format('0.00%')}</Text>
+            <Text>
+              <DecDisplay value={sum && no / sum} precision={2} percentage />
+            </Text>
           </HStack>
-          <Text>{numeral(no).format('0.00')} LION</Text>
+          <Text>
+            <DecDisplay value={no} suffix={` ${config.displayDenom}`} />
+          </Text>
         </Stack>
         <Stack
           px={{ base: '2', md: '4' }}
@@ -96,9 +104,17 @@ export function ProposalVotes({ proposal }: ProposalVotesProps) {
               <Box w="4" h="4" rounded="full" bgColor="orange" />
               <Text fontWeight="medium">No with vote</Text>
             </HStack>
-            <Text>{numeral(sum && noWithVote / sum).format('0.00%')}</Text>
+            <Text>
+              <DecDisplay
+                value={sum && noWithVote / sum}
+                precision={2}
+                percentage
+              />
+            </Text>
           </HStack>
-          <Text>{numeral(noWithVote).format('0.00')} LION</Text>
+          <Text>
+            <DecDisplay value={noWithVote} suffix={` ${config.displayDenom}`} />
+          </Text>
         </Stack>
         <Stack
           px={{ base: '2', md: '4' }}
@@ -111,9 +127,17 @@ export function ProposalVotes({ proposal }: ProposalVotesProps) {
               <Box w="4" h="4" rounded="full" bgColor="gray" />
               <Text fontWeight="medium">Abstain</Text>
             </HStack>
-            <Text>{numeral(sum && abstain / sum).format('0.00%')}</Text>
+            <Text>
+              <DecDisplay
+                value={sum && abstain / sum}
+                precision={2}
+                percentage
+              />
+            </Text>
           </HStack>
-          <Text>{numeral(abstain).format('0.00')} LION</Text>
+          <Text>
+            <DecDisplay value={abstain} suffix={` ${config.displayDenom}`} />
+          </Text>
         </Stack>
       </SimpleGrid>
     </Container>

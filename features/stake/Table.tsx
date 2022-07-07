@@ -19,7 +19,6 @@ import {
 } from '@chakra-ui/react'
 import * as React from 'react'
 import NextLink from 'next/link'
-import numeral from 'numeral'
 import {
   createTable,
   getCoreRowModel,
@@ -27,10 +26,11 @@ import {
   SortingState,
   useTableInstance,
 } from '@tanstack/react-table'
-import { useValidators, Validator } from './hooks'
-import { useConnectWallet } from '@/hooks'
 import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import Fuse from 'fuse.js'
+import { DecDisplay } from '@/components/NumberDisplay'
+import { useConnectWallet } from '@/hooks'
+import { useValidators, Validator } from './hooks'
 
 export interface ValidatorTableProps extends TableProps {
   keyword: string
@@ -94,7 +94,7 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         cell: ({ getValue }) => (
           <Skeleton isLoaded={!!data}>
             <Text color="muted" textAlign="end">
-              {numeral(getValue()).format('0.00%')}
+              <DecDisplay value={getValue()} precision={2} percentage />
             </Text>
           </Skeleton>
         ),
@@ -105,11 +105,8 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         cell: ({ getValue, row }) => (
           <Skeleton isLoaded={!!data}>
             <Text color="muted" textAlign="end">
-              {`${
-                getValue()?.amount ?? 0 < 1000
-                  ? numeral(getValue()?.amount).format('0.000000')
-                  : numeral(getValue()?.amount).format('0.00a').toUpperCase()
-              } ${getValue()?.denom.toUpperCase()}`}
+              <DecDisplay value={getValue()?.amount} />{' '}
+              {getValue()?.denom.toUpperCase()}
             </Text>
           </Skeleton>
         ),
@@ -119,11 +116,8 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         cell: ({ getValue, row }) => (
           <Skeleton isLoaded={!!data}>
             <Text color="muted" textAlign="end">
-              {`${
-                getValue()?.amount ?? 0 < 1000
-                  ? numeral(getValue()?.amount).format('0.000000')
-                  : numeral(getValue()?.amount).format('0.00a').toUpperCase()
-              } ${getValue()?.denom.toUpperCase()}`}
+              <DecDisplay value={getValue()?.amount} />{' '}
+              {getValue()?.denom.toUpperCase()}
             </Text>
           </Skeleton>
         ),
