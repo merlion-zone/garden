@@ -1,8 +1,9 @@
-import { Button, Divider, Flex, HStack, Stack, Text } from '@chakra-ui/react'
+import { Divider, Flex, HStack, Icon, Stack, Text } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import NextLink from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { Proposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+import { BsArrowRight } from 'react-icons/bs'
 import { decodeContent, getTime } from '../proposal/utils'
 
 export function ProposalItem({ proposal }: { proposal: Proposal }) {
@@ -42,7 +43,7 @@ export function ProposalItem({ proposal }: { proposal: Proposal }) {
             {submitTime}
           </Text>
         </Stack>
-        <Button variant="ghost">Vote</Button>
+        <Icon as={BsArrowRight} w="6" h="6" mr="4" />
       </Flex>
     </NextLink>
   )
