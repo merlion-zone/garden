@@ -1,5 +1,4 @@
-import { typeUrls } from '@merlionzone/merlionjs/dist'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { typeUrls } from '@merlionzone/merlionjs'
 import { useQueryDelegatorValidators } from '@/hooks/query'
 import {
   Box,
@@ -17,10 +16,11 @@ import {
 } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
-import { Stats } from './Stats'
-import { ValidatorTable } from './Table'
 import { useToast } from '@/hooks/useToast'
+import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
 import { TransactionToast } from '@/components/TransactionToast'
+import { ValidatorTable } from './Table'
+import { Stats } from './Stats'
 
 export const Staking = () => {
   const toast = useToast()
@@ -116,7 +116,7 @@ export const Staking = () => {
                 justify="space-between"
               >
                 <Text fontSize="lg" fontWeight="medium">
-                  Validators
+                  My validators
                 </Text>
                 <InputGroup maxW="xs">
                   <InputLeftElement pointerEvents="none">

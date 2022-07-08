@@ -18,7 +18,7 @@ export interface Validator
   rewards: Coin
 }
 
-export function useValidators(address: string | null) {
+export function useValidators(address?: string | null) {
   const { data: poolData } = useQueryPool()
   const { data: validatorsData } = useQueryDelegatorValidators(address ?? '')
   const { data: delegationsData } = useQueryDelegatorDelegations(address ?? '')
