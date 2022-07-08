@@ -31,7 +31,7 @@ export function ProposalItem({ proposal }: { proposal: Proposal }) {
         <Stack>
           <HStack>
             <Text fontSize="xs" color="brand">
-              {proposal.proposalId.toNumber()}
+              # {proposal.proposalId.toNumber()}
             </Text>
             <Divider orientation="vertical" h="3" />
             <Text fontSize="xs">{content.type}</Text>

@@ -17,16 +17,35 @@ import {
   useBreakpointValue,
 } from '@chakra-ui/react'
 import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+import type { Duration } from 'cosmjs-types/google/protobuf/duration'
 import { useMemo, useState } from 'react'
 import NextLink from 'next/link'
 import { useQueryGovParams, useQueryProposals } from '@/hooks/query'
-import { ProposalItem } from './ProposalItem'
 import { AmountDisplay } from '@/components/NumberDisplay'
 import config from '@/config'
 import { dayjs } from '@/utils'
 import { getTime } from '../proposal/utils'
+import { ProposalItem } from './ProposalItem'
 
 const limit = 30
+
+function getDuration(value?: Duration) {
+  const duration = dayjs.duration(getTime(value))
+
+  const days = duration.days()
+  const hours = duration.hours()
+  const minutes = duration.minutes()
+
+  const d = days > 0 ? `${days} days` : ''
+  const h = (d && minutes !== 0) || hours > 0 ? ` ${hours} hours` : ''
+  const m = minutes > 0 ? ` ${minutes} min` : ''
+
+  if (!d && !h && !m) {
+    return `${duration.asSeconds().toFixed(2)} sec`
+  }
+
+  return d + h + m
+}
 
 export default function Governance() {
   const { data: depositParamsData } = useQueryGovParams('deposit')
@@ -39,6 +58,15 @@ export default function Governance() {
     limit,
     countTotal: true,
   })
+
+  const votingPeriod = useMemo(() => {
+    let time = dayjs.duration(
+      getTime(votingParamsData?.votingParams?.votingPeriod)
+    )
+
+    if (time.asDays() > 1) return `${time.asDays().toFixed(0)} days`
+    else return `${time.asMinutes()} min`
+  }, [votingParamsData])
 
   const hasPrev = useMemo(() => limit * pageIndex > 0, [pageIndex])
 
@@ -96,29 +124,20 @@ export default function Governance() {
                   depositParamsData?.depositParams?.minDeposit[0].amount ?? 0
                 }
                 decimals={config.denomDecimals}
+                suffix={` ${config.displayDenom}`}
               />
             </StatNumber>
           </Stat>
           <Stat p="6">
             <StatLabel>Maximum deposit period</StatLabel>
             <StatNumber>
-              {dayjs
-                .duration(
-                  getTime(depositParamsData?.depositParams?.maxDepositPeriod)
-                )
-                .asDays()
-                .toFixed(0)}{' '}
-              days
+              {getDuration(depositParamsData?.depositParams?.maxDepositPeriod)}
             </StatNumber>
           </Stat>
           <Stat p="6">
             <StatLabel>Voting period</StatLabel>
             <StatNumber>
-              {dayjs
-                .duration(getTime(votingParamsData?.votingParams?.votingPeriod))
-                .asDays()
-                .toFixed(0)}{' '}
-              days
+              {getDuration(votingParamsData?.votingParams?.votingPeriod)}
             </StatNumber>
           </Stat>
         </StatGroup>
