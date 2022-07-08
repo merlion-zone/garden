@@ -487,8 +487,8 @@ export function useQueryProposalTallyResult(id?: string) {
   return useMerlionQuery('gov', 'tally', id)
 }
 
-export function useQueryGovParams() {
-  return useMerlionQuery('gov', 'params')
+export function useQueryGovParams(type: 'deposit' | 'tallying' | 'voting') {
+  return useMerlionQuery('gov', 'params', type)
 }
 
 /***************************** Txs ******************************/

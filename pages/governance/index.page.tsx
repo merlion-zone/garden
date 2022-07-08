@@ -29,7 +29,8 @@ import { getTime } from '../proposal/utils'
 const limit = 30
 
 export default function Governance() {
-  const { data: paramsData } = useQueryGovParams()
+  const { data: depositParamsData } = useQueryGovParams('deposit')
+  const { data: votingParamsData } = useQueryGovParams('voting')
   const [status, setStatus] = useState<ProposalStatus>(0)
   const [pageIndex, setPageIndex] = useState(0)
   const { data } = useQueryProposals(status, '', '', {
@@ -91,7 +92,9 @@ export default function Governance() {
             <StatLabel>Minimum deposit</StatLabel>
             <StatNumber>
               <AmountDisplay
-                value={paramsData?.depositParams?.minDeposit[0].amount ?? 0}
+                value={
+                  depositParamsData?.depositParams?.minDeposit[0].amount ?? 0
+                }
                 decimals={config.denomDecimals}
               />
             </StatNumber>
@@ -100,7 +103,9 @@ export default function Governance() {
             <StatLabel>Maximum deposit period</StatLabel>
             <StatNumber>
               {dayjs
-                .duration(getTime(paramsData?.depositParams?.maxDepositPeriod))
+                .duration(
+                  getTime(depositParamsData?.depositParams?.maxDepositPeriod)
+                )
                 .asDays()
                 .toFixed(0)}{' '}
               days
@@ -110,7 +115,7 @@ export default function Governance() {
             <StatLabel>Voting period</StatLabel>
             <StatNumber>
               {dayjs
-                .duration(getTime(paramsData?.depositParams?.maxDepositPeriod))
+                .duration(getTime(votingParamsData?.votingParams?.votingPeriod))
                 .asDays()
                 .toFixed(0)}{' '}
               days
