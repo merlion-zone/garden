@@ -12,7 +12,7 @@ import { HiBadgeCheck } from 'react-icons/hi'
 
 export const Card = (props: BoxProps) => (
   <Box
-    bg={useColorModeValue('white', 'gray.700')}
+    bg="bg-surface"
     w="full"
     maxW="full"
     mx="auto"

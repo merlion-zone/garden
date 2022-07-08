@@ -23,6 +23,7 @@ export interface InfoProps {
 
 export function Info({ validatorAddress }: InfoProps) {
   const { data } = useValidator(validatorAddress)
+  const linkColor = useColorModeValue('gray.600', 'gray.300')
 
   return (
     <Card>
@@ -49,7 +50,7 @@ export function Info({ validatorAddress }: InfoProps) {
               {data?.description!.moniker}
             </Heading>
             <Spacer />
-            <Button
+            {/* <Button
               size={{ base: 'xs', sm: 'sm' }}
               variant="outline"
               rightIcon={
@@ -61,29 +62,27 @@ export function Info({ validatorAddress }: InfoProps) {
               }
             >
               Learn more
-            </Button>
+            </Button> */}
           </Flex>
           {/* TODO */}
           <Text mt="2"></Text>
           <Wrap shouldWrapChildren my="4" spacing="4">
-            <Link as={HStack} href={data?.description!.website || undefined}>
-              <Icon as={FaLink} color="gray.400" />
-              <Text
-                fontSize="sm"
-                fontWeight="medium"
-                color={useColorModeValue('gray.600', 'gray.300')}
-              >
-                {data?.description!.website || ''}
-              </Text>
-            </Link>
-            <Link as={HStack} spacing="1">
+            {data?.description!.website && (
+              <Link as={HStack} href={data!.description!.website}>
+                <Icon as={FaLink} color="gray.400" />
+                <Text fontSize="sm" fontWeight="medium" color={linkColor}>
+                  {data.description!.website}
+                </Text>
+              </Link>
+            )}
+            {/* TODO */}
+            {/* <Link as={HStack} spacing="1">
               <Icon as={FaTwitter} color="gray.400" />
               <Text
                 fontSize="sm"
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                {/* TODO */}
               </Text>
             </Link>
             <Link as={HStack} spacing="1">
@@ -93,7 +92,6 @@ export function Info({ validatorAddress }: InfoProps) {
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                {/* TODO */}
               </Text>
             </Link>
             <Link as={HStack} spacing="1">
@@ -103,9 +101,8 @@ export function Info({ validatorAddress }: InfoProps) {
                 fontWeight="medium"
                 color={useColorModeValue('gray.600', 'gray.300')}
               >
-                {/* TODO */}
               </Text>
-            </Link>
+            </Link> */}
           </Wrap>
           <Box fontSize="sm" noOfLines={2}>
             {/* TODO */}

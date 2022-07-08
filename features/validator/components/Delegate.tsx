@@ -110,7 +110,11 @@ export function Delegate() {
       </Button>
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+        <ModalContent
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          bgColor="bg-surface"
+        >
           <ModalHeader>Delegate</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
