@@ -142,7 +142,7 @@ export function Delegate() {
               type="submit"
               rounded="full"
               colorScheme="brand"
-              isLoading={!isSubmitting}
+              isLoading={isSubmitting}
             >
               Submit
             </Button>
