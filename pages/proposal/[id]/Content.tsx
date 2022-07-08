@@ -70,18 +70,27 @@ export function ProposalContent({ proposal }: ProposalContentProps) {
                   </Text>
                   <Divider orientation="vertical" h="3" />
                   <Text fontSize="xs">{content?.type}</Text>
+                  <Divider orientation="vertical" h="3" />
+                  <Text fontSize="xs" color="brand" mb="4">
+                    {proposal &&
+                      formatDistanceToNow(getTime(proposal.submitTime!), {
+                        addSuffix: true,
+                      })}
+                  </Text>
                 </HStack>
                 <Text fontSize="xl" fontWeight="medium">
                   {content?.title}
                 </Text>
-                <Text fontSize="xs" color="brand" mb="4">
-                  {proposal &&
-                    formatDistanceToNow(getTime(proposal.submitTime!), {
-                      addSuffix: true,
-                    })}
-                </Text>
               </Stack>
-              <Tag rounded="full" variant="solid" colorScheme="brand">
+              <Tag
+                rounded="full"
+                variant="solid"
+                colorScheme={
+                  status === 'Faliled' || status === 'Rejected'
+                    ? 'red'
+                    : 'brand'
+                }
+              >
                 {status}
               </Tag>
             </HStack>

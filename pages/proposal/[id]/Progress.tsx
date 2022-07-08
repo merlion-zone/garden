@@ -4,6 +4,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { getTime } from '../utils'
 import { Step } from './Step'
 
+const ZERO_TIME = -62135596800000
+
 export interface ProposalProgressProps {
   proposal?: Proposal
 }
@@ -44,7 +46,11 @@ export function ProposalProgress({ proposal }: ProposalProgressProps) {
           cursor="pointer"
           title="Deposit Period Ends"
           description={formatDistanceToNow(
-            votingStartTime <= now ? votingStartTime : depositEndTime,
+            votingStartTime === ZERO_TIME
+              ? depositEndTime
+              : votingStartTime > now
+              ? depositEndTime
+              : votingStartTime,
             { addSuffix: true }
           )}
           isCompleted={votingStartTime <= now || depositEndTime <= now}
@@ -54,18 +60,26 @@ export function ProposalProgress({ proposal }: ProposalProgressProps) {
         <Step
           cursor="pointer"
           title="Voting Period Starts"
-          description={formatDistanceToNow(votingStartTime, {
-            addSuffix: true,
-          })}
-          isCompleted={votingStartTime <= now}
+          description={
+            votingStartTime !== ZERO_TIME
+              ? formatDistanceToNow(votingStartTime, {
+                  addSuffix: true,
+                })
+              : ''
+          }
+          isCompleted={votingStartTime > ZERO_TIME && votingStartTime <= now}
           isFirstStep={false}
           isLastStep={false}
         />
         <Step
           cursor="pointer"
           title="Voting Period Ends"
-          description={formatDistanceToNow(votingEndTime, { addSuffix: true })}
-          isCompleted={votingEndTime <= now}
+          description={
+            votingEndTime !== ZERO_TIME
+              ? formatDistanceToNow(votingEndTime, { addSuffix: true })
+              : ''
+          }
+          isCompleted={votingStartTime > ZERO_TIME && votingEndTime <= now}
           isFirstStep={false}
           isLastStep={true}
         />
