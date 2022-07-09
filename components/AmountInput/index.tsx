@@ -1,4 +1,4 @@
-import { DenomMetadata, useBalance } from '@/hooks/query'
+import { ChevronDownIcon } from '@chakra-ui/icons'
 import {
   Box,
   Button,
@@ -8,14 +8,15 @@ import {
   useColorModeValue,
   useToken,
 } from '@chakra-ui/react'
-import Avvvatars from 'avvvatars-react'
-import { ChevronDownIcon } from '@chakra-ui/icons'
-import { useAccountAddress } from '@/hooks'
-import { AmountDisplay } from '@/components/NumberDisplay'
-import { Dec } from '@merlionzone/merlionjs'
 import { SystemStyleObject } from '@chakra-ui/styled-system'
 import { TinyColor } from '@ctrl/tinycolor'
+import { Dec } from '@merlionzone/merlionjs'
+import Avvvatars from 'avvvatars-react'
+
 import { WithHint } from '@/components/Hint'
+import { AmountDisplay } from '@/components/NumberDisplay'
+import { useAccountAddress } from '@/hooks'
+import { DenomMetadata, useBalance } from '@/hooks/query'
 
 export interface AmountMetadata {
   metadata?: DenomMetadata

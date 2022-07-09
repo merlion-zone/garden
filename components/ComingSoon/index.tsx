@@ -1,6 +1,7 @@
-import { Text, Box, Stack, Button, HStack } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
+import { Box, Button, HStack, Stack, Text } from '@chakra-ui/react'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
+
 import comingSoonPic from '@/public/images/merlion-sticker.png'
 
 export const ComingSoon = () => {

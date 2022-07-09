@@ -1,14 +1,14 @@
 import {
+  Button,
   Center,
-  Text,
+  Stack,
   Table,
   TableContainer,
   Tbody,
+  Text,
   Th,
   Thead,
   Tr,
-  Button,
-  Stack,
 } from '@chakra-ui/react'
 
 export const NFTAssetTable = () => {

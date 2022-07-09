@@ -58,7 +58,7 @@ export function getModuleErrorMsg(
   const errs = moduleErrors[module]
   for (const key of Object.keys(errs)) {
     if (msg.includes(key)) {
-      return (<any>errs)[key]
+      return (errs as any)[key]
     }
   }
   return 'Invalid amount entered'

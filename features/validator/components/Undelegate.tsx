@@ -20,12 +20,14 @@ import { MsgUndelegateEncodeObject } from '@cosmjs/stargate'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+
 import { TransactionToast } from '@/components/TransactionToast'
+import config from '@/config'
 import { useAccountAddress, useConnectWallet } from '@/hooks'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 import { formatCoin, parseCoin } from '@/utils'
-import config from '@/config'
+
 import { useDelegation } from '../hooks'
 
 interface FormData {

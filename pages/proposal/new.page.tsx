@@ -1,6 +1,3 @@
-import config from '@/config'
-import { useAccountAddress, useMerlionClient } from '@/hooks'
-import { parseCoin } from '@/utils'
 import {
   Alert,
   AlertDescription,
@@ -11,8 +8,8 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Heading,
   HStack,
+  Heading,
   IconButton,
   Input,
   InputGroup,
@@ -34,7 +31,12 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { HiMinus, HiPlus } from 'react-icons/hi'
-import { getContent, ProposalType } from './utils'
+
+import config from '@/config'
+import { useAccountAddress, useMerlionClient } from '@/hooks'
+import { parseCoin } from '@/utils'
+
+import { ProposalType, getContent } from './utils'
 
 interface FormData {
   type: ProposalType

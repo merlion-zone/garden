@@ -1,4 +1,3 @@
-import { useMemo, useState } from 'react'
 import {
   Alert,
   AlertDescription,
@@ -14,17 +13,20 @@ import {
   Text,
   useBreakpointValue,
 } from '@chakra-ui/react'
+import { typeUrls } from '@merlionzone/merlionjs/dist'
+import { useMemo, useState } from 'react'
+
+import { TransactionToast } from '@/components/TransactionToast'
 import {
   BondStatusString,
   useAccountAddress,
   useConnectWallet,
   useMerlionClient,
 } from '@/hooks'
-import { ValidatorTable } from './table'
 import { useQueryDelegatorValidators, useQueryValidators } from '@/hooks/query'
 import { useToast } from '@/hooks/useToast'
-import { typeUrls } from '@merlionzone/merlionjs/dist'
-import { TransactionToast } from '@/components/TransactionToast'
+
+import { ValidatorTable } from './table'
 
 export function Validators() {
   const [status, setStatus] = useState<BondStatusString>('BOND_STATUS_BONDED')

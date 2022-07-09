@@ -1,22 +1,24 @@
-import { useState } from 'react'
 import {
   Container,
+  HStack,
   SimpleGrid,
   Stack,
-  HStack,
-  Text,
-  Tabs,
-  TabList,
   Tab,
-  TabPanels,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
 } from '@chakra-ui/react'
+import { useState } from 'react'
+
 import { Card } from '@/components/Card'
+import { BackingCollateralParams } from '@/pages/stablecoin-view/BackingCollateralParams'
+import { BackingCollateralStatistics } from '@/pages/stablecoin-view/BackingCollateralStatistics'
+
 import { BackingPoolsTable } from './BackingPoolsTable'
 import { CollateralPoolsTable } from './CollateralPoolsTable'
 import { BackingPoolsBarChart, CollateralPoolsBarChart } from './PoolsBarChart'
-import { BackingCollateralStatistics } from '@/pages/stablecoin-view/BackingCollateralStatistics'
-import { BackingCollateralParams } from '@/pages/stablecoin-view/BackingCollateralParams'
 
 export default function StablecoinView() {
   const [poolsTabIndex, setPoolsTabIndex] = useState(0)

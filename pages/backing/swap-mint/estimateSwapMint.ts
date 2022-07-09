@@ -1,7 +1,8 @@
-import { DenomMetadata, getModuleErrorMsg } from '@/hooks/query'
 import { Coin, Dec } from '@merlionzone/merlionjs'
 import { Coin as CosmCoin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
+
 import { MerlionQueryClient } from '@/hooks'
+import { DenomMetadata, getModuleErrorMsg } from '@/hooks/query'
 import { isValidAmount } from '@/utils'
 
 export enum InputKind {

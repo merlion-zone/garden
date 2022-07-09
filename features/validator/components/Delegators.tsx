@@ -1,4 +1,3 @@
-import { formatCoin, validatorToDelegatorAddress } from '@/utils'
 import {
   Flex,
   HStack,
@@ -15,6 +14,9 @@ import {
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi'
+
+import { formatCoin, validatorToDelegatorAddress } from '@/utils'
+
 import { useDelegations } from '../hooks'
 import { Card } from './Card'
 

@@ -1,35 +1,36 @@
-import { useEffect } from 'react'
-import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 import {
   AuthExtension,
   BankExtension,
   DistributionExtension,
   GasPrice,
   QueryClient,
+  StakingExtension,
   setupAuthExtension,
   setupBankExtension,
   setupDistributionExtension,
   setupStakingExtension,
-  StakingExtension,
 } from '@cosmjs/stargate'
+import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 import {
   GovExtension,
+  MakerExtension,
   MerlionClient,
   OracleExtension,
-  MakerExtension,
-  VeExtension,
   TendermintExtension,
   TxExtension,
+  VeExtension,
   setupGovExtension,
-  setupOracleExtension,
   setupMakerExtension,
-  setupVeExtension,
+  setupOracleExtension,
   setupTendermintExtension,
   setupTxExtension,
+  setupVeExtension,
 } from '@merlionzone/merlionjs'
+import { atom, useAtom } from 'jotai'
+import { useEffect } from 'react'
+
 import config from '@/config'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
-import { atom, useAtom } from 'jotai'
 
 const merlionClientAtom = atom<MerlionClient | null>(null)
 

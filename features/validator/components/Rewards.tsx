@@ -1,4 +1,7 @@
+import { Button, HStack, Stack, Text } from '@chakra-ui/react'
 import { typeUrls } from '@merlionzone/merlionjs'
+import { useMemo } from 'react'
+
 import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
 import { useAccountAddress, useConnectWallet } from '@/hooks'
@@ -6,10 +9,9 @@ import { useMerlionQuery } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 import { formatCoin } from '@/utils'
-import { Button, HStack, Stack, Text } from '@chakra-ui/react'
-import { useMemo } from 'react'
-import { Card } from './Card'
+
 import { useDelegation } from '../hooks'
+import { Card } from './Card'
 
 export interface RewardsProps {
   validatorAddress?: string

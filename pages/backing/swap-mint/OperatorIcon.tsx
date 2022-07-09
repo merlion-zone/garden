@@ -1,5 +1,5 @@
-import React, { ReactElement } from 'react'
 import { Center, IconButton, useColorModeValue } from '@chakra-ui/react'
+import React, { ReactElement } from 'react'
 
 export const OperatorIcon = ({
   icon,

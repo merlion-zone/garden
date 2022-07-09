@@ -1,5 +1,9 @@
-import { AxisOptions, Chart } from 'react-charts'
+import { useColorMode, useToken } from '@chakra-ui/react'
+import { Dec } from '@merlionzone/merlionjs'
 import { ReactNode, useMemo } from 'react'
+import { AxisOptions, Chart } from 'react-charts'
+
+import config from '@/config'
 import {
   useAllBackingPools,
   useAllCollateralPools,
@@ -7,11 +11,9 @@ import {
   useDisplayPrice,
   useDisplayPrices,
 } from '@/hooks/query'
-import { Dec } from '@merlionzone/merlionjs'
 import { formatNumber } from '@/utils'
-import config from '@/config'
+
 import TooltipRenderer from './TooltipRenderer'
-import { useColorMode, useToken } from '@chakra-ui/react'
 
 type Amount = {
   pool: string

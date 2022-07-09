@@ -1,9 +1,10 @@
+import { EncodeObject } from '@cosmjs/proto-signing'
+import { DeliverTxResponse } from '@cosmjs/stargate'
+import { atom, useAtom } from 'jotai'
+import { useCallback, useRef } from 'react'
+
 import { useAccountAddress } from '@/hooks/useConnectWallet'
 import { useMerlionClient } from '@/hooks/useMerlionClient'
-import { EncodeObject } from '@cosmjs/proto-signing'
-import { useCallback, useRef } from 'react'
-import { atom, useAtom } from 'jotai'
-import { DeliverTxResponse } from '@cosmjs/stargate'
 import { promiseOnce } from '@/utils'
 
 const isSendCosmTxReadyAtom = atom<boolean>(true)

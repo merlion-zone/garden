@@ -1,10 +1,6 @@
-import { ethers } from 'ethers'
-import { useCallback, useState } from 'react'
-import { useDebounce } from 'react-use'
 import {
-  Collapse,
-  Text,
   Button,
+  Collapse,
   HStack,
   Input,
   Modal,
@@ -14,10 +10,15 @@ import {
   ModalHeader,
   ModalOverlay,
   Stack,
+  Text,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useCachedDenoms } from '@/hooks/useCachedDenoms'
+import { ethers } from 'ethers'
+import { useCallback, useState } from 'react'
+import { useDebounce } from 'react-use'
+
 import { useDenomMetadata } from '@/hooks/query'
+import { useCachedDenoms } from '@/hooks/useCachedDenoms'
 
 interface AddTokenModalProps {
   isOpen: boolean

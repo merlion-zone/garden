@@ -1,4 +1,4 @@
-import { DENOM, DECIMALS, MINIMAL_DENOM } from './env'
+import { DECIMALS, DENOM, MINIMAL_DENOM } from './env'
 
 export interface Currency {
   readonly denom: string

@@ -2,18 +2,19 @@ import {
   Box,
   Button,
   Flex,
-  Heading,
   HStack,
+  Heading,
   Icon,
   Link,
   Spacer,
   Stack,
   Text,
-  useColorModeValue,
   Wrap,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { FaDiscord, FaLink, FaTelegram, FaTwitter } from 'react-icons/fa'
 import { HiOutlineExternalLink } from 'react-icons/hi'
+
 import { useValidator } from '../hooks'
 import { Card, UserAvatar } from './Card'
 

@@ -10,9 +10,10 @@ import { Dec } from '@merlionzone/merlionjs'
 import { Proposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+
+import { DecDisplay } from '@/components/NumberDisplay'
 import config from '@/config'
 import { useQueryProposalTallyResult } from '@/hooks/query'
-import { DecDisplay } from '@/components/NumberDisplay'
 
 export interface ProposalVotesProps {
   proposal?: Proposal

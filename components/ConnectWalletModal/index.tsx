@@ -11,10 +11,11 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import { FiArrowLeft } from 'react-icons/fi'
-import { useConnectWallet } from '@/hooks'
-import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
-import { KeplrIcon } from '@/components/Icons/KeplrIcon'
 import { VscCircleFilled } from 'react-icons/vsc'
+
+import { KeplrIcon } from '@/components/Icons/KeplrIcon'
+import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
+import { useConnectWallet } from '@/hooks'
 
 interface ConnectWalletModalProps {
   back?: boolean

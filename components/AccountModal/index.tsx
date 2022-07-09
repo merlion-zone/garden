@@ -1,6 +1,6 @@
 import {
   Box,
-  Text,
+  Button,
   HStack,
   Modal,
   ModalBody,
@@ -8,14 +8,15 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Button,
+  Text,
 } from '@chakra-ui/react'
 import { MdOpenInNew } from 'react-icons/md'
+
+import { CopyAddressButton } from '@/components/CopyAddress'
+import { KeplrIcon } from '@/components/Icons/KeplrIcon'
+import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
 import { useConnectWallet } from '@/hooks'
 import { shortenAddress } from '@/utils'
-import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
-import { KeplrIcon } from '@/components/Icons/KeplrIcon'
-import { CopyAddressButton } from '@/components/CopyAddress'
 
 interface AccountModalProps {
   isOpen: boolean

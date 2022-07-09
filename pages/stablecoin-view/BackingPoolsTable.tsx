@@ -1,6 +1,9 @@
 import {
-  Stack,
+  Box,
+  Button,
+  Center,
   HStack,
+  Stack,
   Table,
   TableContainer,
   Tbody,
@@ -9,25 +12,24 @@ import {
   Th,
   Thead,
   Tr,
-  Box,
   useColorModeValue,
-  Center,
-  Button,
 } from '@chakra-ui/react'
+import { Dec, proto } from '@merlionzone/merlionjs'
+import Avvvatars from 'avvvatars-react'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+
+import { WithHint } from '@/components/Hint'
+import config from '@/config'
 import {
   useAllBackingParams,
   useAllBackingPools,
   useDenomsMetadataMap,
   useDisplayPrices,
 } from '@/hooks/query'
-import Avvvatars from 'avvvatars-react'
-import { Dec, proto } from '@merlionzone/merlionjs'
-import config from '@/config'
 import { formatNumberSuitable, shortenDenom } from '@/utils'
+
 import { IndicatorTextBox } from './IndicatorBar'
-import { useRouter } from 'next/router'
-import { useMemo } from 'react'
-import { WithHint } from '@/components/Hint'
 
 export const BackingPoolsTable = () => {
   const router = useRouter()

@@ -1,6 +1,6 @@
 import { CommunityPoolSpendProposal } from 'cosmjs-types/cosmos/distribution/v1beta1/distribution'
-import { ParameterChangeProposal } from 'cosmjs-types/cosmos/params/v1beta1/params'
 import { TextProposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+import { ParameterChangeProposal } from 'cosmjs-types/cosmos/params/v1beta1/params'
 import type { Any } from 'cosmjs-types/google/protobuf/any'
 import { Timestamp } from 'cosmjs-types/google/protobuf/timestamp'
 

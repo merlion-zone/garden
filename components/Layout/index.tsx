@@ -1,9 +1,10 @@
-import { ReactNode } from 'react'
 import { Box, Flex, useBreakpoint, useBreakpointValue } from '@chakra-ui/react'
-import { Sidebar } from '@/components/Sidebar'
-import { Navbar } from '@/components/Navbar'
-import { Toolbar } from '@/components/Toolbar'
 import Head from 'next/head'
+import { ReactNode } from 'react'
+
+import { Navbar } from '@/components/Navbar'
+import { Sidebar } from '@/components/Sidebar'
+import { Toolbar } from '@/components/Toolbar'
 
 interface LayoutProps {
   children?: ReactNode

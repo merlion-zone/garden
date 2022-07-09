@@ -1,16 +1,16 @@
+import { PlacementWithLogical } from '@chakra-ui/popper/dist/declarations/src/popper.placement'
 import {
   IconButton,
   Popover,
+  PopoverArrow,
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
   Portal,
-  PopoverArrow,
 } from '@chakra-ui/react'
-import { PlacementWithLogical } from '@chakra-ui/popper/dist/declarations/src/popper.placement'
-import { FaQuestionCircle, FaRegQuestionCircle } from 'react-icons/fa'
+import { ReactElement, ReactNode, isValidElement } from 'react'
 import { BsQuestionCircle } from 'react-icons/bs'
-import { isValidElement, ReactElement, ReactNode } from 'react'
+import { FaQuestionCircle, FaRegQuestionCircle } from 'react-icons/fa'
 
 interface WithHintProps {
   children: ReactNode

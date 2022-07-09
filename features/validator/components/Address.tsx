@@ -11,12 +11,14 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { toBase64 } from '@cosmjs/encoding'
+import { Address as Addr } from '@merlionzone/merlionjs'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { FiKey, FiLink, FiUser } from 'react-icons/fi'
 import { HiOutlineDuplicate, HiOutlineExternalLink } from 'react-icons/hi'
-import { Address as Addr } from '@merlionzone/merlionjs'
+
 import { useCopyToClipboard } from '@/hooks'
+
 import { useValidator } from '../hooks'
 import { Card } from './Card'
 

@@ -1,4 +1,4 @@
-import { useToast as useBaseToast, UseToastOptions } from '@chakra-ui/react'
+import { UseToastOptions, useToast as useBaseToast } from '@chakra-ui/react'
 import { useMemo } from 'react'
 
 export function useToast() {

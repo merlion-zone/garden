@@ -1,4 +1,3 @@
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
 import {
   Button,
   FormControl,
@@ -18,10 +17,12 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { MsgVoteEncodeObject } from '@cosmjs/stargate'
+import { VoteOption } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import Long from 'long'
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
-import { VoteOption } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+
+import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
 
 interface FormData {
   option: VoteOption

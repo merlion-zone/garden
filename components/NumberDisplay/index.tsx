@@ -1,5 +1,5 @@
-import NumberFormat from 'react-number-format'
 import { Dec } from '@merlionzone/merlionjs'
+import NumberFormat from 'react-number-format'
 
 interface AmountDisplayProps {
   value: Dec | string | number | null | undefined

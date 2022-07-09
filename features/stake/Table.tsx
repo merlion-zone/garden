@@ -16,20 +16,22 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react'
-import * as React from 'react'
 import {
+  SortingState,
   createTable,
   getCoreRowModel,
   getSortedRowModel,
-  SortingState,
   useTableInstance,
 } from '@tanstack/react-table'
-import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import Fuse from 'fuse.js'
 import { useRouter } from 'next/router'
+import * as React from 'react'
+import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
+
 import { DecDisplay } from '@/components/NumberDisplay'
 import { useAccountAddress } from '@/hooks'
-import { useValidators, Validator } from './hooks'
+
+import { Validator, useValidators } from './hooks'
 
 export interface ValidatorTableProps extends TableProps {
   keyword: string

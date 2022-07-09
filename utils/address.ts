@@ -1,5 +1,6 @@
-import { bech32 } from 'bech32'
 import { Address } from '@merlionzone/merlionjs'
+import { bech32 } from 'bech32'
+
 import { BECH32_PREFIX } from '@/constants'
 
 // shorten the checksummed version of the input address to have 0x + 4 characters at start and end

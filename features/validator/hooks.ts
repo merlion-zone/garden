@@ -1,5 +1,6 @@
-import { useQuery } from 'react-query'
 import { Dec } from '@merlionzone/merlionjs'
+import { useQuery } from 'react-query'
+
 import { useMerlionQueryClient } from '@/hooks'
 import { getTime } from '@/pages/proposal/utils'
 

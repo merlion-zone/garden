@@ -1,5 +1,6 @@
-import { Card } from '@/components/Card'
 import { HStack, Stack, Text, useColorModeValue } from '@chakra-ui/react'
+
+import { Card } from '@/components/Card'
 import { HintButton } from '@/components/Hint'
 import { AmountDisplay } from '@/components/NumberDisplay'
 import config from '@/config'

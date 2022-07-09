@@ -1,6 +1,7 @@
 import { ChainInfo } from '@keplr-wallet/types'
-import config from '@/config'
 import { ethers } from 'ethers'
+
+import config from '@/config'
 
 // https://eips.ethereum.org/EIPS/eip-3085
 interface EIP3085AddEthereumChainParameter {

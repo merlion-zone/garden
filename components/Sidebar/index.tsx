@@ -10,13 +10,14 @@ import {
 } from '@chakra-ui/react'
 import { BsCurrencyExchange } from 'react-icons/bs'
 import { FiActivity, FiCamera, FiFilm, FiSearch } from 'react-icons/fi'
+import { GiVote, GiWallet } from 'react-icons/gi'
 import { IoMdSwap } from 'react-icons/io'
-import { GiWallet, GiVote } from 'react-icons/gi'
-import { RiGovernmentLine, RiCurrencyFill } from 'react-icons/ri'
+import { RiCurrencyFill, RiGovernmentLine } from 'react-icons/ri'
 import { TbGauge } from 'react-icons/tb'
-import { NavButton } from '@/components/Sidebar/NavButton'
+
 import { Logo } from '@/components/Logo'
 import { Links } from '@/components/Sidebar/Links'
+import { NavButton } from '@/components/Sidebar/NavButton'
 
 interface SidebarProps {
   onButtonClick?: () => void

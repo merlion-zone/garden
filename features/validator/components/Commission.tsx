@@ -8,7 +8,9 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
+
 import { DecDisplay } from '@/components/NumberDisplay'
+
 import { useCommission } from '../hooks'
 import { Card } from './Card'
 

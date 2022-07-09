@@ -6,12 +6,14 @@ import {
   useBreakpointValue,
 } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
+
 import { useQueryProposal } from '@/hooks/query'
+
 import { ProposalContent } from './Content'
-import { ProposalVotes } from './Votes'
-import { ProposalProgress } from './Progress'
 import { Deposit } from './Deposit'
+import { ProposalProgress } from './Progress'
 import { Vote } from './Vote'
+import { ProposalVotes } from './Votes'
 
 export default function ProposalDetail() {
   const { query } = useRouter()

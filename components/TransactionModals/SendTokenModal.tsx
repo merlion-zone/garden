@@ -1,10 +1,3 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
-import { MsgSendEncodeObject } from '@cosmjs/stargate'
-import { useAccountAddress } from '@/hooks'
-import { Address, Coin, Dec, typeUrls } from '@merlionzone/merlionjs'
-import { useSendCosmTx } from '@/hooks/useSendCosmTx'
-import { useToast } from '@/hooks/useToast'
-import { TransactionToast } from '@/components/TransactionToast'
 import {
   Box,
   Button,
@@ -19,13 +12,21 @@ import {
   Stack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { MsgSendEncodeObject } from '@cosmjs/stargate'
+import { Address, Coin, Dec, typeUrls } from '@merlionzone/merlionjs'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+
 import { AmountInput } from '@/components/AmountInput'
+import { TransactionToast } from '@/components/TransactionToast'
+import { useAccountAddress } from '@/hooks'
 import {
   errors,
   useBalance,
   useDenomsMetadataMap,
   useDisplayPrice,
 } from '@/hooks/query'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { useToast } from '@/hooks/useToast'
 import { formatNumber } from '@/utils'
 
 interface SendTokenModalProps {

@@ -1,32 +1,33 @@
-import { Fragment, useCallback, useState } from 'react'
 import {
-  Text,
+  Button,
+  Center,
+  HStack,
+  IconButton,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  IconButton,
-  HStack,
-  Center,
-  Button,
   useDisclosure,
 } from '@chakra-ui/react'
+import Avvvatars from 'avvvatars-react'
+import { Fragment, useCallback, useState } from 'react'
+import { CgArrowsExchange } from 'react-icons/cg'
+
+import { AddTokenModal } from '@/components/AssetTable/AddTokenModal'
+import { SendTokenModal } from '@/components/TransactionModals'
+import { useAccountAddress } from '@/hooks'
 import {
   DenomMetadata,
   useBalance,
   useDenomsMetadataMap,
   useDisplayPrice,
 } from '@/hooks/query'
-import { CgArrowsExchange } from 'react-icons/cg'
-import Avvvatars from 'avvvatars-react'
-import { formatNumberSuitable } from '@/utils'
-import { useAccountAddress } from '@/hooks'
 import { useCachedDenoms } from '@/hooks/useCachedDenoms'
-import { AddTokenModal } from '@/components/AssetTable/AddTokenModal'
-import { SendTokenModal } from '@/components/TransactionModals'
+import { formatNumberSuitable } from '@/utils'
 
 interface TokenAssetRowProps {
   denomMetadata: DenomMetadata

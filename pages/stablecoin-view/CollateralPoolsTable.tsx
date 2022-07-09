@@ -14,21 +14,23 @@ import {
   Tr,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { Coin, Dec } from '@merlionzone/merlionjs'
+import { proto } from '@merlionzone/merlionjs'
+import Avvvatars from 'avvvatars-react'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+
+import { WithHint } from '@/components/Hint'
+import config from '@/config'
 import {
   useAllCollateralParams,
   useAllCollateralPools,
   useDenomsMetadataMap,
   useDisplayPrices,
 } from '@/hooks/query'
-import Avvvatars from 'avvvatars-react'
-import { Coin, Dec } from '@merlionzone/merlionjs'
-import { proto } from '@merlionzone/merlionjs'
 import { formatNumberSuitable, shortenDenom } from '@/utils'
+
 import { IndicatorTextBox } from './IndicatorBar'
-import config from '@/config'
-import { useRouter } from 'next/router'
-import { useMemo } from 'react'
-import { WithHint } from '@/components/Hint'
 
 export const CollateralPoolsTable = () => {
   const router = useRouter()

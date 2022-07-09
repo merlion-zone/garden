@@ -5,7 +5,7 @@ function hydrateConfigFromEnv(config: Config): Config {
 
   for (const key in config) {
     const defaultValue = config[key]
-    const envValue = (<any>envConfig)[key]
+    const envValue = (envConfig as any)[key]
 
     if (envValue !== undefined) {
       switch (typeof defaultValue) {
@@ -16,7 +16,7 @@ function hydrateConfigFromEnv(config: Config): Config {
           config[key] = Number(envValue)
           break
         case 'boolean':
-          config[key] = truthyValues.includes((<string>envValue).toLowerCase())
+          config[key] = truthyValues.includes((envValue as any).toLowerCase())
           break
       }
     }

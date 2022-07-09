@@ -1,10 +1,10 @@
+import { Dec } from '@merlionzone/merlionjs'
 import { useMemo } from 'react'
 import { useQueries, useQuery } from 'react-query'
 
+import config from '@/config'
 import { LION } from '@/constants'
 import { BondStatusString, useMerlionQueryClient, useValidators } from '@/hooks'
-import { Dec } from '@merlionzone/merlionjs'
-import config from '@/config'
 
 export interface Validator {
   operatorAddress: string

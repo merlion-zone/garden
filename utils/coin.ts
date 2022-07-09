@@ -1,5 +1,5 @@
-import BigNumber from 'bignumber.js'
 import { Coin } from '@cosmjs/stargate'
+import BigNumber from 'bignumber.js'
 
 import { CURRENCIES } from '@/constants'
 

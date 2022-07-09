@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import {
   AlertDialog,
   AlertDialogBody,
@@ -16,6 +15,8 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { useRef } from 'react'
+
 import { switchEthereumChain, useConnectWallet } from '@/hooks'
 
 interface WrongNetworkAlertProps {

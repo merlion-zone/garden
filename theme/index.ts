@@ -1,16 +1,16 @@
-import {
-  Colors,
-  extendTheme,
-  theme as baseTheme,
-  ThemeConfig,
-  withDefaultColorScheme,
-} from '@chakra-ui/react'
 import { theme as proTheme } from '@chakra-ui/pro-theme'
 import {
-  cssVar,
-  mode,
+  Colors,
+  ThemeConfig,
+  theme as baseTheme,
+  extendTheme,
+  withDefaultColorScheme,
+} from '@chakra-ui/react'
+import {
   StyleFunctionProps,
   SystemStyleFunction,
+  cssVar,
+  mode,
   transparentize,
 } from '@chakra-ui/theme-tools'
 

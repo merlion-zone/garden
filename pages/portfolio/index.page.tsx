@@ -1,13 +1,11 @@
-import { useState } from 'react'
 import {
   Box,
   BoxProps,
   Button,
   Center,
-  chakra,
   Container,
-  Heading,
   HStack,
+  Heading,
   SimpleGrid,
   Stack,
   Tab,
@@ -16,17 +14,20 @@ import {
   TabPanels,
   Tabs,
   Text,
+  chakra,
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useBalance, useDisplayPrice } from '@/hooks/query'
-import { useAccountAddress } from '@/hooks'
-import config from '@/config'
-import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
-import { HintButton } from '@/components/Hint'
-import QRCodeSVG from 'qrcode.react'
-import { CopyAddressIcon } from '@/components/CopyAddress'
 import { useRouter } from 'next/router'
+import QRCodeSVG from 'qrcode.react'
+import { useState } from 'react'
+
+import { NFTAssetTable, TokenAssetTable } from '@/components/AssetTable'
+import { CopyAddressIcon } from '@/components/CopyAddress'
+import { HintButton } from '@/components/Hint'
+import config from '@/config'
+import { useAccountAddress } from '@/hooks'
+import { useBalance, useDisplayPrice } from '@/hooks/query'
 import { formatNumberSuitable } from '@/utils'
 
 const Card = (props: BoxProps) => (

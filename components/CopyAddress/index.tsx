@@ -1,5 +1,6 @@
 import { Button, useClipboard } from '@chakra-ui/react'
 import { FiCheckCircle, FiCopy } from 'react-icons/fi'
+
 import { HintButton } from '@/components/Hint'
 
 export const CopyAddressButton = ({ addr }: { addr: string }) => {

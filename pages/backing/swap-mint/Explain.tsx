@@ -1,22 +1,23 @@
+import { ChevronDownIcon, InfoOutlineIcon } from '@chakra-ui/icons'
 import {
   Box,
-  Text,
   Collapse,
-  HStack,
-  Stack,
   Divider,
-  useDisclosure,
-  useColorModeValue,
+  HStack,
   Spinner,
+  Stack,
+  Text,
+  useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react'
-import { useSwapMintSettings } from '@/hooks/useSetting'
-import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
 import { Dec } from '@merlionzone/merlionjs'
-import { DenomMetadata, useDisplayPrice } from '@/hooks/query'
-import config from '@/config'
 import React, { useState } from 'react'
-import { ChevronDownIcon, InfoOutlineIcon } from '@chakra-ui/icons'
+
 import { WithHint } from '@/components/Hint'
+import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
+import config from '@/config'
+import { DenomMetadata, useDisplayPrice } from '@/hooks/query'
+import { useSwapMintSettings } from '@/hooks/useSetting'
 
 interface ExplainProps {
   loading: boolean

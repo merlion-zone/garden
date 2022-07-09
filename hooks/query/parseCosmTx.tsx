@@ -1,14 +1,15 @@
-import { FunctionComponent } from 'react'
+import { Coin, proto, typeUrls } from '@merlionzone/merlionjs'
 import {
   StringEvent,
   TxResponse,
 } from 'cosmjs-types/cosmos/base/abci/v1beta1/abci'
-import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { GetTxsEventResponse } from 'cosmjs-types/cosmos/tx/v1beta1/service'
+import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { Any } from 'cosmjs-types/google/protobuf/any'
-import { typeUrls, proto, Coin } from '@merlionzone/merlionjs'
-import { useFormatCoin, useFormatCoins } from '@/hooks/query/moduleQueries'
+import { FunctionComponent } from 'react'
+
 import config from '@/config'
+import { useFormatCoin, useFormatCoins } from '@/hooks/query/moduleQueries'
 import { shortenAddress } from '@/utils'
 
 export interface CosmMsg {

@@ -1,4 +1,3 @@
-import { useCallback, useState } from 'react'
 import {
   Box,
   Button,
@@ -10,16 +9,18 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import { useCallback, useState } from 'react'
 // import { MdLanguage } from 'react-icons/md'
 import { FaMoon, FaSun } from 'react-icons/fa'
-import { useConnectWallet } from '@/hooks'
 import { useEffectOnce } from 'react-use'
-import { shortenAddress } from '@/utils'
-import { ConnectWalletModal } from '@/components/ConnectWalletModal'
+
 import { AccountModal } from '@/components/AccountModal'
-import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
+import { ConnectWalletModal } from '@/components/ConnectWalletModal'
 import { KeplrIcon } from '@/components/Icons/KeplrIcon'
+import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
 import { WrongNetworkAlert } from '@/components/WrongNetworkAlert'
+import { useConnectWallet } from '@/hooks'
+import { shortenAddress } from '@/utils'
 
 export const Toolbar = () => {
   const { colorMode, toggleColorMode } = useColorMode()

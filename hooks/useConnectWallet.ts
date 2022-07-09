@@ -1,18 +1,19 @@
-import { useCallback, useRef } from 'react'
-import { ethers } from 'ethers'
-import { Web3Provider } from '@ethersproject/providers'
-import detectEthereumProvider from '@metamask/detect-provider'
-import { OfflineSigner } from '@cosmjs/proto-signing'
-import { Address, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
 import { useCallbackRef } from '@chakra-ui/hooks'
+import { OfflineSigner } from '@cosmjs/proto-signing'
+import { Web3Provider } from '@ethersproject/providers'
+import { Address, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
+import detectEthereumProvider from '@metamask/detect-provider'
+import { ethers } from 'ethers'
 import { atom, useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
+import { useCallback, useRef } from 'react'
+
+import config from '@/config'
 import {
   addEthereumChainParams,
   keplrChainInfo,
   switchEthereumChainParams,
 } from '@/config/chainInfo'
-import config from '@/config'
 import { promiseOnce } from '@/utils'
 
 export type WalletType = 'metamask' | 'keplr'
@@ -229,7 +230,7 @@ export function useConnectWallet(): {
             onConnected(accounts[0])
           }
         } catch (err) {
-          if ((<any>err).code === 4001) {
+          if ((err as any).code === 4001) {
             // EIP-1193 userRejectedRequest error
             // If this happens, the user rejected the connection request.
             console.warn('Please connect to MetaMask')
@@ -322,7 +323,7 @@ export async function switchEthereumChain() {
       params: [switchEthereumChainParams],
     })
   } catch (switchError) {
-    if ((<any>switchError).code === 4902) {
+    if ((switchError as any).code === 4902) {
       // the chain has not been added to MetaMask
       try {
         await window.ethereum.request({

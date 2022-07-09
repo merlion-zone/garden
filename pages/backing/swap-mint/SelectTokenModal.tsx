@@ -1,10 +1,3 @@
-import { useAccountAddress } from '@/hooks'
-import {
-  useAllBackingParams,
-  useAllBackingPools,
-  useBalance,
-  useDenomsMetadataMap,
-} from '@/hooks/query'
 import {
   Box,
   HStack,
@@ -18,9 +11,17 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import Avvvatars from 'avvvatars-react'
-import { shortenDenom } from '@/utils'
-import { AmountDisplay } from '@/components/NumberDisplay'
 import React from 'react'
+
+import { AmountDisplay } from '@/components/NumberDisplay'
+import { useAccountAddress } from '@/hooks'
+import {
+  useAllBackingParams,
+  useAllBackingPools,
+  useBalance,
+  useDenomsMetadataMap,
+} from '@/hooks/query'
+import { shortenDenom } from '@/utils'
 
 interface SelectTokenModalProps {
   isOpen: boolean

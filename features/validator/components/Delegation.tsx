@@ -1,8 +1,10 @@
-import { useMemo } from 'react'
 import { HStack, Stack, Text } from '@chakra-ui/react'
+import { useMemo } from 'react'
+
 import { DecDisplay } from '@/components/NumberDisplay'
 import { useAccountAddress } from '@/hooks'
 import { formatCoin } from '@/utils'
+
 import { useDelegation } from '../hooks'
 import { Card } from './Card'
 import { Delegate } from './Delegate'

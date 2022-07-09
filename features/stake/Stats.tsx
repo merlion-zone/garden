@@ -1,4 +1,3 @@
-import { useConnectWallet } from '@/hooks'
 import {
   Box,
   Heading,
@@ -8,6 +7,9 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
+
+import { useConnectWallet } from '@/hooks'
+
 import { useValidators } from './hooks'
 
 export function Stats() {

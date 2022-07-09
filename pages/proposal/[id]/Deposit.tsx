@@ -1,7 +1,3 @@
-import config from '@/config'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
-import { useBalance } from '@/hooks/query'
-import { formatCoin, parseCoin } from '@/utils'
 import {
   Button,
   FormControl,
@@ -28,6 +24,11 @@ import Long from 'long'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+
+import config from '@/config'
+import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useBalance } from '@/hooks/query'
+import { formatCoin, parseCoin } from '@/utils'
 
 interface FormData {
   amount: string

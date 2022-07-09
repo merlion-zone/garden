@@ -17,17 +17,19 @@ import {
   Select,
   useDisclosure,
 } from '@chakra-ui/react'
-import { Controller, useForm } from 'react-hook-form'
-import { useDelegation } from '../hooks'
+import { MsgBeginRedelegateEncodeObject } from '@merlionzone/merlionjs'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import { MsgBeginRedelegateEncodeObject } from '@merlionzone/merlionjs'
+import { Controller, useForm } from 'react-hook-form'
+
+import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
-import { formatCoin, parseCoin } from '@/utils'
 import { useAccountAddress, useConnectWallet, useValidators } from '@/hooks'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
-import { TransactionToast } from '@/components/TransactionToast'
 import { useToast } from '@/hooks/useToast'
+import { formatCoin, parseCoin } from '@/utils'
+
+import { useDelegation } from '../hooks'
 
 interface FormData {
   validator: string

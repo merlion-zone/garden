@@ -1,7 +1,7 @@
+import { Dec } from '@merlionzone/merlionjs'
 import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import { useMemo } from 'react'
-import { Dec } from '@merlionzone/merlionjs'
 
 export function useFiatCurrency() {
   // TODO

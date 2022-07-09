@@ -1,4 +1,3 @@
-import * as React from 'react'
 import {
   Avatar,
   AvatarBadge,
@@ -8,6 +7,7 @@ import {
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react'
+import * as React from 'react'
 import { HiBadgeCheck } from 'react-icons/hi'
 
 export const Card = (props: BoxProps) => (

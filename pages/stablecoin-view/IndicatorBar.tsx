@@ -1,4 +1,5 @@
-import { chakra, Box, HStack, Text, useColorModeValue } from '@chakra-ui/react'
+import { Box, HStack, Text, chakra, useColorModeValue } from '@chakra-ui/react'
+
 import { DecDisplay } from '@/components/NumberDisplay'
 import { formatNumberSuitable } from '@/utils'
 

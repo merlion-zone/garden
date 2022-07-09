@@ -1,13 +1,14 @@
-import { FC, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/router'
 import { Box, Container, Grid, GridItem, Stack } from '@chakra-ui/react'
 import { Address as Addr } from '@merlionzone/merlionjs'
+import { useRouter } from 'next/router'
+import { FC, useEffect, useMemo } from 'react'
+
 import {
-  Info,
-  Commission,
-  Delegators,
   Address,
+  Commission,
   Delegation,
+  Delegators,
+  Info,
   Rewards,
 } from './components'
 

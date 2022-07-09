@@ -1,14 +1,15 @@
+import { Coin, Dec, Events } from '@merlionzone/merlionjs'
+import { DenomUnit, Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
+import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+import { useCallback, useMemo } from 'react'
 import useSWR, { Fetcher } from 'swr'
+
+import config from '@/config'
 import {
   BondStatusString,
   QueryExtensions,
   useMerlionQueryClient,
 } from '@/hooks'
-import { useCallback, useMemo } from 'react'
-import { DenomUnit, Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
-import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
-import { Coin, Dec, Events } from '@merlionzone/merlionjs'
-import config from '@/config'
 import { formatNumber } from '@/utils'
 
 export function useMerlionQuery<

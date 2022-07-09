@@ -16,17 +16,18 @@ import {
   NumberInputField,
   useDisclosure,
 } from '@chakra-ui/react'
-import { useMemo } from 'react'
+import { MsgDelegateEncodeObject } from '@cosmjs/stargate'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+
+import { TransactionToast } from '@/components/TransactionToast'
+import config from '@/config'
 import { useAccountAddress, useConnectWallet } from '@/hooks'
 import { useBalance } from '@/hooks/query'
-import config from '@/config'
-import { formatCoin, parseCoin } from '@/utils'
-import { MsgDelegateEncodeObject } from '@cosmjs/stargate'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
-import { TransactionToast } from '@/components/TransactionToast'
 import { useToast } from '@/hooks/useToast'
+import { formatCoin, parseCoin } from '@/utils'
 
 interface FormData {
   amount: string

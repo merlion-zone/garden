@@ -1,3 +1,9 @@
+import { Coin } from '@cosmjs/stargate'
+import { Dec } from '@merlionzone/merlionjs'
+import type { Validator as ValidatorPB } from 'cosmjs-types/cosmos/staking/v1beta1/staking'
+import { useMemo } from 'react'
+
+import config from '@/config'
 import {
   useQueryDelegatorDelegations,
   useQueryDelegatorRewardsMultiple,
@@ -5,11 +11,6 @@ import {
   useQueryPool,
 } from '@/hooks/query'
 import { formatCoin } from '@/utils'
-import config from '@/config'
-import { Coin } from '@cosmjs/stargate'
-import type { Validator as ValidatorPB } from 'cosmjs-types/cosmos/staking/v1beta1/staking'
-import { useMemo } from 'react'
-import { Dec } from '@merlionzone/merlionjs'
 
 export interface Validator
   extends Pick<ValidatorPB, 'description' | 'operatorAddress'> {

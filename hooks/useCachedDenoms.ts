@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import { useCallback, useEffect } from 'react'
+
 import config from '@/config'
 
 const cachedDenomsAtom = atomWithStorage<string[]>('cached-denoms', [])

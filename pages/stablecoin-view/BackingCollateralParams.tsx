@@ -8,10 +8,11 @@ import {
 } from '@chakra-ui/react'
 import { Dec } from '@merlionzone/merlionjs'
 import { BiExtension } from 'react-icons/bi'
-import { useBackingRatio, useMakerParams } from '@/hooks/query'
-import { HintButton, WithHint } from '@/components/Hint'
+
 import { Card } from '@/components/Card'
+import { HintButton, WithHint } from '@/components/Hint'
 import { DecDisplay } from '@/components/NumberDisplay'
+import { useBackingRatio, useMakerParams } from '@/hooks/query'
 
 export const BackingCollateralParams = () => {
   const { data: makerParams } = useMakerParams()

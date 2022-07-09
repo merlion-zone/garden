@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import {
   Box,
   Container,
@@ -10,12 +9,15 @@ import {
   Tag,
   Text,
 } from '@chakra-ui/react'
-import type { Proposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
-import { decodeContent, getTime, ProposalType } from '../utils'
-import { formatDistanceToNow } from 'date-fns'
-import { HiOutlineExternalLink } from 'react-icons/hi'
-import { formatCoin, shortenAddress } from '@/utils'
 import type { CommunityPoolSpendProposal } from 'cosmjs-types/cosmos/distribution/v1beta1/distribution'
+import type { Proposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+import { formatDistanceToNow } from 'date-fns'
+import { useMemo } from 'react'
+import { HiOutlineExternalLink } from 'react-icons/hi'
+
+import { formatCoin, shortenAddress } from '@/utils'
+
+import { ProposalType, decodeContent, getTime } from '../utils'
 
 export interface ProposalContentProps {
   proposal?: Proposal

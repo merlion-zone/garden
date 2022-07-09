@@ -1,4 +1,5 @@
 import { Dec, proto } from '@merlionzone/merlionjs'
+
 import { InputKind } from '@/pages/backing/swap-mint/estimateSwapMint'
 import { isValidAmount } from '@/utils'
 

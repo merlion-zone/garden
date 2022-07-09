@@ -1,6 +1,7 @@
-import { Text, Box, Center, Stack, Button, HStack } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
+import { Box, Button, Center, HStack, Stack, Text } from '@chakra-ui/react'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
+
 import notFoundPic from '@/public/images/merlion-sticker.png'
 
 export default function NotFound() {

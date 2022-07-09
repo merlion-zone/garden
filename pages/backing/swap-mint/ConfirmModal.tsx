@@ -1,3 +1,4 @@
+import { ArrowDownIcon, SmallAddIcon } from '@chakra-ui/icons'
 import {
   Button,
   Modal,
@@ -7,10 +8,10 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+
 import { AmountInput, AmountMetadata } from '@/components/AmountInput'
-import { OperatorIcon } from '@/pages/backing/swap-mint/OperatorIcon'
-import { ArrowDownIcon, SmallAddIcon } from '@chakra-ui/icons'
 import { Explain } from '@/pages/backing/swap-mint/Explain'
+import { OperatorIcon } from '@/pages/backing/swap-mint/OperatorIcon'
 
 interface ConfirmModalProps {
   isMint: boolean

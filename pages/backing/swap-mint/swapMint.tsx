@@ -1,14 +1,15 @@
+import { EncodeObject } from '@cosmjs/proto-signing'
+import { DeliverTxResponse } from '@cosmjs/stargate'
 import {
   MsgBurnBySwapEncodeObject,
   MsgMintBySwapEncodeObject,
 } from '@merlionzone/merlionjs'
 import { Address, Coin, Dec, typeUrls } from '@merlionzone/merlionjs'
-import { EncodeObject } from '@cosmjs/proto-signing'
-import { DeliverTxResponse } from '@cosmjs/stargate'
-import config from '@/config'
-import { useToast } from '@/hooks/useToast'
-import { DenomMetadata } from '@/hooks/query'
+
 import { TransactionToast } from '@/components/TransactionToast'
+import config from '@/config'
+import { DenomMetadata } from '@/hooks/query'
+import { useToast } from '@/hooks/useToast'
 
 interface SwapMintArgs {
   isMint: boolean

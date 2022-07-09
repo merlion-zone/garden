@@ -1,10 +1,11 @@
+import { ArrowDownIcon, SettingsIcon } from '@chakra-ui/icons'
 import {
-  Icon,
-  Text,
   Box,
   Button,
   Container,
+  Divider,
   HStack,
+  Icon,
   IconButton,
   Popover,
   PopoverBody,
@@ -13,14 +14,28 @@ import {
   Portal,
   SimpleGrid,
   Stack,
+  Text,
+  useBreakpointValue,
   useColorModeValue,
   useDisclosure,
-  Divider,
-  useBreakpointValue,
 } from '@chakra-ui/react'
-import { ArrowDownIcon, SettingsIcon } from '@chakra-ui/icons'
-import { Settings } from '@/pages/backing/swap-mint/Settings'
+import { EncodeObject } from '@cosmjs/proto-signing'
+import {
+  Coin,
+  Dec,
+  MsgBuyBackingEncodeObject,
+  MsgSellBackingEncodeObject,
+  typeUrls,
+} from '@merlionzone/merlionjs'
+import { proto } from '@merlionzone/merlionjs'
+import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { FaGift } from 'react-icons/fa'
+import { useDebounce } from 'react-use'
+
+import { AmountInput } from '@/components/AmountInput'
+import { TransactionToast } from '@/components/TransactionToast'
+import config from '@/config'
 import { useAccountAddress } from '@/hooks'
 import {
   errors,
@@ -33,32 +48,19 @@ import {
   useMakerParams,
   useTotalBacking,
 } from '@/hooks/query'
-import {
-  Coin,
-  Dec,
-  MsgBuyBackingEncodeObject,
-  MsgSellBackingEncodeObject,
-  typeUrls,
-} from '@merlionzone/merlionjs'
-import config from '@/config'
-import { AmountInput } from '@/components/AmountInput'
-import { OperatorIcon } from '@/pages/backing/swap-mint/OperatorIcon'
-import { InputKind } from '@/pages/backing/swap-mint/estimateSwapMint'
-import { SelectTokenModal } from '@/pages/backing/swap-mint/SelectTokenModal'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useSwapMintSettings } from '@/hooks/useSetting'
 import { useToast } from '@/hooks/useToast'
-import { useDebounce } from 'react-use'
-import { proto } from '@merlionzone/merlionjs'
-import { EncodeObject } from '@cosmjs/proto-signing'
-import { TransactionToast } from '@/components/TransactionToast'
-import { Explain } from './Explain'
-import { ConfirmModal } from './ConfirmModal'
-import { formatNumberSuitable } from '@/utils'
-import { FaGift } from 'react-icons/fa'
-import { estimateBuybackReback } from '@/pages/backing/buyback-reback/estimateBuybackReback'
 import { Navbar } from '@/pages/backing/Navbar'
-import { useRouter } from 'next/router'
+import { estimateBuybackReback } from '@/pages/backing/buyback-reback/estimateBuybackReback'
+import { OperatorIcon } from '@/pages/backing/swap-mint/OperatorIcon'
+import { SelectTokenModal } from '@/pages/backing/swap-mint/SelectTokenModal'
+import { Settings } from '@/pages/backing/swap-mint/Settings'
+import { InputKind } from '@/pages/backing/swap-mint/estimateSwapMint'
+import { formatNumberSuitable } from '@/utils'
+
+import { ConfirmModal } from './ConfirmModal'
+import { Explain } from './Explain'
 
 export default function BuybackReback() {
   const router = useRouter()

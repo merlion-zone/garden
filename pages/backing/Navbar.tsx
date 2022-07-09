@@ -1,4 +1,4 @@
-import { HStack, Button, useColorModeValue } from '@chakra-ui/react'
+import { Button, HStack, useColorModeValue } from '@chakra-ui/react'
 import { ReactNode } from 'react'
 
 export type NavTarget = 'mint-burn' | 'buyback-reback'

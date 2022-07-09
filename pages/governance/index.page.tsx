@@ -1,8 +1,8 @@
 import {
   Button,
   Container,
-  Heading,
   HStack,
+  Heading,
   List,
   ListItem,
   Stack,
@@ -18,12 +18,14 @@ import {
 } from '@chakra-ui/react'
 import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import type { Duration } from 'cosmjs-types/google/protobuf/duration'
-import { useMemo, useState } from 'react'
 import NextLink from 'next/link'
-import { useQueryGovParams, useQueryProposals } from '@/hooks/query'
+import { useMemo, useState } from 'react'
+
 import { AmountDisplay } from '@/components/NumberDisplay'
 import config from '@/config'
+import { useQueryGovParams, useQueryProposals } from '@/hooks/query'
 import { dayjs } from '@/utils'
+
 import { getTime } from '../proposal/utils'
 import { ProposalItem } from './ProposalItem'
 

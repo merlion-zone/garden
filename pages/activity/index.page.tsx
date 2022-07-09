@@ -14,6 +14,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+
 import { TxList } from '@/pages/activity/TxList'
 
 const Card = (props: BoxProps) => (

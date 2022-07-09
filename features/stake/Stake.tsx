@@ -1,5 +1,3 @@
-import { typeUrls } from '@merlionzone/merlionjs'
-import { useQueryDelegatorValidators } from '@/hooks/query'
 import {
   Box,
   Button,
@@ -14,13 +12,17 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { typeUrls } from '@merlionzone/merlionjs'
 import { useMemo, useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
-import { useToast } from '@/hooks/useToast'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+
 import { TransactionToast } from '@/components/TransactionToast'
-import { ValidatorTable } from './Table'
+import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useQueryDelegatorValidators } from '@/hooks/query'
+import { useToast } from '@/hooks/useToast'
+
 import { Stats } from './Stats'
+import { ValidatorTable } from './Table'
 
 export const Staking = () => {
   const toast = useToast()

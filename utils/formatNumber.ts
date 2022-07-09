@@ -1,5 +1,6 @@
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/constants/locales'
 import { Dec } from '@merlionzone/merlionjs'
+
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/constants/locales'
 
 interface FormatLocaleNumberArgs {
   number?: number | string | Dec | null

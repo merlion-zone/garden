@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Box,
   Button,
@@ -16,8 +15,10 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { parseCosmTxs, getMsgDescComponent, useTxs } from '@/hooks/query'
+import { useState } from 'react'
+
 import { useAccountAddress } from '@/hooks'
+import { getMsgDescComponent, parseCosmTxs, useTxs } from '@/hooks/query'
 import { dayjs } from '@/utils'
 
 export const TxList = () => {

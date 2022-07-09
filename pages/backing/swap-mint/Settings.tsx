@@ -1,20 +1,21 @@
+import { WarningTwoIcon } from '@chakra-ui/icons'
 import {
-  Text,
-  Stack,
-  useColorModeValue,
-  HStack,
-  Switch,
   Button,
+  HStack,
   Input,
   InputGroup,
-  InputRightElement,
   InputLeftElement,
+  InputRightElement,
+  Stack,
+  Switch,
+  Text,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { useSwapMintSettings } from '@/hooks/useSetting'
-import { WarningTwoIcon } from '@chakra-ui/icons'
 import { Dec } from '@merlionzone/merlionjs'
 import { useEffect, useState } from 'react'
+
 import { HintButton } from '@/components/Hint'
+import { useSwapMintSettings } from '@/hooks/useSetting'
 
 export const Settings = () => {
   const {

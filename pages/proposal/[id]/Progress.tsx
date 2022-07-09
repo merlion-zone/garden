@@ -1,6 +1,7 @@
 import { Container, Stack } from '@chakra-ui/react'
 import type { Proposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import { formatDistanceToNow } from 'date-fns'
+
 import { getTime } from '../utils'
 import { Step } from './Step'
 

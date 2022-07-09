@@ -1,3 +1,4 @@
+import { ArrowDownIcon, SettingsIcon, SmallAddIcon } from '@chakra-ui/icons'
 import {
   Alert,
   AlertIcon,
@@ -14,8 +15,15 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { ArrowDownIcon, SettingsIcon, SmallAddIcon } from '@chakra-ui/icons'
+import { Coin, Dec } from '@merlionzone/merlionjs'
+import { Coin as CosmCoin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
+import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useDebounce } from 'react-use'
+
+import { AmountInput } from '@/components/AmountInput'
+import config from '@/config'
+import { useAccountAddress, useMerlionQueryClient } from '@/hooks'
 import {
   errors,
   moduleAlerts,
@@ -27,27 +35,21 @@ import {
   useMakerParams,
   useMerTargetPrice,
 } from '@/hooks/query'
-import { useAccountAddress, useMerlionQueryClient } from '@/hooks'
-import { Coin, Dec } from '@merlionzone/merlionjs'
-import { Coin as CosmCoin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
-import config from '@/config'
-import { useDebounce } from 'react-use'
-import { AmountInput } from '@/components/AmountInput'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { useSwapMintSettings } from '@/hooks/useSetting'
+import { useToast } from '@/hooks/useToast'
+import { Navbar } from '@/pages/backing/Navbar'
+import { ConfirmModal } from '@/pages/backing/swap-mint/ConfirmModal'
+import { Explain } from '@/pages/backing/swap-mint/Explain'
+import { Settings } from '@/pages/backing/swap-mint/Settings'
+import {
+  InputKind,
+  estimateSwapMint,
+} from '@/pages/backing/swap-mint/estimateSwapMint'
+import { swapMint } from '@/pages/backing/swap-mint/swapMint'
+
 import { OperatorIcon } from './OperatorIcon'
 import { SelectTokenModal } from './SelectTokenModal'
-import { Settings } from '@/pages/backing/swap-mint/Settings'
-import { Explain } from '@/pages/backing/swap-mint/Explain'
-import { swapMint } from '@/pages/backing/swap-mint/swapMint'
-import { useToast } from '@/hooks/useToast'
-import { useSendCosmTx } from '@/hooks/useSendCosmTx'
-import {
-  estimateSwapMint,
-  InputKind,
-} from '@/pages/backing/swap-mint/estimateSwapMint'
-import { ConfirmModal } from '@/pages/backing/swap-mint/ConfirmModal'
-import { useSwapMintSettings } from '@/hooks/useSetting'
-import { Navbar } from '@/pages/backing/Navbar'
-import { useRouter } from 'next/router'
 
 export default function SwapMint() {
   const router = useRouter()

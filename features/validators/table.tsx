@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -22,20 +21,23 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import {
+  SortingState,
   createTable,
   getCoreRowModel,
   getSortedRowModel,
-  SortingState,
   useTableInstance,
 } from '@tanstack/react-table'
-import { useRouter } from 'next/router'
 import Fuse from 'fuse.js'
-import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { useMemo } from 'react'
-import { BondStatusString } from '@/hooks'
-import { useValidatorsData, Validator } from './hooks'
+import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { FiSearch } from 'react-icons/fi'
+
 import { DecDisplay } from '@/components/NumberDisplay'
+import { BondStatusString } from '@/hooks'
+
+import { Validator, useValidatorsData } from './hooks'
 
 export interface ValidatorTableProps {
   status: BondStatusString
