@@ -5,7 +5,6 @@ import {
   Center,
   HStack,
   Icon,
-  Link,
   Skeleton,
   Table,
   TableProps,
@@ -18,7 +17,6 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import * as React from 'react'
-import NextLink from 'next/link'
 import {
   createTable,
   getCoreRowModel,
@@ -28,8 +26,9 @@ import {
 } from '@tanstack/react-table'
 import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import Fuse from 'fuse.js'
+import { useRouter } from 'next/router'
 import { DecDisplay } from '@/components/NumberDisplay'
-import { useConnectWallet } from '@/hooks'
+import { useAccountAddress } from '@/hooks'
 import { useValidators, Validator } from './hooks'
 
 export interface ValidatorTableProps extends TableProps {
@@ -39,8 +38,9 @@ export interface ValidatorTableProps extends TableProps {
 const table = createTable().setRowType<Validator>()
 
 export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
-  const { account } = useConnectWallet()
-  const { data } = useValidators(account)
+  const router = useRouter()
+  const address = useAccountAddress()
+  const { data } = useValidators(address?.mer())
 
   const dataFuse = React.useMemo(
     () =>
@@ -68,14 +68,9 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
             <HStack spacing="3">
               {/* TODO */}
               <Avatar name={getValue()?.moniker} src="" boxSize="10" />
-              <Box>
-                <NextLink
-                  href={`/validators/${original!.operatorAddress}`}
-                  passHref
-                >
-                  <Link fontWeight="medium">{getValue()?.moniker}</Link>
-                </NextLink>
-              </Box>
+              <Text fontSize="md" fontWeight="medium">
+                {getValue()?.moniker}
+              </Text>
             </HStack>
           </Skeleton>
         ),
@@ -137,7 +132,7 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         cell: () => (
           <HStack>
             <Button variant="ghost" size="sm">
-              Deposit
+              Delegate
             </Button>
             <Button variant="ghost" size="sm">
               Withdraw
@@ -157,6 +152,10 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   })
+
+  const gotoValidator = async (address: string) => {
+    await router.push(`/validators/${address}`)
+  }
 
   return (
     <Table {...props}>
@@ -229,7 +228,11 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
             </Tr>
           ))}
         {getRowModel().rows.map(({ original, getVisibleCells }) => (
-          <Tr key={original?.operatorAddress}>
+          <Tr
+            key={original!.operatorAddress}
+            onClick={() => gotoValidator(original!.operatorAddress)}
+            _hover={{ cursor: 'pointer' }}
+          >
             {getVisibleCells().map(({ id, renderCell }) => (
               <Td key={id}>{renderCell()}</Td>
             ))}

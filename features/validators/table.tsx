@@ -9,7 +9,6 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Link,
   Skeleton,
   Stack,
   Table,
@@ -29,7 +28,7 @@ import {
   SortingState,
   useTableInstance,
 } from '@tanstack/react-table'
-import NextLink from 'next/link'
+import { useRouter } from 'next/router'
 import Fuse from 'fuse.js'
 import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { useMemo } from 'react'
@@ -45,6 +44,7 @@ export interface ValidatorTableProps {
 const table = createTable().setRowType<Validator>()
 
 export function ValidatorTable({ status }: ValidatorTableProps) {
+  const router = useRouter()
   const {
     data,
     missCounters,
@@ -83,14 +83,9 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
             <HStack spacing="3">
               {/* TODO */}
               <Avatar name={getValue()?.moniker} src="" boxSize="10" />
-              <Box>
-                <NextLink
-                  href={`/validators/${original!.operatorAddress}`}
-                  passHref
-                >
-                  <Link fontWeight="medium">{getValue()?.moniker}</Link>
-                </NextLink>
-              </Box>
+              <Text fontSize="md" fontWeight="medium">
+                {getValue()?.moniker}
+              </Text>
             </HStack>
           </Skeleton>
         ),
@@ -179,6 +174,10 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   })
+
+  const gotoValidator = async (address: string) => {
+    await router.push(`/validators/${address}`)
+  }
 
   return (
     <Box
@@ -279,7 +278,11 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
               {instance
                 .getRowModel()
                 .rows.map(({ original, getVisibleCells }) => (
-                  <Tr key={original?.operatorAddress}>
+                  <Tr
+                    key={original!.operatorAddress}
+                    onClick={() => gotoValidator(original!.operatorAddress)}
+                    _hover={{ cursor: 'pointer' }}
+                  >
                     {getVisibleCells().map(({ id, renderCell }) => (
                       <Td key={id}>{renderCell()}</Td>
                     ))}

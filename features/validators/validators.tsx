@@ -132,7 +132,7 @@ export function Validators() {
           </TabList>
         </Tabs>
       </Container>
-      <Container as="section" maxW="5xl">
+      <Container as="section" maxW="5xl" pb={{ base: '4', md: '8' }}>
         <ValidatorTable status={status} />
       </Container>
     </>
