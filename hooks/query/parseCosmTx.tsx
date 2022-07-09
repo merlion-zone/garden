@@ -201,6 +201,8 @@ function MsgSellBackingDesc({ msg }: CosmMsgProps) {
   return <>{`Swap ${coinIn} for ${coinOut}`}</>
 }
 
+/****************************** Gov ******************************/
+
 function MsgSubmitProposalDesc({ msg }: CosmMsgProps) {
   let attrs = extractEventAttributes(msg.events, 'submit_proposal')
   const proposalId = attrs?.get('proposal_id')

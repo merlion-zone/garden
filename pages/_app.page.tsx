@@ -1,20 +1,24 @@
-import type { AppProps } from 'next/app'
 import { ChakraProvider } from '@chakra-ui/react'
-import { QueryClientProvider } from 'react-query'
 import '@fontsource/inter/variable.css'
-import { theme } from '@/theme'
-import { queryClient } from '@/constants'
+import type { AppProps } from 'next/app'
+import { QueryClientProvider } from 'react-query'
+
 import { Layout } from '@/components/Layout'
+import { queryClient } from '@/constants'
+import { LanguageProvider } from '@/pages/i18n'
+import { theme } from '@/theme'
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider resetCSS theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </QueryClientProvider>
-    </ChakraProvider>
+    <LanguageProvider>
+      <ChakraProvider resetCSS theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </QueryClientProvider>
+      </ChakraProvider>
+    </LanguageProvider>
   )
 }
 
