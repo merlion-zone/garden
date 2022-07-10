@@ -6,7 +6,7 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import { ethers } from 'ethers'
 import { atom, useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import config from '@/config'
 import {
@@ -15,6 +15,10 @@ import {
   switchEthereumChainParams,
 } from '@/config/chainInfo'
 import { promiseOnce } from '@/utils'
+import {
+  getMemorizedHandler,
+  setMemorizedHandler,
+} from '@/utils/memorizedHandler'
 
 export type WalletType = 'metamask' | 'keplr'
 
@@ -54,7 +58,7 @@ export function useConnectWallet(): {
   const [signer, setSigner] = useAtom(signerAtom)
   const [account, setAccount] = useAtom(accountAtom)
 
-  const handleEthereumChainChanged = useCallbackRef(
+  const handleEthereumChainChanged = useCallback(
     (chainIDStr: string) => {
       if (walletType !== 'metamask') {
         return
@@ -66,10 +70,14 @@ export function useConnectWallet(): {
       setConnected(chainID === config.getChainID().eip155)
       setChainID(chainID)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [walletType]
   )
+  useEffect(() => {
+    setMemorizedHandler('chainChanged', handleEthereumChainChanged)
+  }, [handleEthereumChainChanged])
 
-  const handleEthereumAccountsChanged = useCallbackRef(
+  const handleEthereumAccountsChanged = useCallback(
     (accounts: string[]) => {
       if (walletType !== 'metamask') {
         return
@@ -82,41 +90,61 @@ export function useConnectWallet(): {
         setAccount(accounts[0])
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [walletType]
   )
+  useEffect(() => {
+    setMemorizedHandler('accountsChanged', handleEthereumAccountsChanged)
+  }, [handleEthereumAccountsChanged])
 
-  const handleKeplrAccountsChanged = useCallbackRef(() => {
+  const handleKeplrAccountsChanged = useCallback(() => {
     if (walletType !== 'keplr') {
       return
     }
     disconnect(true)
     onConnect(walletType)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletType])
+  useEffect(() => {
+    setMemorizedHandler('keplr_keystorechange', handleKeplrAccountsChanged)
+  }, [handleKeplrAccountsChanged])
 
   const addOrRemoveListeners = useCallback(
-    (on: boolean) => {
-      if (window.ethereum) {
-        const action = (event: any, handler: any) => {
-          on
-            ? window.ethereum.on(event, handler)
-            : window.ethereum.removeListener(event, handler)
-        }
-        action('chainChanged', handleEthereumChainChanged)
-        action('accountsChanged', handleEthereumAccountsChanged)
-      } else if (window.keplr) {
-        const action = (event: any, handler: any) => {
-          on
-            ? window.addEventListener(event, handler)
-            : window.removeEventListener(event, handler)
-        }
-        action('keplr_keystorechange', handleKeplrAccountsChanged)
+    (on: boolean, walletType?: WalletType) => {
+      const handleEthereumChainChanged = getMemorizedHandler('chainChanged')
+      const handleEthereumAccountsChanged =
+        getMemorizedHandler('accountsChanged')
+      const handleKeplrAccountsChanged = getMemorizedHandler(
+        'keplr_keystorechange'
+      )
+
+      if (!on) {
+        window.ethereum?.removeListener(
+          'chainChanged',
+          handleEthereumChainChanged
+        )
+        window.ethereum?.removeListener(
+          'accountsChanged',
+          handleEthereumAccountsChanged
+        )
+        window.removeEventListener(
+          'keplr_keystorechange',
+          handleKeplrAccountsChanged as any
+        )
+        return
+      }
+
+      if (walletType === 'metamask') {
+        window.ethereum?.on('chainChanged', handleEthereumChainChanged)
+        window.ethereum?.on('accountsChanged', handleEthereumAccountsChanged)
+      } else if (walletType === 'keplr') {
+        window.addEventListener(
+          'keplr_keystorechange',
+          handleKeplrAccountsChanged as any
+        )
       }
     },
-    [
-      handleEthereumChainChanged,
-      handleEthereumAccountsChanged,
-      handleKeplrAccountsChanged,
-    ]
+    []
   )
 
   const disconnect = useCallback(
@@ -132,13 +160,13 @@ export function useConnectWallet(): {
       setAccount(null)
     },
     [
-      setWalletType,
       setWeb3Provider,
       setConnected,
       setChainID,
       setSigner,
       setAccount,
       addOrRemoveListeners,
+      setWalletType,
     ]
   )
 
@@ -198,7 +226,7 @@ export function useConnectWallet(): {
 
         if (cancelled()) return
         const onConnected = (account: string) => {
-          addOrRemoveListeners(true)
+          addOrRemoveListeners(true, 'metamask')
           setWeb3Provider(provider)
           setConnected(chainID === config.getChainID().eip155)
           setChainID(chainID)
@@ -257,7 +285,7 @@ export function useConnectWallet(): {
         const accounts = await signer.getAccounts()
 
         if (cancelled()) return
-        addOrRemoveListeners(true)
+        addOrRemoveListeners(true, 'keplr')
         setConnected(true)
         setChainID(config.getChainID().eip155)
         setSigner(signer)
