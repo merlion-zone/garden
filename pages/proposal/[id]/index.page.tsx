@@ -1,18 +1,11 @@
-import {
-  Button,
-  Container,
-  Heading,
-  Stack,
-  useBreakpointValue,
-} from '@chakra-ui/react'
+import { Container, Heading, Stack, useBreakpointValue } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
 
+import { DepositModal, VoteModal } from '@/components/TransactionModals'
 import { useQueryProposal } from '@/hooks/query'
 
 import { ProposalContent } from './Content'
-import { Deposit } from './Deposit'
 import { ProposalProgress } from './Progress'
-import { Vote } from './Vote'
 import { ProposalVotes } from './Votes'
 
 export default function ProposalDetail() {
@@ -36,10 +29,14 @@ export default function ProposalDetail() {
             size={useBreakpointValue({ base: 'xs', md: 'sm' })}
             fontWeight="medium"
           >
-            Porposal detail
+            Proposal detail
           </Heading>
-          {data?.proposal!.status === 1 && <Deposit />}
-          {data?.proposal!.status === 2 && <Vote />}
+          {data?.proposal!.status === 1 && (
+            <DepositModal proposalId={query.id as string} />
+          )}
+          {data?.proposal!.status === 2 && (
+            <VoteModal proposalId={query.id as string} />
+          )}
         </Stack>
       </Container>
       <ProposalContent proposal={data?.proposal} />

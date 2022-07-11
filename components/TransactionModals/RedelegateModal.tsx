@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonProps,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -18,47 +19,51 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { MsgBeginRedelegateEncodeObject } from '@merlionzone/merlionjs'
-import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
 import { useAccountAddress, useConnectWallet, useValidators } from '@/hooks'
+import { useQueryDelegation } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 import { formatCoin, parseCoin } from '@/utils'
 
-import { useDelegation } from '../hooks'
+interface RedelegateModalProps extends ButtonProps {
+  validatorAddress: string
+}
 
 interface FormData {
   validator: string
   amount: string
 }
 
-export function Redelegate() {
+export function RedelegateModal({
+  validatorAddress,
+  ...props
+}: RedelegateModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { query } = useRouter()
   const { data } = useValidators()
   const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
   const toast = useToast()
-  const { data: delegationData } = useDelegation(
+  const { data: delegationData } = useQueryDelegation(
     address?.mer(),
-    query.address as string
+    validatorAddress
   )
   const balance = useMemo(
     () =>
-      delegationData && delegationData.balance
-        ? formatCoin(delegationData.balance)
+      delegationData?.delegationResponse?.balance
+        ? formatCoin(delegationData.delegationResponse.balance)
         : null,
     [delegationData]
   )
-  const { sendTx } = useSendCosmTx()
+  const { sendTx, isSendReady } = useSendCosmTx()
 
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     register,
     reset,
@@ -83,9 +88,9 @@ export function Redelegate() {
     const message: MsgBeginRedelegateEncodeObject = {
       typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegate',
       value: {
-        delegatorAddress: address?.mer(),
+        delegatorAddress: address!.mer(),
         validatorDstAddress: validator,
-        validatorSrcAddress: query.address as string,
+        validatorSrcAddress: validatorAddress,
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },
     }
@@ -96,7 +101,7 @@ export function Redelegate() {
       render: ({ onClose }) => {
         return (
           <TransactionToast
-            title="Redelegate success"
+            title={`Redelegate ${amount} ${config.displayDenom}`}
             receiptPromise={receiptPromise}
             onClose={onClose}
           />
@@ -116,10 +121,7 @@ export function Redelegate() {
   return (
     <>
       <Button
-        w="50%"
-        rounded="full"
-        variant="outline"
-        colorScheme="brand"
+        {...props}
         onClick={onOpen}
         disabled={Number(balance?.amount ?? 0) <= 0}
       >
@@ -144,11 +146,14 @@ export function Redelegate() {
                   required: 'Please select a validator',
                 })}
               >
-                {data?.validators.map(({ description, operatorAddress }) => (
-                  <option key={operatorAddress} value={operatorAddress}>
-                    {description!.moniker}
-                  </option>
-                ))}
+                {data?.validators.map(
+                  ({ description, operatorAddress }) =>
+                    operatorAddress !== validatorAddress && (
+                      <option key={operatorAddress} value={operatorAddress}>
+                        {description!.moniker}
+                      </option>
+                    )
+                )}
               </Select>
               <FormErrorMessage>{errors.validator?.message}</FormErrorMessage>
             </FormControl>
@@ -180,7 +185,7 @@ export function Redelegate() {
               type="submit"
               rounded="full"
               colorScheme="brand"
-              isLoading={isSubmitting}
+              isLoading={!isSendReady}
             >
               Submit
             </Button>

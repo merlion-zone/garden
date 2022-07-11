@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonProps,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -16,45 +17,50 @@ import {
   NumberInputField,
   useDisclosure,
 } from '@chakra-ui/react'
-import { MsgDelegateEncodeObject } from '@cosmjs/stargate'
-import { useRouter } from 'next/router'
+import { MsgUndelegateEncodeObject } from '@cosmjs/stargate'
 import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
 import { useAccountAddress, useConnectWallet } from '@/hooks'
-import { useBalance } from '@/hooks/query'
+import { useQueryDelegation } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 import { formatCoin, parseCoin } from '@/utils'
+
+interface UndelegateModalProps extends ButtonProps {
+  validatorAddress: string
+}
 
 interface FormData {
   amount: string
 }
 
-export function Delegate() {
-  const { query } = useRouter()
+export function UndelegateModal({
+  validatorAddress,
+  ...props
+}: UndelegateModalProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
-  const { balance: lionBalance = '0' } = useBalance(
+  const toast = useToast()
+  const { data: delegationData } = useQueryDelegation(
     address?.mer(),
-    config.denom
+    validatorAddress
   )
   const balance = useMemo(
     () =>
-      lionBalance
-        ? formatCoin({ amount: lionBalance, denom: config.denom })
+      delegationData?.delegationResponse?.balance
+        ? formatCoin(delegationData.delegationResponse.balance)
         : null,
-    [lionBalance]
+    [delegationData]
   )
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const toast = useToast()
-  const { sendTx } = useSendCosmTx()
+  const { sendTx, isSendReady } = useSendCosmTx()
 
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     reset,
     setValue,
@@ -74,20 +80,22 @@ export function Delegate() {
       })
       return
     }
-    const message: MsgDelegateEncodeObject = {
-      typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
+    const message: MsgUndelegateEncodeObject = {
+      typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate',
       value: {
-        delegatorAddress: address!.mer(),
-        validatorAddress: query.address as string,
+        delegatorAddress: address?.mer(),
+        validatorAddress: validatorAddress,
         amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
       },
     }
+
     const receiptPromise = sendTx(message)
+
     toast({
       render: ({ onClose }) => {
         return (
           <TransactionToast
-            title="Delegate success"
+            title={`Undelegate ${amount} ${config.displayDenom}`}
             receiptPromise={receiptPromise}
             onClose={onClose}
           />
@@ -106,8 +114,12 @@ export function Delegate() {
 
   return (
     <>
-      <Button w="full" rounded="full" colorScheme="brand" onClick={onOpen}>
-        Delegate
+      <Button
+        {...props}
+        onClick={onOpen}
+        disabled={Number(balance?.amount ?? 0) <= 0}
+      >
+        Undelegate
       </Button>
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
@@ -116,7 +128,7 @@ export function Delegate() {
           onSubmit={handleSubmit(onSubmit)}
           bgColor="bg-surface"
         >
-          <ModalHeader>Delegate</ModalHeader>
+          <ModalHeader>Undelegate</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <FormControl isInvalid={!!errors.amount}>
@@ -147,7 +159,7 @@ export function Delegate() {
               type="submit"
               rounded="full"
               colorScheme="brand"
-              isLoading={isSubmitting}
+              isLoading={!isSendReady}
             >
               Submit
             </Button>

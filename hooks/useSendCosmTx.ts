@@ -11,7 +11,7 @@ const isSendCosmTxReadyAtom = atom<boolean>(true)
 
 export function useSendCosmTx(): {
   sendTx: (
-    msg: EncodeObject,
+    msgOrMsgs: EncodeObject | EncodeObject[],
     memo?: string
   ) => Promise<DeliverTxResponse> | undefined
   isSendReady: boolean
@@ -24,18 +24,22 @@ export function useSendCosmTx(): {
 
   const sendTx = useCallback(
     (
-      msg: EncodeObject,
+      msgOrMsgs: EncodeObject | EncodeObject[],
       memo?: string
     ): Promise<DeliverTxResponse> | undefined => {
       if (!client || !account) {
         return
       }
 
-      // Only one transaction can be sent and waited for at a time
       return promiseOnce(
         [isSendReady, setIsSendReady],
         promiseResolverQueueRef,
-        client.signAndBroadcast(account.mer(), [msg], 'auto', memo)
+        client.signAndBroadcast(
+          account.mer(),
+          Array.isArray(msgOrMsgs) ? msgOrMsgs : [msgOrMsgs],
+          'auto',
+          memo
+        )
       )
     },
     [account, client, isSendReady, setIsSendReady]

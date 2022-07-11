@@ -1,5 +1,6 @@
 import {
   Box,
+  HStack,
   Heading,
   SimpleGrid,
   Stack,
@@ -8,15 +9,24 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 
-import { useConnectWallet } from '@/hooks'
+import { AmountDisplay } from '@/components/NumberDisplay'
+import config from '@/config'
+import { useAccountAddress } from '@/hooks'
 
 import { useValidators } from './hooks'
 
 export function Stats() {
+  const address = useAccountAddress()
+  const { totalBonded, data } = useValidators(address?.mer())
+
   const boxShadow = useColorModeValue('sm', 'sm-dark')
   const headingSize = useBreakpointValue({ base: 'sm', md: 'md' })
-  const { account } = useConnectWallet()
-  const { totalBonded } = useValidators(account)
+
+  const totalRewards = data
+    .map(({ rewards }) => Number(rewards.amount))
+    .reduce((prev, current) => {
+      return prev + current
+    }, 0)
 
   return (
     <SimpleGrid columns={{ base: 1, md: 3 }} gap={{ base: '5', md: '6' }}>
@@ -45,7 +55,12 @@ export function Stats() {
           <Text fontSize="sm" color="muted">
             Bonded coins
           </Text>
-          <Heading size={headingSize}>{totalBonded}</Heading>
+          <HStack alignItems="baseline">
+            <Heading size={headingSize}>
+              <AmountDisplay value={totalBonded} />
+            </Heading>
+            <Text>{config.displayDenom}</Text>
+          </HStack>
         </Stack>
       </Box>
       <Box
@@ -57,9 +72,14 @@ export function Stats() {
       >
         <Stack>
           <Text fontSize="sm" color="muted">
-            Locked coins
+            Total Rewards
           </Text>
-          <Heading size={headingSize}>1000</Heading>
+          <HStack alignItems="baseline">
+            <Heading size={headingSize}>
+              <AmountDisplay value={totalRewards} precision={2} />
+            </Heading>
+            <Text>{config.displayDenom}</Text>
+          </HStack>
         </Stack>
       </Box>
     </SimpleGrid>

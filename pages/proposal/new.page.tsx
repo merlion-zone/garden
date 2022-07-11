@@ -15,7 +15,6 @@ import {
   InputGroup,
   InputLeftAddon,
   InputRightElement,
-  Link,
   NumberInput,
   NumberInputField,
   Select,
@@ -24,17 +23,20 @@ import {
   Text,
   Textarea,
   useBreakpointValue,
-  useToast,
 } from '@chakra-ui/react'
 import { MsgSubmitProposalEncodeObject } from '@cosmjs/stargate'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { HiMinus, HiPlus } from 'react-icons/hi'
 
+import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
-import { useAccountAddress, useMerlionClient } from '@/hooks'
-import { parseCoin } from '@/utils'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
+import { useBalance } from '@/hooks/query'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { useToast } from '@/hooks/useToast'
+import { formatCoin, parseCoin } from '@/utils'
 
 import { ProposalType, getContent } from './utils'
 
@@ -44,7 +46,7 @@ interface FormData {
   description: string
   deposit: string
   recipient?: string
-  amount?: string
+  amount: string
   changes?: { subspace: string; key: string; value: string }[]
 }
 
@@ -52,11 +54,14 @@ export default function NewProposal() {
   const router = useRouter()
   const toast = useToast()
   const [type, setType] = useState<ProposalType>(ProposalType.TEXT)
+  const { walletType } = useConnectWallet()
+  const { sendTx, isSendReady } = useSendCosmTx()
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     register,
+    setValue,
     watch,
   } = useForm<FormData>({
     defaultValues: {
@@ -69,14 +74,25 @@ export default function NewProposal() {
     name: 'changes',
   })
 
-  const merlionClient = useMerlionClient()
   const address = useAccountAddress()
+  const { balance: lionBalance = '0' } = useBalance(
+    address?.mer(),
+    config.denom
+  )
+  const balance = useMemo(
+    () =>
+      lionBalance
+        ? formatCoin({ amount: lionBalance, denom: config.denom })
+        : null,
+    [lionBalance]
+  )
 
-  const onSubmit = async ({
-    deposit,
-    amount = '0',
-    ...contentParams
-  }: FormData) => {
+  // TODO
+  const onMax = () => {
+    setValue('deposit', balance?.amount ?? '0')
+  }
+
+  const onSubmit = async ({ deposit, amount, ...contentParams }: FormData) => {
     const content = getContent(type, {
       ...contentParams,
       amount: [
@@ -87,46 +103,51 @@ export default function NewProposal() {
       ],
     })
 
+    const initialDeposit = []
+
+    if (deposit) {
+      initialDeposit.push(
+        parseCoin({
+          amount: deposit,
+          denom: config.displayDenom.toLowerCase(),
+        })
+      )
+    }
+
     const msg: MsgSubmitProposalEncodeObject = {
       typeUrl: '/cosmos.gov.v1beta1.MsgSubmitProposal',
       value: {
         content: content!,
-        initialDeposit: [
-          parseCoin({
-            denom: config.displayDenom.toLowerCase(),
-            amount: deposit,
-          }),
-        ],
+        initialDeposit,
         proposer: address!.mer(),
       },
     }
 
-    try {
-      const { transactionHash } = await merlionClient!.signAndBroadcast(
-        address!.mer(),
-        [msg]
-      )
-      toast({
-        title: 'Submit proposal success',
-        description: (
-          <Text>
-            View on explorer: <Link isExternal>{transactionHash}</Link>
-          </Text>
-        ),
-        status: 'success',
-      })
+    const receiptPromise = new Promise<any>((resolve, rejected) => {
+      sendTx(msg)
+        ?.then((res) => {
+          router.push('/governance')
+          resolve(res)
+        })
+        .catch((err) => rejected(err))
+    })
 
-      await router.push(`/governance`)
-    } catch (error) {
-      console.log(error)
-      toast({
-        title: 'Submit proposal failed',
-        status: 'error',
-      })
-    }
+    toast({
+      render: ({ onClose }) => {
+        return (
+          <TransactionToast
+            title="New a proposal"
+            receiptPromise={receiptPromise}
+            onClose={onClose}
+          />
+        )
+      },
+    })
+
+    receiptPromise?.finally(() => {
+      router.push(`/governance`)
+    })
   }
-
-  const onMax = () => {}
 
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
@@ -227,8 +248,17 @@ export default function NewProposal() {
               <InputGroup>
                 <InputLeftAddon>LION</InputLeftAddon>
                 <Controller
-                  control={control}
                   name="deposit"
+                  control={control}
+                  rules={{
+                    required:
+                      walletType === 'metamask' &&
+                      'Initial deposit is required',
+                    validate: (v) =>
+                      walletType === 'metamask'
+                        ? Number(v) > 0 || 'initial deposit must greater then 0'
+                        : true,
+                  }}
                   render={({ field: { ref, ...restField } }) => {
                     return (
                       <NumberInput {...restField} w="full">
@@ -256,13 +286,14 @@ export default function NewProposal() {
                   <Input {...register('recipient')} />
                   {/* TODO: check address */}
                 </FormControl>
-                <FormControl isInvalid={!!errors.deposit}>
+                <FormControl isInvalid={!!errors.amount}>
                   <FormLabel>Amount</FormLabel>
                   <InputGroup>
                     <InputLeftAddon>LION</InputLeftAddon>
                     <Controller
-                      control={control}
                       name="amount"
+                      control={control}
+                      rules={{ required: true }}
                       render={({ field: { ref, ...restField } }) => {
                         return (
                           <NumberInput {...restField} w="full">
@@ -282,7 +313,7 @@ export default function NewProposal() {
                       }}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{errors.deposit?.message}</FormErrorMessage>
+                  <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
                 </FormControl>
               </>
             )}
@@ -353,7 +384,7 @@ export default function NewProposal() {
                 </FormControl>
               </>
             )}
-            <Button type="submit" isLoading={isSubmitting}>
+            <Button type="submit" isLoading={!isSendReady}>
               Submit
             </Button>
           </Stack>

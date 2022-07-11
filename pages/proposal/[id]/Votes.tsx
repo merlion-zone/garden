@@ -27,26 +27,26 @@ export function ProposalVotes({ proposal }: ProposalVotesProps) {
     isVoting ? (query.id as string) : undefined
   )
 
-  const { yes, no, noWithVote, abstain } = useMemo(() => {
+  const { yes, no, noWithVeto, abstain } = useMemo(() => {
     const tally = isVoting ? data?.tally : proposal?.finalTallyResult
     const yes = new Dec(tally?.yes ?? 0).divPow(config.denomDecimals).toNumber()
     const no = new Dec(tally?.no ?? 0).divPow(config.denomDecimals).toNumber()
-    const noWithVote = new Dec(tally?.noWithVeto ?? 0)
+    const noWithVeto = new Dec(tally?.noWithVeto ?? 0)
       .divPow(config.denomDecimals)
       .toNumber()
-    const abstain = new Dec(tally?.noWithVeto ?? 0)
+    const abstain = new Dec(tally?.abstain ?? 0)
       .divPow(config.denomDecimals)
       .toNumber()
 
     return {
       yes,
       no,
-      noWithVote,
+      noWithVeto,
       abstain,
     }
   }, [data, isVoting, proposal])
 
-  const sum = yes + no + noWithVote + abstain
+  const sum = yes + no + noWithVeto + abstain
 
   return (
     <Container
@@ -103,18 +103,18 @@ export function ProposalVotes({ proposal }: ProposalVotesProps) {
           <HStack justifyContent="space-between" spacing="0">
             <HStack>
               <Box w="4" h="4" rounded="full" bgColor="orange" />
-              <Text fontWeight="medium">No with vote</Text>
+              <Text fontWeight="medium">No with veto</Text>
             </HStack>
             <Text>
               <DecDisplay
-                value={sum && noWithVote / sum}
+                value={sum && noWithVeto / sum}
                 precision={2}
                 percentage
               />
             </Text>
           </HStack>
           <Text>
-            <DecDisplay value={noWithVote} suffix={` ${config.displayDenom}`} />
+            <DecDisplay value={noWithVeto} suffix={` ${config.displayDenom}`} />
           </Text>
         </Stack>
         <Stack

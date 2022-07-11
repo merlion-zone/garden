@@ -54,9 +54,15 @@ export function useValidators(address?: string | null) {
             ({ delegation }) => delegation?.validatorAddress === operatorAddress
           )?.balance ?? { amount: '0', denom: config.denom }
 
-          const rewards = rewardsData?.[index].rewards.find(
-            ({ denom }) => denom === config.denom
-          ) ?? { amount: '0', denom: config.denom }
+          const rewards = rewardsData?.[index].rewards
+            .map(({ amount, denom }) => ({
+              amount: Dec.fromProto(amount).toString(),
+              denom,
+            }))!
+            .find(({ denom }) => denom === config.denom) ?? {
+            amount: '0',
+            denom: config.denom,
+          }
 
           return {
             description: description!,

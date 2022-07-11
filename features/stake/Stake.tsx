@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Container,
   Heading,
   Icon,
@@ -16,6 +15,7 @@ import { typeUrls } from '@merlionzone/merlionjs'
 import { useMemo, useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
 
+import { WithdrawAllModal } from '@/components/TransactionModals'
 import { TransactionToast } from '@/components/TransactionToast'
 import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
 import { useQueryDelegatorValidators } from '@/hooks/query'
@@ -28,10 +28,13 @@ export const Staking = () => {
   const toast = useToast()
   const merlionClient = useMerlionClient()
   const [keyword, setKeyword] = useState('')
-  const { connected, walletType } = useConnectWallet()
+  const { connected } = useConnectWallet()
   const address = useAccountAddress()
   const { data } = useQueryDelegatorValidators(address?.mer())
-  const isMetaMask = useMemo(() => walletType === 'metamask', [walletType])
+  const validatorAddresses = useMemo(
+    () => data?.validators.map(({ operatorAddress }) => operatorAddress) ?? [],
+    [data]
+  )
   const hasValidators = useMemo(
     () => data && data.validators.length > 0,
     [data]
@@ -46,7 +49,7 @@ export const Staking = () => {
       return
     }
 
-    if (isMetaMask || !hasValidators) return
+    if (!hasValidators) return
 
     const msgs = data!.validators.map(({ operatorAddress }) => ({
       typeUrl: typeUrls.MsgWithdrawDelegatorReward,
@@ -91,15 +94,12 @@ export const Staking = () => {
             </Heading>
             <Text color="muted">{/*  */}</Text>
           </Stack>
-          <Button
+          <WithdrawAllModal
             variant="primary"
             rounded="full"
-            display={isMetaMask ? 'none' : 'unset'}
-            disabled={isMetaMask || !hasValidators}
-            onClick={onWithdraw}
-          >
-            Withdraw all rewards
-          </Button>
+            disabled={!hasValidators}
+            validatorAddresses={validatorAddresses}
+          />
         </Stack>
       </Container>
       <Container maxW="5xl" pb={{ base: '4', md: '8' }}>

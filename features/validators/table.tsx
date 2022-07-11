@@ -79,7 +79,7 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
   const columns = useMemo(
     () => [
       table.createDataColumn('description', {
-        header: () => <Text>Moniker</Text>,
+        header: () => 'Moniker',
         cell: ({ getValue, row: { original } }) => (
           <Skeleton isLoaded={!isValidatorsLoading}>
             <HStack spacing="3">
@@ -213,19 +213,20 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
               {instance.getHeaderGroups().map(({ id, headers }) => (
                 <Tr key={id}>
                   {headers.map(({ id, column, renderHeader }) => (
-                    <Th key={id} isNumeric={id !== 'description'}>
+                    <Th key={id} isNumeric={id !== 'description'} py="2">
                       <Button
                         h="unset"
                         variant="unstyled"
                         onClick={column.getToggleSortingHandler()}
                       >
-                        <Center>
+                        <Center fontSize="xs">
                           {renderHeader()}
-                          <Box position="relative" w="4" h="4">
+                          <Box position="relative" w="3" h="3">
                             <Icon
                               position="absolute"
                               as={FaSortUp}
                               color="muted"
+                              left="1"
                               opacity={
                                 column.getIsSorted() === 'asc' ? '1' : '0.2'
                               }
@@ -234,6 +235,7 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
                               position="absolute"
                               as={FaSortDown}
                               color="muted"
+                              left="1"
                               opacity={
                                 column.getIsSorted() === 'desc' ? '1' : '0.2'
                               }

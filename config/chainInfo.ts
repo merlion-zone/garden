@@ -81,5 +81,5 @@ export const keplrChainInfo: ChainInfo = {
     average: 0.025,
     high: 0.03,
   },
-  features: ['eth-address-gen', 'eth-key-sign']
+  features: ['eth-address-gen', 'eth-key-sign'],
 }

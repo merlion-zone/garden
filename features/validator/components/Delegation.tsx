@@ -1,15 +1,18 @@
 import { HStack, Stack, Text } from '@chakra-ui/react'
 import { useMemo } from 'react'
 
-import { DecDisplay } from '@/components/NumberDisplay'
+import { AmountDisplay } from '@/components/NumberDisplay'
+import {
+  DelegateModal,
+  RedelegateModal,
+  UndelegateModal,
+} from '@/components/TransactionModals'
+import config from '@/config'
 import { useAccountAddress } from '@/hooks'
 import { formatCoin } from '@/utils'
 
 import { useDelegation } from '../hooks'
 import { Card } from './Card'
-import { Delegate } from './Delegate'
-import { Redelegate } from './Redelegate'
-import { Undelegate } from './Undelegate'
 
 export interface DelegationProps {
   validatorAddress?: string
@@ -31,16 +34,35 @@ export function Delegation({ validatorAddress }: DelegationProps) {
         </Text>
         <HStack alignItems="baseline" mb="4">
           <Text fontSize="4xl">
-            <DecDisplay
-              value={balance?.amount}
-              suffix={` ${balance?.denom.toUpperCase()}`}
+            <AmountDisplay
+              value={balance?.amount ?? 0}
+              suffix={` ${(
+                balance?.denom ?? config.displayDenom
+              ).toUpperCase()}`}
             />
           </Text>
         </HStack>
-        <Delegate />
+        <DelegateModal
+          w="full"
+          rounded="full"
+          colorScheme="brand"
+          validatorAddress={validatorAddress!}
+        />
         <HStack>
-          <Redelegate />
-          <Undelegate />
+          <RedelegateModal
+            w="50%"
+            rounded="full"
+            variant="outline"
+            colorScheme="brand"
+            validatorAddress={validatorAddress!}
+          />
+          <UndelegateModal
+            w="50%"
+            rounded="full"
+            variant="outline"
+            colorScheme="brand"
+            validatorAddress={validatorAddress!}
+          />
         </HStack>
       </Stack>
     </Card>
