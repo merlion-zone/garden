@@ -454,6 +454,18 @@ export function useQueryValidatorMissCounters(params: [string][]) {
   return useMerlionQueryMultiple('oracle', 'missCounter', params)
 }
 
+export function useQueryDelegation(
+  delegatorAddress?: string,
+  validatorAddress?: string
+) {
+  return useMerlionQuery(
+    'staking',
+    'delegation',
+    delegatorAddress,
+    validatorAddress
+  )
+}
+
 export function useQueryDelegatorDelegations(address?: string | null) {
   return useMerlionQuery('staking', 'delegatorDelegations', address as string)
 }

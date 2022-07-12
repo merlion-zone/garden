@@ -1,11 +1,11 @@
 import {
   Button,
+  ButtonProps,
   FormControl,
   FormErrorMessage,
   FormLabel,
   InputGroup,
   InputRightElement,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,29 +15,32 @@ import {
   ModalOverlay,
   NumberInput,
   NumberInputField,
-  Text,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
-import { MsgDepositEncodeObject } from '@cosmjs/stargate'
-import Long from 'long'
-import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { MouseEventHandler, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
+import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
 import { useBalance } from '@/hooks/query'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { useToast } from '@/hooks/useToast'
 import { formatCoin, parseCoin } from '@/utils'
+
+interface DelegateModalProps extends ButtonProps {
+  validatorAddress: string
+}
 
 interface FormData {
   amount: string
 }
 
-export function Deposit() {
-  const toast = useToast()
-  const { query } = useRouter()
-
+export function DelegateModal({
+  validatorAddress,
+  ...props
+}: DelegateModalProps) {
+  const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
   const { balance: lionBalance = '0' } = useBalance(
     address?.mer(),
@@ -50,84 +53,81 @@ export function Deposit() {
         : null,
     [lionBalance]
   )
-
-  const { connected, account } = useConnectWallet()
-  const merlionClient = useMerlionClient()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const toast = useToast()
+  const { sendTx, isSendReady } = useSendCosmTx()
 
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     reset,
     setValue,
   } = useForm<FormData>()
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const openModal: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    onOpen()
+  }
+
   const closeModal = () => {
     onClose()
     setTimeout(reset, 100)
+  }
+
+  const onSubmit = async ({ amount }: FormData) => {
+    if (!connected || !account) {
+      toast({
+        title: 'Please connect wallet first',
+        status: 'warning',
+        isClosable: true,
+      })
+      return
+    }
+    const message = {
+      typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
+      value: {
+        delegatorAddress: address!.mer(),
+        validatorAddress,
+        amount: parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
+      },
+    }
+    const receiptPromise = sendTx(message)
+    toast({
+      render: ({ onClose }) => {
+        return (
+          <TransactionToast
+            title={`Delegate ${amount} ${config.displayDenom}`}
+            receiptPromise={receiptPromise}
+            onClose={onClose}
+          />
+        )
+      },
+    })
+
+    receiptPromise?.finally(() => {
+      closeModal()
+    })
   }
 
   const onMax = () => {
     setValue('amount', balance?.amount ?? '0')
   }
 
-  const onSubmit = async ({ amount }: FormData) => {
-    if (!connected || !account || !query.id) {
-      toast({
-        title: 'Please connect wallet first',
-        status: 'warning',
-      })
-
-      return
-    }
-
-    const message: MsgDepositEncodeObject = {
-      typeUrl: '/cosmos.gov.v1beta1.MsgDeposit',
-      value: {
-        proposalId: Long.fromString(query.id as string),
-        depositor: address!.mer(),
-        amount: [
-          parseCoin({ amount, denom: config.displayDenom.toLowerCase() }),
-        ],
-      },
-    }
-
-    try {
-      const { transactionHash } = await merlionClient!.signAndBroadcast(
-        account!,
-        [message]
-      )
-
-      toast({
-        title: 'Deposit success',
-        description: (
-          <Text>
-            View on explorer: <Link isExternal>{transactionHash}</Link>
-          </Text>
-        ),
-        status: 'success',
-      })
-    } catch (error) {
-      console.error(error)
-      toast({
-        title: 'Deposit failed',
-        status: 'error',
-      })
-    }
-
-    closeModal()
-  }
-
   return (
     <>
-      <Button variant="primary" onClick={onOpen}>
-        Deposit
+      <Button {...props} onClick={openModal}>
+        Delegate
       </Button>
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Deposit</ModalHeader>
+        <ModalContent
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          bgColor="bg-surface"
+        >
+          <ModalHeader>Delegate</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <FormControl isInvalid={!!errors.amount}>
@@ -151,13 +151,14 @@ export function Deposit() {
               <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
             </FormControl>
           </ModalBody>
+
           <ModalFooter>
             <Button
               w="full"
               type="submit"
               rounded="full"
               colorScheme="brand"
-              isLoading={isSubmitting}
+              isLoading={!isSendReady}
             >
               Submit
             </Button>

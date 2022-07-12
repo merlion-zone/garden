@@ -1,7 +1,9 @@
-import { Button, HStack, Stack, Text } from '@chakra-ui/react'
-import { typeUrls } from '@merlionzone/merlionjs'
+import { HStack, Stack, Text } from '@chakra-ui/react'
+import { Dec, typeUrls } from '@merlionzone/merlionjs'
 import { useMemo } from 'react'
 
+import { AmountDisplay } from '@/components/NumberDisplay'
+import { WithdrawModal } from '@/components/TransactionModals'
 import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
 import { useAccountAddress, useConnectWallet } from '@/hooks'
@@ -42,7 +44,8 @@ export function Rewards({ validatorAddress }: RewardsProps) {
   )
   const reward = useMemo(() => {
     const reward = data?.rewards.find((r) => r.denom === config.denom)
-    return reward && formatCoin(reward)
+    const dec = Dec.fromProto(reward?.amount ?? '0')
+    return dec.divPow(18)
   }, [data])
 
   const onWithdraw = () => {
@@ -89,18 +92,17 @@ export function Rewards({ validatorAddress }: RewardsProps) {
           My rewards
         </Text>
         <HStack alignItems="baseline" mb="4">
-          <Text fontSize="4xl">{reward?.amount ?? 0}</Text>
+          <Text fontSize="4xl">
+            <AmountDisplay value={reward ?? 0} />
+          </Text>
           <Text>{config.displayDenom}</Text>
         </HStack>
-        <Button
+        <WithdrawModal
           w="full"
           rounded="full"
           colorScheme="brand"
-          disabled={Number(balance?.amount ?? 0) <= 0}
-          onClick={onWithdraw}
-        >
-          Withdraw rewards
-        </Button>
+          validatorAddress={validatorAddress!}
+        />
       </Stack>
     </Card>
   )

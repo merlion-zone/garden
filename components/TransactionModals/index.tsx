@@ -1,1 +1,8 @@
 export { SendTokenModal } from './SendTokenModal'
+export { DelegateModal } from './DelegateModal'
+export { RedelegateModal } from './RedelegateModal'
+export { UndelegateModal } from './UndelegateModal'
+export { WithdrawModal } from './WithdrawModal'
+export { WithdrawAllModal } from './WithdrawAllModal'
+export { DepositModal } from './DepositModal'
+export { VoteModal } from './VoteModal'

@@ -3,7 +3,6 @@ import {
   AlertDescription,
   AlertIcon,
   AlertTitle,
-  Button,
   Container,
   Heading,
   Stack,
@@ -16,14 +15,11 @@ import {
 import { typeUrls } from '@merlionzone/merlionjs/dist'
 import { useMemo, useState } from 'react'
 
+import { WithdrawAllModal } from '@/components/TransactionModals'
 import { TransactionToast } from '@/components/TransactionToast'
-import {
-  BondStatusString,
-  useAccountAddress,
-  useConnectWallet,
-  useMerlionClient,
-} from '@/hooks'
-import { useQueryDelegatorValidators, useQueryValidators } from '@/hooks/query'
+import { BondStatusString, useAccountAddress, useConnectWallet } from '@/hooks'
+import { useQueryDelegatorValidators } from '@/hooks/query'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 
 import { ValidatorTable } from './table'
@@ -32,11 +28,14 @@ export function Validators() {
   const [status, setStatus] = useState<BondStatusString>('BOND_STATUS_BONDED')
 
   const toast = useToast()
-  const merlionClient = useMerlionClient()
-  const { connected, walletType } = useConnectWallet()
+  const { connected } = useConnectWallet()
+  const { sendTx, isSendReady } = useSendCosmTx()
   const address = useAccountAddress()
   const { data } = useQueryDelegatorValidators(address?.mer())
-  const isMetaMask = useMemo(() => walletType === 'metamask', [walletType])
+  const validatorAddresses = useMemo(
+    () => data?.validators.map(({ operatorAddress }) => operatorAddress) ?? [],
+    [data]
+  )
   const hasValidators = useMemo(
     () => data && data.validators.length > 0,
     [data]
@@ -63,7 +62,7 @@ export function Validators() {
       return
     }
 
-    if (isMetaMask || !hasValidators) return
+    if (!hasValidators) return
 
     const msgs = data!.validators.map(({ operatorAddress }) => ({
       typeUrl: typeUrls.MsgWithdrawDelegatorReward,
@@ -73,7 +72,7 @@ export function Validators() {
       },
     }))
 
-    const receiptPromise = merlionClient!.signAndBroadcast(address!.mer(), msgs)
+    const receiptPromise = sendTx(msgs)
 
     toast({
       render: ({ onClose }) => (
@@ -108,15 +107,11 @@ export function Validators() {
             </Heading>
             <Text color="muted">Stake Lion and earn rewards</Text>
           </Stack>
-          <Button
+          <WithdrawAllModal
+            validatorAddresses={validatorAddresses}
             variant="primary"
             rounded="full"
-            display={isMetaMask ? 'none' : 'unset'}
-            isDisabled={isMetaMask || !hasValidators}
-            onClick={onWithdraw}
-          >
-            Withdraw all rewards
-          </Button>
+          />
         </Stack>
       </Container>
       <Container as="section" maxW="5xl" pb={{ base: '4', md: '8' }}>

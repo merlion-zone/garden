@@ -89,18 +89,15 @@ export function useValidatorsData(status: BondStatusString) {
                 .toNumber()
             : null
 
-        const rewardsAmount = validatorRewards[
-          index
-        ].data?.rewards?.rewards.find(
-          ({ denom }) => denom === LION.minimalDenom
-        )?.amount
+        const rewardsAmount = validatorRewards[index].data?.rewards?.rewards
+          .map(({ amount, denom }) => ({
+            amount: Dec.fromProto(amount),
+            denom,
+          }))
+          .find(({ denom }) => denom === LION.minimalDenom)?.amount
 
         const amount: number | null = rewardsAmount
-          ? new Dec(rewardsAmount)
-              .div(validator.tokens)
-              .divPow(config.denomDecimals)
-              .times(100)
-              .toNumber()
+          ? rewardsAmount.div(validator.tokens).times(100).toNumber()
           : null
 
         return {

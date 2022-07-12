@@ -1,9 +1,9 @@
 import {
   Button,
+  ButtonProps,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,32 +12,36 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
-  Text,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
 import { MsgVoteEncodeObject } from '@cosmjs/stargate'
 import { VoteOption } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import Long from 'long'
-import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
+import { useSendCosmTx } from '@/hooks/useSendCosmTx'
+import { useToast } from '@/hooks/useToast'
+
+import { TransactionToast } from '../TransactionToast'
+
+interface VoteModalProps extends ButtonProps {
+  proposalId: string
+}
 
 interface FormData {
   option: VoteOption
 }
 
-export function Vote() {
+export function VoteModal({ proposalId, ...props }: VoteModalProps) {
   const toast = useToast()
-  const { query } = useRouter()
   const { connected, account } = useConnectWallet()
-  const merlionClient = useMerlionClient()
+  const { sendTx, isSendReady } = useSendCosmTx()
   const address = useAccountAddress()
 
   const {
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     reset,
   } = useForm<FormData>()
@@ -49,7 +53,7 @@ export function Vote() {
   }
 
   const onSubmit = async ({ option }: FormData) => {
-    if (!connected || !account || !query.id) {
+    if (!connected || !account) {
       toast({
         title: 'Please connect wallet first',
         status: 'warning',
@@ -61,46 +65,61 @@ export function Vote() {
     const message: MsgVoteEncodeObject = {
       typeUrl: '/cosmos.gov.v1beta1.MsgVote',
       value: {
-        proposalId: Long.fromString(query.id as string),
+        proposalId: Long.fromString(proposalId),
         voter: address!.mer(),
         option: option,
       },
     }
 
-    try {
-      const { transactionHash } = await merlionClient!.signAndBroadcast(
-        account!,
-        [message]
-      )
+    const receiptPromise = sendTx(message)
 
-      toast({
-        title: 'Vote success',
-        description: (
-          <Text>
-            View on explorer: <Link isExternal>{transactionHash}</Link>
-          </Text>
-        ),
-        status: 'success',
-      })
-    } catch (error) {
-      console.error(error)
-      toast({
-        title: 'Vote failed',
-        status: 'error',
-      })
+    let displayOption: string
+
+    switch (option) {
+      case 1:
+        displayOption = '`Yes`'
+        break
+      case 2:
+        displayOption = '`Abstain`'
+        break
+      case 3:
+        displayOption = '`No`'
+        break
+      case 4:
+        displayOption = '`NoWithVeto`'
+        break
+      default:
+        displayOption = ''
+        break
     }
 
-    closeModal()
+    toast({
+      render: ({ onClose }) => (
+        <TransactionToast
+          title={`Vote ${displayOption} for proposal: #${proposalId}`}
+          receiptPromise={receiptPromise}
+          onClose={onClose}
+        />
+      ),
+    })
+
+    receiptPromise?.finally(() => {
+      closeModal()
+    })
   }
 
   return (
     <>
-      <Button variant="primary" onClick={onOpen}>
+      <Button {...props} onClick={onOpen}>
         Vote
       </Button>
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+        <ModalContent
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          bgColor="bg-surface"
+        >
           <ModalHeader>Vote</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -115,7 +134,7 @@ export function Vote() {
                 <option value={VoteOption.VOTE_OPTION_YES}>Yes</option>
                 <option value={VoteOption.VOTE_OPTION_NO}>No</option>
                 <option value={VoteOption.VOTE_OPTION_NO_WITH_VETO}>
-                  No with vote
+                  No with veto
                 </option>
                 <option value={VoteOption.VOTE_OPTION_ABSTAIN}>Abstain</option>
               </Select>
@@ -128,7 +147,7 @@ export function Vote() {
               type="submit"
               rounded="full"
               colorScheme="brand"
-              isLoading={isSubmitting}
+              isLoading={!isSendReady}
             >
               Submit
             </Button>

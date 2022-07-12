@@ -25,11 +25,12 @@ import {
 } from '@tanstack/react-table'
 import Fuse from 'fuse.js'
 import { useRouter } from 'next/router'
-import * as React from 'react'
+import { useMemo, useState } from 'react'
 import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 
-import { DecDisplay } from '@/components/NumberDisplay'
-import { useAccountAddress } from '@/hooks'
+import { AmountDisplay, DecDisplay } from '@/components/NumberDisplay'
+import { DelegateModal, WithdrawModal } from '@/components/TransactionModals'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
 
 import { Validator, useValidators } from './hooks'
 
@@ -44,7 +45,7 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
   const address = useAccountAddress()
   const { data } = useValidators(address?.mer())
 
-  const dataFuse = React.useMemo(
+  const dataFuse = useMemo(
     () =>
       new Fuse(data, {
         includeScore: false,
@@ -53,18 +54,18 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(data)]
   )
-  const filterResult = React.useMemo(
+  const filterResult = useMemo(
     () => (keyword ? dataFuse.search(keyword).map(({ item }) => item) : data),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(data), dataFuse, keyword]
   )
 
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>([])
 
-  const columns = React.useMemo(
+  const columns = useMemo(
     () => [
       table.createDataColumn('description', {
-        header: () => <Text>Moniker</Text>,
+        header: () => 'Moniker',
         cell: ({ getValue, row: { original } }) => (
           <Skeleton isLoaded={!!data}>
             <HStack spacing="3">
@@ -96,13 +97,12 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
           </Skeleton>
         ),
       }),
-      // TODO: ve lock
       table.createDataColumn('delegation', {
         header: 'Delegated',
         cell: ({ getValue, row }) => (
           <Skeleton isLoaded={!!data}>
             <Text color="muted" textAlign="end">
-              <DecDisplay value={getValue()?.amount} />{' '}
+              <AmountDisplay value={getValue()?.amount} />{' '}
               {getValue()?.denom.toUpperCase()}
             </Text>
           </Skeleton>
@@ -113,7 +113,7 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         cell: ({ getValue, row }) => (
           <Skeleton isLoaded={!!data}>
             <Text color="muted" textAlign="end">
-              <DecDisplay value={getValue()?.amount} />{' '}
+              <AmountDisplay value={getValue()?.amount} />{' '}
               {getValue()?.denom.toUpperCase()}
             </Text>
           </Skeleton>
@@ -131,14 +131,18 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         id: 'action',
         header: '',
         enableSorting: false,
-        cell: () => (
+        cell: ({ row }) => (
           <HStack>
-            <Button variant="ghost" size="sm">
-              Delegate
-            </Button>
-            <Button variant="ghost" size="sm">
-              Withdraw
-            </Button>
+            <DelegateModal
+              size="sm"
+              variant="ghost"
+              validatorAddress={row.original!.operatorAddress}
+            />
+            <WithdrawModal
+              size="sm"
+              variant="ghost"
+              validatorAddress={row.original!.operatorAddress}
+            />
           </HStack>
         ),
       }),
@@ -165,26 +169,28 @@ export const ValidatorTable = ({ keyword, ...props }: ValidatorTableProps) => {
         {getHeaderGroups().map(({ id, headers }) => (
           <Tr key={id}>
             {headers.map(({ id, column, renderHeader }) => (
-              <Th key={id} isNumeric={id !== 'description'}>
+              <Th key={id} isNumeric={id !== 'description'} py="2">
                 <Button
                   h="unset"
                   variant="unstyled"
                   onClick={column.getToggleSortingHandler()}
                 >
-                  <Center>
+                  <Center fontSize="xs">
                     {renderHeader()}
                     {column.getCanSort() && (
-                      <Box position="relative" w="4" h="4">
+                      <Box position="relative" w="3" h="3">
                         <Icon
                           position="absolute"
                           as={FaSortUp}
                           color="muted"
+                          left="1"
                           opacity={column.getIsSorted() === 'asc' ? '1' : '0.2'}
                         />
                         <Icon
                           position="absolute"
                           as={FaSortDown}
                           color="muted"
+                          left="1"
                           opacity={
                             column.getIsSorted() === 'desc' ? '1' : '0.2'
                           }
