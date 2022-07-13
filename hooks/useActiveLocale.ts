@@ -50,6 +50,14 @@ const userLocaleAtom = atomWithStorage<SupportedLocale | null>(
   null
 )
 
+export function useUserLocale() {
+  const [userLocale, setUserLocale] = useAtom(userLocaleAtom)
+  return {
+    userLocale,
+    setUserLocale,
+  }
+}
+
 function userLocale(): SupportedLocale | undefined {
   const userLocaleStr =
     typeof localStorage !== 'undefined' && localStorage.getItem(userLocaleKey)
@@ -61,14 +69,6 @@ function userLocale(): SupportedLocale | undefined {
     userLocale = JSON.parse(userLocaleStr)
   } catch {}
   return parseLocale(userLocale)
-}
-
-export function useUserLocale() {
-  const [userLocale, setUserLocale] = useAtom(userLocaleAtom)
-  return {
-    userLocale,
-    setUserLocale,
-  }
 }
 
 const urlLocaleKey = 'lng'
@@ -86,7 +86,7 @@ export const initialLocale =
 
 /**
  * Returns the currently active locale, from a combination of user agent, query string, and user settings stored in redux
- * Stores the query string locale in redux (if set) to persist across sessions
+ * Stores the query string locale in localStorage (if set) to persist across sessions
  */
 export function useActiveLocale(): SupportedLocale {
   const urlLocale = useUrlLocale()

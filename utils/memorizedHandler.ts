@@ -1,22 +1,22 @@
-const eventHandlers = new Map<
+const memorizedHandlers = new Map<
   string,
   { memorized: Function; handler: Function }
 >()
 
 export function setMemorizedHandler(event: string, handler: Function) {
-  if (!eventHandlers.has(event)) {
+  if (!memorizedHandlers.has(event)) {
     const memo = {
       memorized: (...args: any[]) => {
         memo.handler(...args)
       },
       handler,
     }
-    eventHandlers.set(event, memo)
+    memorizedHandlers.set(event, memo)
   } else {
-    eventHandlers.get(event)!.handler = handler
+    memorizedHandlers.get(event)!.handler = handler
   }
 }
 
 export function getMemorizedHandler(event: string): Function | undefined {
-  return eventHandlers.get(event)?.memorized
+  return memorizedHandlers.get(event)?.memorized
 }

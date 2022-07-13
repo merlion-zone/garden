@@ -2536,9 +2536,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@merlionzone/merlionjs@npm:^0.1.16":
-  version: 0.1.16
-  resolution: "@merlionzone/merlionjs@npm:0.1.16"
+"@merlionzone/merlionjs@npm:^0.1.17":
+  version: 0.1.17
+  resolution: "@merlionzone/merlionjs@npm:0.1.17"
   dependencies:
     "@cosmjs/amino": ^0.28.9
     "@cosmjs/crypto": ^0.28.9
@@ -2558,7 +2558,7 @@ __metadata:
     long: ^4.0.0
     protobufjs: ~6.11.2
     utf-8-validate: ^5.0.9
-  checksum: 80d7724fc8af0158df6118b47dfc57767f4ecfb6b5dc75d3235209bb7f0118dc4da6fcc448c40c97a9eddcb9217f10c18581e25db027e76a8265dfa367b8a7b4
+  checksum: 8d2729b92a469216c1eb7cbe1cd1a9d4d62b0256fe479183ec9420b2a9946dad7613944e137f5842ec78d0456ccd21a9bfa1de9540f8c6ff20760651937ea3d4
   languageName: node
   linkType: hard
 
@@ -5615,7 +5615,7 @@ __metadata:
     "@lingui/cli": ^3.14.0
     "@lingui/macro": ^3.14.0
     "@lingui/react": ^3.14.0
-    "@merlionzone/merlionjs": ^0.1.16
+    "@merlionzone/merlionjs": ^0.1.17
     "@metamask/detect-provider": ^1.2.0
     "@nivo/core": ^0.78.0
     "@nivo/pie": ^0.78.0
