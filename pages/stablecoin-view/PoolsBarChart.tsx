@@ -153,7 +153,7 @@ export const CollateralPoolsBarChart = () => {
       data: [],
     }
     const lionSeries: Series = {
-      label: 'LION Burned',
+      label: 'LION Collateralized',
       data: [],
     }
     collateralPools?.forEach((pool, i) => {
@@ -172,14 +172,14 @@ export const CollateralPoolsBarChart = () => {
       usmSeries.data.push({
         pool: metadata.symbol,
         amount: new Dec(pool.merDebt!.amount)
-          .add(pool.merByLion!.amount)
+          .add(pool.merDebt!.amount)
           .mul(usmPrice || 1)
           .divPow(config.merDenomDecimals)
           .toNumber(),
       })
       lionSeries.data.push({
         pool: metadata.symbol,
-        amount: new Dec(pool.lionBurned!.amount)
+        amount: new Dec(pool.lionCollateralized!.amount)
           .mul(lionPrice || 1)
           .divPow(config.denomDecimals)
           .toNumber(),

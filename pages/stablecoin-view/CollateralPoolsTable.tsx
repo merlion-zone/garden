@@ -148,13 +148,6 @@ export const CollateralPoolsTable = () => {
                 params.collateralDenom
               )
 
-              let merMint: Coin | undefined
-              if (collateralPool?.merDebt && collateralPool.merByLion) {
-                merMint = Coin.fromProto(collateralPool.merDebt).add(
-                  collateralPool.merByLion.amount
-                )
-              }
-
               return (
                 <Tr
                   key={params.collateralDenom}
@@ -180,7 +173,7 @@ export const CollateralPoolsTable = () => {
                       items={[
                         {
                           name: 'USM',
-                          content: merMint?.amount.toString(),
+                          content: collateralPool?.merDebt?.amount,
                           decimals: config.merDenomDecimals,
                         },
                         {
@@ -191,7 +184,7 @@ export const CollateralPoolsTable = () => {
                         },
                         {
                           name: 'LION',
-                          content: collateralPool?.lionBurned?.amount,
+                          content: collateralPool?.lionCollateralized?.amount,
                           decimals: config.denomDecimals,
                         },
                       ]}

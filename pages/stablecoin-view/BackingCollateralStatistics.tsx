@@ -91,11 +91,11 @@ export const BackingCollateralStatistics = () => {
           <HStack align="baseline">
             <Text fontSize="3xl">
               <AmountDisplay
-                value={totalCollateral ? totalCollateral.lionBurned?.amount : 0}
+                value={totalCollateral ? totalCollateral.lionCollateralized?.amount : 0}
                 decimals={config.denomDecimals}
               ></AmountDisplay>
             </Text>
-            <Text color={gray}>LION Burned</Text>
+            <Text color={gray}>LION Collateralized</Text>
           </HStack>
         </Stack>
       </Card>
