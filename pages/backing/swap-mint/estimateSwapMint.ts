@@ -8,6 +8,7 @@ import { isValidAmount } from '@/utils'
 export enum InputKind {
   None = 'none',
   Backing = 'backing',
+  Collateral = 'collateral',
   Lion = 'lion',
   Usm = 'usm',
 }

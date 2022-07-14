@@ -410,6 +410,10 @@ export function useAllCollateralPools() {
   return useMerlionQuery('maker', 'allCollateralPools')
 }
 
+export function useAccountCollateral(account?: string, collateralDenom?: string) {
+  return useMerlionQuery('maker', 'collateralOfAccount', account, collateralDenom)
+}
+
 export function useBackingRatio() {
   const { data, ...rest } = useMerlionQuery('maker', 'backingRatio')
   return useMemo(() => {

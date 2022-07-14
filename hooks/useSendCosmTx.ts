@@ -9,11 +9,13 @@ import { promiseOnce } from '@/utils'
 
 const isSendCosmTxReadyAtom = atom<boolean>(true)
 
+export type SendTx = (
+  msgOrMsgs: EncodeObject | EncodeObject[],
+  memo?: string
+) => Promise<DeliverTxResponse> | undefined
+
 export function useSendCosmTx(): {
-  sendTx: (
-    msgOrMsgs: EncodeObject | EncodeObject[],
-    memo?: string
-  ) => Promise<DeliverTxResponse> | undefined
+  sendTx: SendTx
   isSendReady: boolean
 } {
   const client = useMerlionClient()
@@ -31,6 +33,7 @@ export function useSendCosmTx(): {
         return
       }
 
+      // Only one transaction can be sent and waited for at a time
       return promiseOnce(
         [isSendReady, setIsSendReady],
         promiseResolverQueueRef,
