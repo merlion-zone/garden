@@ -18,24 +18,24 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { Dec, proto } from '@merlionzone/merlionjs'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Dec, Int, proto } from '@merlionzone/merlionjs'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useDebounce, useDeepCompareEffect } from 'react-use'
 
 import { AmountInput } from '@/components/AmountInput'
 import { DecDisplay } from '@/components/NumberDisplay'
 import config from '@/config'
 import { useAccountAddress } from '@/hooks'
 import {
+  errors,
   useAccountCollateral,
-  useAllBackingParams,
-  useAllBackingPools,
   useAllCollateralParams,
   useAllCollateralPools,
   useBalance,
+  useChainStatus,
   useDenomsMetadataMap,
   useDisplayPrice,
   useMakerParams,
-  useTotalBacking,
   useTotalCollateral,
 } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
@@ -45,12 +45,15 @@ import { SelectTokenModal } from '@/pages/backing/swap-mint/SelectTokenModal'
 import { Settings } from '@/pages/backing/swap-mint/Settings'
 import { InputKind } from '@/pages/backing/swap-mint/estimateSwapMint'
 import { LtvSlider } from '@/pages/collateral/LtvSlider'
+import { borrowOrRepay } from '@/pages/collateral/borrowOrRepay'
+import { depositOrRedeem } from '@/pages/collateral/depositOrRedeem'
+import { calculateActualLtv, calculateDebt } from '@/pages/collateral/estimate'
 import { formatNumberSuitable } from '@/utils'
 
 export default function Collateral() {
   const account = useAccountAddress()
 
-  const { data: makerParams } = useMakerParams()
+  const { data: chainStatus } = useChainStatus()
   const { data: totalCollateral, mutate: mutateTotalCollateral } =
     useTotalCollateral()
   const { data: allCollateralParams } = useAllCollateralParams()
@@ -58,7 +61,9 @@ export default function Collateral() {
     useAllCollateralPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
-  const [collateralDenom, setCollateralDenom] = useState('')
+  const [collateralDenom, setCollateralDenom] = useState<string | undefined>(
+    undefined
+  )
   const [collateralParams, setCollateralParams] = useState<
     proto.maker.CollateralRiskParams | undefined
   >(undefined)
@@ -81,10 +86,8 @@ export default function Collateral() {
     setCollateralPool(pool)
   }, [collateralDenom, allCollateralParams, allCollateralPools])
 
-  const { data: accountCollateral } = useAccountCollateral(
-    account?.mer(),
-    collateralDenom
-  )
+  const { data: accountCollateral, mutate: mutateAccountCollateral } =
+    useAccountCollateral(account?.mer(), collateralDenom)
 
   const { data: collateralPrice } = useDisplayPrice(collateralDenom)
   const { data: lionPrice } = useDisplayPrice(config.denom)
@@ -96,23 +99,17 @@ export default function Collateral() {
     account?.mer(),
     config.denom
   )
-
-  const [isDepositBorrow, setIsDepositBorrow] = useState(true)
+  const { balance: usmBalance, mutate: mutateUsmBalance } = useBalance(
+    account?.mer(),
+    config.merDenom
+  )
 
   const collateralToken = useMemo(() => {
     return {
-      metadata: denomsMetadataMap?.get(collateralDenom),
+      metadata: denomsMetadataMap?.get(collateralDenom!),
       price: collateralPrice,
     }
   }, [denomsMetadataMap, collateralDenom, collateralPrice])
-
-  const lionToken = useMemo(
-    () => ({
-      metadata: denomsMetadataMap?.get(config.denom),
-      price: lionPrice,
-    }),
-    [denomsMetadataMap, lionPrice]
-  )
 
   const usmToken = useMemo(
     () => ({
@@ -122,30 +119,404 @@ export default function Collateral() {
     [denomsMetadataMap, merPrice]
   )
 
-  const [disabled, setDisabled] = useState(false)
-  const [sendEnabled, setSendEnabled] = useState(false)
-  const [sendTitle, setSendTitle] = useState<string | null>('Enter an amount')
+  const [isDepositBorrow, setIsDepositBorrow] = useState(true)
+
+  useRef()
+  const { maxLoan } = useMemo(
+    () =>
+      calculateActualLtv({
+        isDeposit: isDepositBorrow,
+        collateralParams,
+        collateralToken,
+        accountCollateral,
+        collateralPrice,
+        lionPrice,
+      }),
+    [
+      accountCollateral,
+      collateralParams,
+      collateralPrice,
+      collateralToken,
+      isDepositBorrow,
+      lionPrice,
+    ]
+  )
+  const { debt, interestPerMinute } = useMemo(
+    () =>
+      calculateDebt({
+        collateralParams,
+        accountCollateral,
+        latestBlockHeight: chainStatus?.syncInfo.latestBlockHeight,
+      }),
+    [accountCollateral, chainStatus, collateralParams]
+  )
+
+  const [poolDisabled, setPoolDisabled] = useState(false)
+  const [depositDisabled, setDepositDisabled] = useState(false)
+  const [borrowDisabled, setBorrowDisabled] = useState(false)
+  const [sendDepositEnabled, setSendDepositEnabled] = useState(false)
+  const [sendBorrowEnabled, setSendBorrowEnabled] = useState(false)
+  const [sendDepositTitle, setSendDepositTitle] = useState<string>('')
+  const [sendBorrowTitle, setSendBorrowTitle] = useState<string>('')
+  const setInitialDepositTitle = useCallback(() => {
+    setSendDepositTitle(isDepositBorrow ? 'Deposit' : 'Redeem')
+  }, [isDepositBorrow])
+  const setInitialBorrowTitle = useCallback(() => {
+    setSendBorrowTitle(isDepositBorrow ? 'Borrow' : 'Repay')
+  }, [isDepositBorrow])
+
+  const [collateralAmt, setCollateralAmt] = useState('')
+  const [lionAmt, setLionAmt] = useState('')
+  const [usmAmt, setUsmAmt] = useState('')
+  const [feeAmt, setFeeAmt] = useState('')
+
+  const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
+  const [estimated, setEstimated] = useState(false)
 
   const { sendTx, isSendReady } = useSendCosmTx()
   const { expertMode, slippageTolerance } = useSwapMintSettings()
   const toast = useToast()
 
-  const [collateralAmt, setCollateralAmt] = useState('')
-  const [lionAmt, setLionAmt] = useState('')
-  const [usmAmt, setUsmAmt] = useState('')
+  // initial states
+  useEffect(() => {
+    setPoolDisabled(false)
+    setDepositDisabled(false)
+    setBorrowDisabled(false)
+    setSendDepositEnabled(false)
+    setSendBorrowEnabled(false)
+    setInitialDepositTitle()
+    setInitialBorrowTitle()
 
-  const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
-  const [estimated, setEstimated] = useState(false)
+    setCollateralAmt('')
+    setLionAmt('')
+    setUsmAmt('')
+    setFeeAmt('')
 
-  const onDepositInput = useCallback(() => {}, [])
+    setEstimated(false)
+  }, [isDepositBorrow, setInitialDepositTitle, setInitialBorrowTitle])
 
-  const onBorrowInput = useCallback(() => {}, [])
+  // check availability
+  useDeepCompareEffect(() => {
+    const params = allCollateralParams?.find(
+      (params) => params.collateralDenom === collateralDenom
+    )
+    // check collateral pool availability
+    if (params && !params.enabled) {
+      setPoolDisabled(true)
+      setSendDepositEnabled(false)
+      setSendBorrowEnabled(false)
+      setSendDepositTitle(errors.collateralDisabled)
+      setSendBorrowTitle(errors.collateralDisabled)
+      return
+    }
+
+    if (isDepositBorrow) {
+      // check borrow
+      if (debt.greaterThanOrEqualTo(maxLoan)) {
+        setBorrowDisabled(true)
+        setSendBorrowEnabled(false)
+        setSendBorrowTitle(errors.noUsmLoanable)
+      } else {
+        setBorrowDisabled(false)
+        setInitialBorrowTitle()
+      }
+    } else {
+      // check redeem
+      if (!maxLoan.greaterThan(0) || debt.greaterThanOrEqualTo(maxLoan)) {
+        setDepositDisabled(true)
+        setSendDepositEnabled(false)
+        setSendDepositTitle(errors.noCollateralRedeemable)
+      } else {
+        setDepositDisabled(false)
+        setInitialDepositTitle()
+      }
+      // check repay
+      if (!debt.greaterThan(0)) {
+        setBorrowDisabled(true)
+        setSendBorrowEnabled(false)
+        setSendBorrowTitle(errors.noUsmDebt)
+      } else {
+        setBorrowDisabled(false)
+        setInitialBorrowTitle()
+      }
+    }
+  }, [
+    allCollateralParams,
+    collateralDenom,
+    debt,
+    isDepositBorrow,
+    maxLoan,
+    setInitialBorrowTitle,
+    setInitialDepositTitle,
+  ])
+
+  const onInput = useCallback(
+    (name: string, value: string) => {
+      switch (name) {
+        case collateralToken.metadata?.base:
+          setInputKind(InputKind.Collateral)
+          setCollateralAmt(value)
+          setLionAmt('') // it's ok
+          break
+        case config.denom:
+          setInputKind(InputKind.Lion)
+          setLionAmt(value)
+          break
+        case config.merDenom:
+          setInputKind(InputKind.Usm)
+          setUsmAmt(value)
+          break
+      }
+    },
+    [collateralToken]
+  )
+
+  // estimate deposit/redeem
+  useDebounce(
+    () => {
+      if (
+        poolDisabled ||
+        !collateralToken.metadata ||
+        !collateralPool?.collateral ||
+        !collateralParams
+      ) {
+        return
+      }
+      if (inputKind === InputKind.None) {
+        return
+      }
+      setInputKind(InputKind.None)
+
+      const collateralAmount = new Dec(collateralAmt)
+        .mulPow(collateralToken.metadata.displayExponent)
+        .toInt()
+      const lionAmount = new Dec(lionAmt).mulPow(config.denomDecimals).toInt()
+      if (!collateralAmount.greaterThan(0) && !lionAmount.greaterThan(0)) {
+        setSendDepositEnabled(false)
+        setInitialDepositTitle()
+        return
+      }
+
+      if (isDepositBorrow) {
+        // estimate deposit
+        if (
+          collateralAmount
+            .add(collateralPool.collateral.amount)
+            .greaterThan(collateralParams.maxCollateral)
+        ) {
+          setSendDepositEnabled(false)
+          setSendDepositTitle(errors.collateralInsufficientQuota)
+          return
+        }
+        if (collateralAmount.greaterThan(collateralBalance || 0)) {
+          setSendDepositEnabled(false)
+          setSendDepositTitle(errors.collateralInsufficientBalance)
+          return
+        }
+        if (lionAmount.greaterThan(lionBalance || 0)) {
+          setSendDepositEnabled(false)
+          setSendDepositTitle(errors.lionInsufficientBalance)
+          return
+        }
+      } else {
+        // estimate redeem
+        const { ltv, error } = calculateActualLtv({
+          isDeposit: isDepositBorrow,
+          collateralParams,
+          collateralToken,
+          accountCollateral,
+          collateralPrice,
+          lionPrice,
+          collateralAmt,
+          lionAmt,
+        })
+        if (
+          error ||
+          new Dec(collateralPool.collateral.amount)
+            .sub(collateralAmount)
+            .mul(ltv)
+            .lessThan(debt)
+        ) {
+          setSendDepositEnabled(false)
+          setSendDepositTitle(errors.exceedsCollateralRedeemable)
+          return
+        }
+      }
+
+      setSendDepositEnabled(true)
+      setInitialDepositTitle()
+    },
+    1000,
+    [
+      collateralAmt,
+      lionAmt,
+      collateralParams,
+      collateralPool,
+      collateralToken,
+      poolDisabled,
+      setInitialDepositTitle,
+      inputKind,
+      isDepositBorrow,
+      collateralBalance,
+      lionBalance,
+      accountCollateral,
+      collateralPrice,
+      lionPrice,
+      debt,
+    ]
+  )
+
+  // estimate borrow/repay
+  useDebounce(
+    () => {
+      if (
+        poolDisabled ||
+        !chainStatus ||
+        !accountCollateral ||
+        !collateralParams
+      ) {
+        return
+      }
+      if (inputKind === InputKind.None) {
+        return
+      }
+      setInputKind(InputKind.None)
+
+      const usmAmount = new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()
+      if (isDepositBorrow) {
+        // estimate borrow
+        const feeRatio = Dec.fromProto(collateralParams.mintFee)
+        const feeAmount = usmAmount.mul(feeRatio)
+        if (
+          collateralParams.maxMerMint &&
+          usmAmount
+            .add(feeAmount)
+            .add(collateralPool?.merDebt?.amount || 0)
+            .greaterThan(collateralParams.maxMerMint)
+        ) {
+          setSendBorrowEnabled(false)
+          setSendBorrowTitle(errors.usmInsufficientQuota)
+        } else {
+          setSendBorrowEnabled(true)
+          setInitialBorrowTitle()
+          if (
+            usmAmount
+              .add(feeAmount)
+              .add(debt)
+              .add(interestPerMinute)
+              .greaterThan(maxLoan)
+          ) {
+            const usmAvailable = maxLoan
+              .sub(debt)
+              .sub(interestPerMinute)
+              .div(feeRatio.add(1))
+              .divPow(config.merDenomDecimals)
+            if (usmAvailable.greaterThan(0)) {
+              setUsmAmt(usmAvailable.toString())
+            } else {
+              setUsmAmt('')
+            }
+          }
+        }
+      } else {
+        // estimate repay
+        if (usmAmount.greaterThan(usmBalance || 0)) {
+          setSendBorrowEnabled(false)
+          setSendBorrowTitle(errors.usmInsufficientBalance)
+        } else {
+          setSendBorrowEnabled(true)
+          setInitialBorrowTitle()
+          if (usmAmount.greaterThan(debt.add(interestPerMinute))) {
+            let repayMax = new Dec(debt.add(interestPerMinute))
+            if (repayMax.greaterThan(usmBalance || 0)) {
+              repayMax = new Dec(usmBalance)
+            }
+            setUsmAmt(repayMax.divPow(config.merDenomDecimals).toString())
+          }
+        }
+      }
+    },
+    1000,
+    [
+      accountCollateral,
+      chainStatus,
+      collateralParams,
+      collateralPool,
+      debt,
+      interestPerMinute,
+      inputKind,
+      isDepositBorrow,
+      maxLoan,
+      poolDisabled,
+      setInitialBorrowTitle,
+      usmAmt,
+      usmBalance,
+    ]
+  )
+
+  const onReceipt = useCallback(() => {
+    setCollateralAmt('')
+    setLionAmt('')
+    setUsmAmt('')
+
+    mutateTotalCollateral()
+    mutateAllCollateralPools()
+    mutateAccountCollateral()
+    mutateCollateralBalance()
+    mutateLionBalance()
+    mutateUsmBalance()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // on deposit/redeem tx submit
-  const onDepositSubmit = useCallback(() => {}, [])
+  const onDepositRedeemSubmit = useCallback(() => {
+    if (!account) {
+      return
+    }
+    depositOrRedeem({
+      isDeposit: isDepositBorrow,
+      account: account.mer(),
+      collateralToken,
+      collateralAmt,
+      lionAmt,
+      sendTx,
+      toast,
+      onReceipt,
+    })
+  }, [
+    account,
+    collateralAmt,
+    collateralToken,
+    isDepositBorrow,
+    lionAmt,
+    onReceipt,
+    sendTx,
+    toast,
+  ])
 
   // on borrow/repay tx submit
-  const onBorrowSubmit = useCallback(() => {}, [])
+  const onBorrowRepaySubmit = useCallback(() => {
+    if (!account || !collateralDenom) {
+      return
+    }
+    borrowOrRepay({
+      isBorrow: isDepositBorrow,
+      account: account.mer(),
+      collateralDenom,
+      usmAmt,
+      sendTx,
+      toast,
+      onReceipt,
+    })
+  }, [
+    account,
+    collateralDenom,
+    isDepositBorrow,
+    onReceipt,
+    sendTx,
+    toast,
+    usmAmt,
+  ])
 
   const {
     isOpen: isSelectTokenModalOpen,
@@ -213,7 +584,7 @@ export default function Collateral() {
                     <Text>Collateral Deposit:</Text>
                     <Text>
                       {formatNumberSuitable(
-                        accountCollateral?.collateral?.amount,
+                        accountCollateral?.collateral?.amount || 0,
                         collateralToken.metadata?.displayExponent
                       )}
                       &nbsp;
@@ -224,7 +595,7 @@ export default function Collateral() {
                     <Text>Catalytic LION:</Text>
                     <Text>
                       {formatNumberSuitable(
-                        accountCollateral?.lionCollateralized?.amount,
+                        accountCollateral?.lionCollateralized?.amount || 0,
                         config.denomDecimals
                       )}
                       &nbsp;
@@ -235,7 +606,7 @@ export default function Collateral() {
                     <Text>USM Debt:</Text>
                     <Text>
                       {formatNumberSuitable(
-                        accountCollateral?.merDebt?.amount,
+                        accountCollateral?.merDebt?.amount || 0,
                         config.merDenomDecimals
                       )}
                       &nbsp;
@@ -328,20 +699,24 @@ export default function Collateral() {
                   value={collateralAmt}
                   onSelectToken={onSelectTokenModalOpen}
                   hoverBorder
-                  onInput={onDepositInput}
-                  isDisabled={disabled}
+                  onInput={onInput}
+                  isDisabled={poolDisabled || depositDisabled}
                 ></AmountInput>
 
                 <LtvSlider
+                  isDeposit={isDepositBorrow}
+                  isDisabled={poolDisabled || depositDisabled}
                   collateralParams={collateralParams}
+                  collateralToken={collateralToken}
                   accountCollateral={accountCollateral}
                   collateralPrice={collateralPrice}
                   lionPrice={lionPrice}
-                  collateralBalance={new Dec(collateralBalance).divPow(collateralToken.metadata?.displayExponent || 0)}
-                  lionBalance={new Dec(lionBalance).divPow(config.denomDecimals)}
-                  collateral={new Dec(accountCollateral?.collateral?.amount).divPow(collateralToken.metadata?.displayExponent || 0)}
-                  value={lionAmt}
-                  onChange={setLionAmt}
+                  lionBalance={new Dec(lionBalance).divPow(
+                    config.denomDecimals
+                  )}
+                  collateralAmt={collateralAmt}
+                  lionAmt={lionAmt}
+                  onInput={onInput}
                 />
 
                 <Button
@@ -350,14 +725,14 @@ export default function Collateral() {
                   mt="4"
                   borderRadius="2xl"
                   fontSize="xl"
-                  isDisabled={!sendEnabled || !isSendReady}
+                  isDisabled={!sendDepositEnabled || !isSendReady}
                   isLoading={!isSendReady}
                   loadingText="Waiting for transaction completed"
                   onClick={() => {
-                    expertMode ? onDepositSubmit() : onConfirmModalOpen()
+                    expertMode ? onDepositRedeemSubmit() : onConfirmModalOpen()
                   }}
                 >
-                  {sendTitle}
+                  {sendDepositTitle}
                 </Button>
               </Box>
 
@@ -368,8 +743,9 @@ export default function Collateral() {
                   token={usmToken}
                   value={usmAmt}
                   hoverBorder
-                  onInput={onBorrowInput}
-                  isDisabled={disabled}
+                  onInput={onInput}
+                  isDisabled={poolDisabled || borrowDisabled}
+                  noMaxButton={isDepositBorrow}
                 ></AmountInput>
 
                 <Button
@@ -378,14 +754,14 @@ export default function Collateral() {
                   mt="6"
                   borderRadius="2xl"
                   fontSize="xl"
-                  isDisabled={!sendEnabled || !isSendReady}
+                  isDisabled={!sendBorrowEnabled || !isSendReady}
                   isLoading={!isSendReady}
                   loadingText="Waiting for transaction completed"
                   onClick={() => {
-                    expertMode ? onBorrowSubmit() : onConfirmModalOpen()
+                    expertMode ? onBorrowRepaySubmit() : onConfirmModalOpen()
                   }}
                 >
-                  {sendTitle}
+                  {sendBorrowTitle}
                 </Button>
               </Box>
             </Stack>

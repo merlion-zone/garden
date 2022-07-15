@@ -13,6 +13,7 @@ import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
 import { SendTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
+import { formatNumberSuitable } from '@/utils'
 
 export function depositOrRedeem({
   isDeposit,
@@ -39,11 +40,13 @@ export function depositOrRedeem({
 
   const collateral = new Coin(
     collateralToken.metadata.base,
-    new Dec(collateralAmt).mulPow(collateralToken.metadata.displayExponent)
+    new Dec(collateralAmt)
+      .mulPow(collateralToken.metadata.displayExponent)
+      .toInt()
   ).toProto()
   const lion = new Coin(
     config.denom,
-    new Dec(lionAmt).mulPow(config.denomDecimals)
+    new Dec(lionAmt).mulPow(config.denomDecimals).toInt()
   ).toProto()
 
   let msg: EncodeObject
@@ -60,7 +63,11 @@ export function depositOrRedeem({
       },
     } as MsgDepositCollateralEncodeObject
 
-    title = `Deposit ${collateralAmt} ${collateralToken.metadata.display} and catalytic ${lionAmt} ${config.displayDenom}`
+    title = `Deposit ${collateralAmt || 0} ${
+      collateralToken.metadata.symbol
+    } and catalytic ${formatNumberSuitable(lionAmt || 0)} ${
+      config.displayDenom
+    }`
   } else {
     msg = {
       typeUrl: typeUrls.MsgRedeemCollateral,
@@ -72,7 +79,11 @@ export function depositOrRedeem({
       },
     } as MsgRedeemCollateralEncodeObject
 
-    title = `Redeem ${collateralAmt} ${collateralToken.metadata.display} and catalytic ${lionAmt} ${config.displayDenom}`
+    title = `Redeem ${collateralAmt || 0} ${
+      collateralToken.metadata.symbol
+    } and catalytic ${formatNumberSuitable(lionAmt || 0)} ${
+      config.displayDenom
+    }`
   }
 
   console.debug(`${JSON.stringify(msg)}`)

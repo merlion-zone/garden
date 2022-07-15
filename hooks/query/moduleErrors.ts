@@ -21,6 +21,10 @@ export const errors = {
   invalidReceiverAddress: 'Invalid receiver address',
   noExcessBackingValue: 'No excess value allows buyback',
   noLackingBackingValue: 'No lacking value allows reback',
+  noCollateralRedeemable: 'No collateral asset redeemable',
+  noUsmLoanable: 'No USM loanable',
+  noUsmDebt: 'No USM debt',
+  exceedsCollateralRedeemable: 'Exceeds redeemable amount',
 }
 
 const moduleErrors = {

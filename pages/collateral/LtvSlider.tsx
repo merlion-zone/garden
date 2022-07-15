@@ -8,36 +8,44 @@ import {
   SliderThumb,
   SliderTrack,
   Text,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { Dec, proto } from '@merlionzone/merlionjs'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useDebounce } from 'react-use'
 
-import { DecDisplay } from '@/components/NumberDisplay'
+import { AmountMetadata } from '@/components/AmountInput'
 import config from '@/config'
+import { calculateActualLtv } from '@/pages/collateral/estimate'
+import { formatNumberSuitable } from '@/utils'
 
 interface LtvSliderProps {
+  isDeposit: boolean
+  isDisabled?: boolean
   collateralParams?: proto.maker.CollateralRiskParams
+  collateralToken: AmountMetadata
   accountCollateral?: proto.maker.AccountCollateral
   collateralPrice?: Dec
   lionPrice?: Dec
-  collateralBalance?: Dec
   lionBalance?: Dec
-  collateral: Dec
-  value: string
+  collateralAmt: string // input
+  lionAmt: string // input
 
-  onChange(value: string): void
+  onInput: (name: string, value: string) => void
 }
 
 export const LtvSlider = ({
+  isDeposit,
+  isDisabled,
   collateralParams,
+  collateralToken,
   accountCollateral,
   collateralPrice,
   lionPrice,
-  collateralBalance,
   lionBalance,
-  collateral,
-  value,
-  onChange,
+  collateralAmt,
+  lionAmt,
+  onInput,
 }: LtvSliderProps) => {
   const maxLtv = Dec.fromProto(collateralParams?.loanToValue || '')
   const basicLtv = Dec.fromProto(collateralParams?.basicLoanToValue || '')
@@ -48,62 +56,103 @@ export const LtvSlider = ({
     accountCollateral?.lionCollateralized?.amount
   ).divPow(config.denomDecimals)
 
+  const collateral = new Dec(accountCollateral?.collateral?.amount)
+    .divPow(collateralToken.metadata?.displayExponent || 0)
+    .add(collateralAmt)
+
   const min = basicLtv.mul(100).toNumber()
   const max = maxLtv.mul(100).toNumber()
   const step = 0.5
 
   const [sliderValue, setSliderValue] = useState(0)
-  useEffect(() => {
-    const catalyticRatio = lionCollateralized
-      .add(value)
-      .mul(lionPrice || 0)
-      .divPow(collateral.mul(collateralPrice || 0) || 0)
+  const [sliderAnchorValue, setSliderAnchorValue] = useState(0)
 
-    let ltv = basicLtv
-    if (fullCatalyticRatio.greaterThan(0)) {
-      ltv = maxLtv
-        .sub(basicLtv)
-        .mul(catalyticRatio)
-        .div(fullCatalyticRatio)
-        .add(basicLtv)
-    }
+  const getLtv = useCallback(
+    (lionAmt?: string) => {
+      const { ltv } = calculateActualLtv({
+        isDeposit,
+        collateralParams,
+        collateralToken,
+        accountCollateral,
+        collateralPrice,
+        lionPrice,
+        collateralAmt,
+        lionAmt,
+      })
+      return ltv
+    },
+    [
+      accountCollateral,
+      collateralAmt,
+      collateralParams,
+      collateralPrice,
+      collateralToken,
+      lionPrice,
+    ]
+  )
 
-    setSliderValue(ltv.mul(100).toDecimalPlaces(1).toNumber())
-  }, [
-    basicLtv,
-    collateral,
-    collateralPrice,
-    fullCatalyticRatio,
-    lionCollateralized,
-    lionPrice,
-    maxLtv,
-    value,
-  ])
+  const currentValue = useMemo(() => {
+    return getLtv().mul(100).toDecimalPlaces(2).toNumber()
+  }, [getLtv])
+
+  useDebounce(
+    () => {
+      setSliderValue(currentValue)
+      setSliderAnchorValue(currentValue)
+    },
+    100,
+    [currentValue, collateralAmt, isDeposit]
+  )
 
   const onSliderValue = useCallback(
     (value: number) => {
-      const catalyticRatio = fullCatalyticRatio
+      let catalyticRatio = fullCatalyticRatio
         .mul(new Dec(value).div(100).sub(basicLtv))
         .div(maxLtv.sub(basicLtv))
+      if (catalyticRatio.greaterThan(fullCatalyticRatio)) {
+        catalyticRatio = fullCatalyticRatio
+      }
 
-      console.log('coll:', collateral.toString())
       const lionCollateralizedNew = catalyticRatio
         .mul(collateral.mul(collateralPrice || 0))
         .div(lionPrice || 1)
-      const lionDeposit = lionCollateralizedNew.sub(lionCollateralized)
-      onChange(lionDeposit.toString())
+
+      if (
+        !collateral.greaterThan(0) ||
+        (isDeposit ? value < currentValue : value > currentValue)
+      ) {
+        setSliderValue(currentValue)
+        onInput(config.denom, '')
+        return
+      }
+
+      setSliderValue(value)
+      onInput(
+        config.denom,
+        lionCollateralizedNew.sub(lionCollateralized).abs().toString()
+      )
     },
     [
       basicLtv,
       collateral,
       collateralPrice,
+      currentValue,
       fullCatalyticRatio,
+      isDeposit,
       lionCollateralized,
       lionPrice,
       maxLtv,
-      onChange,
+      onInput,
     ]
   )
+
+  const onMax = useCallback(() => {
+    const value = getLtv(lionBalance?.toString())
+      .mul(100)
+      .toDecimalPlaces(2)
+      .toNumber()
+    onSliderValue(value)
+  }, [getLtv, lionBalance, onSliderValue])
 
   const labelStyles = {
     mt: '2',
@@ -121,12 +170,26 @@ export const LtvSlider = ({
         step={step}
         value={sliderValue}
         onChange={(val) => onSliderValue(val)}
+        isDisabled={isDisabled}
       >
         <SliderMark value={min} {...labelStyles}>
           {min}%
         </SliderMark>
         <SliderMark value={max} {...labelStyles}>
           {max}%
+        </SliderMark>
+        <SliderMark
+          value={sliderAnchorValue}
+          textAlign="center"
+          fontSize="xs"
+          bg={useColorModeValue('gray.500', 'gray.700')}
+          color="white"
+          mt="-7"
+          ml="-5"
+          minW="10"
+          borderRadius="sm"
+        >
+          {sliderAnchorValue}%
         </SliderMark>
         <SliderMark
           value={sliderValue}
@@ -144,25 +207,34 @@ export const LtvSlider = ({
         <SliderTrack>
           <SliderFilledTrack bg="brand.300" />
         </SliderTrack>
+        <SliderMark value={sliderAnchorValue} mt="-7px" ml="-7px">
+          <Box bg="brand.300" w="14px" h="14px" borderRadius="50%"></Box>
+        </SliderMark>
         <SliderThumb />
       </Slider>
 
       <HStack justify="center" mt="-1.5">
-        <Text fontSize="xs">Collateral Ratio</Text>
+        <Text fontSize="xs" opacity={isDisabled ? 0.6 : undefined}>
+          Collateral Ratio
+        </Text>
       </HStack>
 
-      <HStack justify="end" pe="1" mt="2">
-        <Text fontSize="sm" color="subtle">
-          Deposit LION:&nbsp;
-          <DecDisplay value={value} />
+      <HStack
+        justify="space-between"
+        align="baseline"
+        pe="1"
+        mt="2"
+        fontSize="sm"
+        color="subtle"
+      >
+        <Text>
+          {isDeposit ? 'Deposit' : 'Redeem'} LION:&nbsp;
+          {formatNumberSuitable(lionAmt, undefined, 2, 4)}
+        </Text>
+        <Text>
+          Balance: {formatNumberSuitable(lionBalance, undefined, 2, 4)} LION
           {lionBalance?.greaterThan(0) && (
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => {
-                lionBalance?.greaterThan(0)
-              }}
-            >
+            <Button variant="ghost" size="xs" onClick={onMax}>
               Max
             </Button>
           )}

@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/useToast'
 export function borrowOrRepay({
   isBorrow,
   account,
+  collateralDenom,
   usmAmt,
   sendTx,
   toast,
@@ -23,6 +24,7 @@ export function borrowOrRepay({
 }: {
   isBorrow: boolean
   account: string
+  collateralDenom: string
   usmAmt: string
   sendTx: SendTx
   toast: ReturnType<typeof useToast>
@@ -30,7 +32,7 @@ export function borrowOrRepay({
 }) {
   const usmAmount = new Coin(
     config.merDenom,
-    new Dec(usmAmt).mulPow(config.merDenomDecimals)
+    new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()
   ).toProto()
 
   let msg: EncodeObject
@@ -42,7 +44,7 @@ export function borrowOrRepay({
       value: {
         sender: account,
         to: '',
-        collateralDenom: '',
+        collateralDenom,
         mintOut: usmAmount,
       },
     }
@@ -54,7 +56,7 @@ export function borrowOrRepay({
       typeUrl: typeUrls.MsgBurnByCollateral,
       value: {
         sender: account,
-        collateralDenom: '',
+        collateralDenom,
         repayInMax: usmAmount, // TODO
       },
     }

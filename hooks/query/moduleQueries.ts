@@ -60,9 +60,17 @@ export function useMerlionQuery<
       : null,
     querier as Fetcher<Response, any>,
     {
-      // onError: (err: Error, key: string) => {
-      // console.debug(`${key}: ${err.stack}`)
-      // },
+      onError: (err: Error, key: string) => {
+        if (
+          err.stack?.includes(
+            'panic message redacted to hide potentially sensitive system info'
+          )
+        ) {
+          console.error(`${key}: ${err.stack}`)
+        } else {
+          // console.debug(`${key}: ${err.stack}`)
+        }
+      },
     }
   )
 }
@@ -121,7 +129,7 @@ export function useMerlionQueryMultiple<
 
 /****************************** Tendermint ******************************/
 
-export function useStatus() {
+export function useChainStatus() {
   return useMerlionQuery('tendermint', 'status')
 }
 
@@ -410,8 +418,16 @@ export function useAllCollateralPools() {
   return useMerlionQuery('maker', 'allCollateralPools')
 }
 
-export function useAccountCollateral(account?: string, collateralDenom?: string) {
-  return useMerlionQuery('maker', 'collateralOfAccount', account, collateralDenom)
+export function useAccountCollateral(
+  account?: string,
+  collateralDenom?: string
+) {
+  return useMerlionQuery(
+    'maker',
+    'collateralOfAccount',
+    account,
+    collateralDenom
+  )
 }
 
 export function useBackingRatio() {
