@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client'
 import dayjs from 'dayjs'
 import { utils } from 'ethers'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import requestIp from 'request-ip'
 
 import config from '@/config'
 
@@ -51,7 +52,7 @@ async function recaptcha(token: string): Promise<boolean> {
       }),
     }).then(async (res) => res.json())
 
-    return res.tokenProperties.valid && res.riskAnalysis.score < 0.9
+    return res.tokenProperties.valid && res.riskAnalysis.score < 0.1
   } catch (_) {}
 
   return false
@@ -87,15 +88,29 @@ export default async function handler(
     return res.status(500).json({ ok: false, error: '' })
   }
 
-  try {
-    const now = Date.now()
+  const detectedIp = requestIp.getClientIp(req)
 
-    const updatedAt =
+  if (!detectedIp) {
+    console.warn('IP not detected')
+  }
+
+  const now = Date.now()
+
+  try {
+    const ipUpdatedAt =
+      (
+        await prisma.ip.findUnique({
+          where: { address: detectedIp! },
+        })
+      )?.updatedAt.getTime() ?? 0
+    const userUpdatedAt =
       (
         await prisma.user.findUnique({
           where: { address: address.mer() },
         })
       )?.updatedAt.getTime() ?? 0
+
+    const updatedAt = Math.max(ipUpdatedAt, userUpdatedAt)
 
     const duration = dayjs.duration(now - updatedAt).asHours()
 
@@ -107,9 +122,16 @@ export default async function handler(
     }
 
     if (!(await recaptcha(body.token))) {
+      // TODO
       return res.status(500).json({ ok: false, error: 'Transaction error' })
     }
+  } catch (error) {
+    console.log(error)
+    // TODO
+    return res.status(500).json({ ok: false, error: 'Transaction error' })
+  }
 
+  try {
     const hdWallet = utils.HDNode.fromMnemonic(FAUCET_MNEMONIC)
     const account = hdWallet.derivePath("m/44'/60'/0'/0/0")
     const privateKey = utils.arrayify(account.privateKey)
@@ -129,10 +151,21 @@ export default async function handler(
       { amount: '1000000000000000000', denom: 'alion' },
     ])
 
+    const ip = {
+      address: detectedIp!,
+      updatedAt: new Date(now),
+    }
+
     const user = {
       address: address.mer(),
       updatedAt: new Date(now),
     }
+
+    await prisma.ip.upsert({
+      where: { address: detectedIp! },
+      update: ip,
+      create: ip,
+    })
 
     await prisma.user.upsert({
       where: { address: address.mer() },
