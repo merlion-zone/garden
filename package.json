@@ -10,13 +10,15 @@
     "format": "prettier --write --loglevel warn \"./{pages,features,components,theme,hooks,constants,utils,config}/**\"",
     "i18n:extract": "NODE_ENV=development lingui extract --clean --overwrite --locale en",
     "i18n:compile": "lingui compile",
-    "i18n": "yarn i18n:extract && yarn i18n:compile"
+    "i18n": "yarn i18n:extract && yarn i18n:compile",
+    "db:gen": "prisma generate"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.2",
     "@chakra-ui/pro-theme": "^0.0.53",
     "@chakra-ui/react": "^2.2.1",
     "@cosmjs/encoding": "^0.28.9",
+    "@cosmjs/proto-signing": "^0.28.10",
     "@cosmjs/stargate": "^0.28.9",
     "@cosmjs/tendermint-rpc": "^0.28.9",
     "@dinero.js/currencies": "alpha",
@@ -32,6 +34,7 @@
     "@metamask/detect-provider": "^1.2.0",
     "@nivo/core": "^0.78.0",
     "@nivo/pie": "^0.78.0",
+    "@prisma/client": "^4.0.0",
     "@react-spring/web": "^9.4.5",
     "@tanstack/react-table": "beta",
     "@visx/group": "^2.10.0",
@@ -56,7 +59,8 @@
     "react": "^18.2.0",
     "react-charts": "beta",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.31.3",
+    "react-google-recaptcha-v3": "^1.9.8",
+    "react-hook-form": "^7.33.1",
     "react-icons": "^4.4.0",
     "react-number-format": "^4.9.3",
     "react-query": "beta",
@@ -80,6 +84,7 @@
     "eslint-config-prettier": "^8.5.0",
     "localtunnel": "^2.0.2",
     "prettier": "^2.6.2",
+    "prisma": "^4.0.0",
     "typescript": "4.6.4"
   },
   "packageManager": "yarn@3.2.1"
