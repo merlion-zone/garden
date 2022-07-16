@@ -65,9 +65,7 @@ export function depositOrRedeem({
 
     title = `Deposit ${collateralAmt || 0} ${
       collateralToken.metadata.symbol
-    } and catalytic ${formatNumberSuitable(lionAmt || 0)} ${
-      config.displayDenom
-    }`
+    } and ${formatNumberSuitable(lionAmt || 0)} ${config.displayDenom}`
   } else {
     msg = {
       typeUrl: typeUrls.MsgRedeemCollateral,
@@ -81,14 +79,12 @@ export function depositOrRedeem({
 
     title = `Redeem ${collateralAmt || 0} ${
       collateralToken.metadata.symbol
-    } and catalytic ${formatNumberSuitable(lionAmt || 0)} ${
-      config.displayDenom
-    }`
+    } and ${formatNumberSuitable(lionAmt || 0)} ${config.displayDenom}`
   }
 
   console.debug(`${JSON.stringify(msg)}`)
   const receiptPromise = sendTx(msg)
-  receiptPromise?.finally(onReceipt)
+  receiptPromise?.finally(onReceipt).catch(() => {})
 
   toast({
     render: ({ onClose }) => {

@@ -208,7 +208,7 @@ export const SendTokenModal = ({
                 size="lg"
                 isDisabled={isDisabled}
                 isLoading={!isSendReady}
-                loadingText="Waiting for transaction completed"
+                loadingText="Waiting for completed"
                 onClick={onSend}
               >
                 {title}

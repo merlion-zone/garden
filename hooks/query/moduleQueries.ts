@@ -402,6 +402,27 @@ export function useAllCollateralParams() {
   return useMerlionQuery('maker', 'allCollateralRiskParams')
 }
 
+export function useFirstCollateralDenom() {
+  const { data: allParams, ...rest } = useAllCollateralParams()
+  const denom = useMemo(() => allParams?.at(0)?.collateralDenom, [allParams])
+  return {
+    denom,
+    ...rest,
+  }
+}
+
+export function useCollateralParams(denom?: string) {
+  const { data: allParams, ...rest } = useAllCollateralParams()
+  const params = useMemo(
+    () => allParams?.find((params) => params.collateralDenom === denom),
+    [allParams, denom]
+  )
+  return {
+    params,
+    ...rest,
+  }
+}
+
 export function useTotalBacking() {
   return useMerlionQuery('maker', 'totalBacking')
 }
@@ -416,6 +437,18 @@ export function useAllBackingPools() {
 
 export function useAllCollateralPools() {
   return useMerlionQuery('maker', 'allCollateralPools')
+}
+
+export function useCollateralPool(denom?: string) {
+  const { data: allPools, ...rest } = useAllCollateralPools()
+  const pool = useMemo(
+    () => allPools?.find((params) => params.collateral?.denom === denom),
+    [allPools, denom]
+  )
+  return {
+    pool,
+    ...rest,
+  }
 }
 
 export function useAccountCollateral(

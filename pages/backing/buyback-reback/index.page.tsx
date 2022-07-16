@@ -604,7 +604,7 @@ export default function BuybackReback() {
                 fontSize="xl"
                 isDisabled={!sendEnabled || !isSendReady}
                 isLoading={!isSendReady}
-                loadingText="Waiting for transaction completed"
+                loadingText="Waiting for completed"
                 onClick={() => {
                   expertMode ? onSubmit() : onConfirmModalOpen()
                 }}

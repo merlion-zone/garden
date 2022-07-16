@@ -67,7 +67,7 @@ export function borrowOrRepay({
 
   console.debug(`${JSON.stringify(msg)}`)
   const receiptPromise = sendTx(msg)
-  receiptPromise?.finally(onReceipt)
+  receiptPromise?.finally(onReceipt).catch(() => {})
 
   toast({
     render: ({ onClose }) => {

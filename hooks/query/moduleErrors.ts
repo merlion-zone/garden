@@ -24,6 +24,7 @@ export const errors = {
   noCollateralRedeemable: 'No collateral asset redeemable',
   noUsmLoanable: 'No USM loanable',
   noUsmDebt: 'No USM debt',
+  exceedsCollateralLoanable: 'Exceeds loanable amount',
   exceedsCollateralRedeemable: 'Exceeds redeemable amount',
 }
 

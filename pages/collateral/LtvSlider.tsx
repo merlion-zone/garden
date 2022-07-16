@@ -87,6 +87,7 @@ export const LtvSlider = ({
       collateralParams,
       collateralPrice,
       collateralToken,
+      isDeposit,
       lionPrice,
     ]
   )
@@ -127,10 +128,11 @@ export const LtvSlider = ({
       }
 
       setSliderValue(value)
-      onInput(
-        config.denom,
-        lionCollateralizedNew.sub(lionCollateralized).abs().toString()
-      )
+      let lionAmt = lionCollateralizedNew.sub(lionCollateralized)
+      if (isDeposit ? lionAmt.lessThan(0) : lionAmt.greaterThan(0)) {
+        lionAmt = new Dec(0)
+      }
+      onInput(config.denom, lionAmt.abs().toString())
     },
     [
       basicLtv,
@@ -233,7 +235,7 @@ export const LtvSlider = ({
         </Text>
         <Text>
           Balance: {formatNumberSuitable(lionBalance, undefined, 2, 4)} LION
-          {lionBalance?.greaterThan(0) && (
+          {isDeposit && lionBalance?.greaterThan(0) && (
             <Button variant="ghost" size="xs" onClick={onMax}>
               Max
             </Button>
