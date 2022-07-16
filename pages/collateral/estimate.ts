@@ -114,7 +114,8 @@ export function calculateDebt({
   const interestPerMinute = principal
     .mul(Dec.fromProto(collateralParams?.interestFee || ''))
     .mul(BlocksPerMinute)
-    .div(BlocksPerYear).toInt()
+    .div(BlocksPerYear)
+    .toInt()
 
   const interest = interestOfPeriod
     .add(accountCollateral?.lastInterest!.amount || 0)

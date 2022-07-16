@@ -22,9 +22,11 @@ import { useSwapMintSettings } from '@/hooks/useSetting'
 import { useToast } from '@/hooks/useToast'
 import { SelectTokenModal } from '@/pages/backing/swap-mint/SelectTokenModal'
 import { InputKind } from '@/pages/backing/swap-mint/estimateSwapMint'
-import { LtvSlider } from '@/pages/collateral/LtvSlider'
-import { depositOrRedeem } from '@/pages/collateral/depositOrRedeem'
+import { LtvSlider } from '@/pages/collateral/deposit-redeem/LtvSlider'
+import { depositOrRedeem } from '@/pages/collateral/deposit-redeem/depositOrRedeem'
 import { calculateActualLtv, calculateDebt } from '@/pages/collateral/estimate'
+
+import { ConfirmModal } from './ConfirmModal'
 
 export default function DepositRedeem({
   isDeposit,
@@ -72,6 +74,14 @@ export default function DepositRedeem({
       price: collateralPrice,
     }
   }, [denomsMetadataMap, collateralDenom, collateralPrice])
+
+  const lionToken = useMemo(
+    () => ({
+      metadata: denomsMetadataMap?.get(config.denom),
+      price: lionPrice,
+    }),
+    [denomsMetadataMap, lionPrice]
+  )
 
   const { maxLoan } = useMemo(
     () =>
@@ -290,7 +300,7 @@ export default function DepositRedeem({
   }, [])
 
   // on deposit/redeem tx submit
-  const onDepositRedeemSubmit = useCallback(() => {
+  const onSubmit = useCallback(() => {
     if (!account) {
       return
     }
@@ -361,7 +371,7 @@ export default function DepositRedeem({
         isLoading={!isSendReady}
         loadingText="Waiting for completed"
         onClick={() => {
-          expertMode ? onDepositRedeemSubmit() : onConfirmModalOpen()
+          expertMode ? onSubmit() : onConfirmModalOpen()
         }}
       >
         {sendTitle}
@@ -374,6 +384,18 @@ export default function DepositRedeem({
           setCollateralDenom(denom)
           setInputKind(InputKind.Collateral)
         }}
+      />
+
+      <ConfirmModal
+        isDeposit={isDeposit}
+        collateralToken={collateralToken}
+        lionToken={lionToken}
+        collateralAmt={collateralAmt}
+        lionAmt={lionAmt}
+        feeAmt={feeAmt}
+        isOpen={isConfirmModalOpen}
+        onClose={onConfirmModalClose}
+        onSubmit={onSubmit}
       />
     </Box>
   )

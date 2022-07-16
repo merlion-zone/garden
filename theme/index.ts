@@ -118,6 +118,8 @@ export const theme: Record<string, any> = extendTheme(
           const $arrowBg = cssVar('popper-arrow-bg')
           const $arrowShadowColor = cssVar('popper-arrow-shadow-color')
 
+          const baseStyle = baseTheme.components.Popover.baseStyle(props)
+
           const baseStyleContent: SystemStyleFunction = (props) => {
             const bg = mode('white', 'gray.800')(props)
             const shadowColor = mode('gray.300', 'whiteAlpha.300')(props)
@@ -141,7 +143,11 @@ export const theme: Record<string, any> = extendTheme(
           }
 
           return {
-            ...baseTheme.components.Popover.baseStyle(props),
+            ...baseStyle,
+            popper: {
+              ...baseStyle.popper,
+              zIndex: 1500,
+            },
             content: {
               ...baseStyleContent(props),
               borderWidth: '1px',

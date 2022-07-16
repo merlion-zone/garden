@@ -17,7 +17,11 @@ import { useEffect, useState } from 'react'
 import { HintButton } from '@/components/Hint'
 import { useSwapMintSettings } from '@/hooks/useSetting'
 
-export const Settings = () => {
+interface SettingsProps {
+  hideSlippageTolerance?: boolean
+}
+
+export const Settings = ({ hideSlippageTolerance }: SettingsProps) => {
   const {
     slippageTolerancePercentage,
     setSlippageTolerancePercentage,
@@ -55,81 +59,83 @@ export const Settings = () => {
       py="1"
       color={useColorModeValue('gray.600', 'gray.400')}
     >
-      <Stack
-        p="4"
-        borderRadius="lg"
-        border="1px"
-        borderColor={useColorModeValue('gray.300', 'gray.700')}
-        spacing="4"
-      >
-        <Text fontSize="sm" fontWeight="500">
-          Transaction Settings
-        </Text>
-        <HStack>
-          <Text>Slippage tolerance</Text>
-          <HintButton
-            hint="Your transaction will revert if the price changes unfavorably by more than this percentage."
-            ariaLabel="Slippage Tolerance Tooltip"
-            outlineQuestionIcon
-          />
-        </HStack>
-        <HStack>
-          <Button
-            variant={slippageTolerancePercentage ? 'ghost' : 'solid'}
-            size="sm"
-            onClick={() => {
-              setSlippageTolerancePercentage('')
-            }}
-          >
-            Auto
-          </Button>
-          <InputGroup size="sm">
-            {slippageFrontrun && (
-              <InputLeftElement>
-                <WarningTwoIcon color={slippageInvalid ? 'red' : 'orange'} />
-              </InputLeftElement>
-            )}
-            <Input
-              placeholder="0.5"
-              textAlign="right"
-              variant="outline"
-              sx={{ paddingInlineEnd: '28px' }}
-              borderColor={inputBorderColor}
-              _hover={{ borderColor: inputHoverBorderColor }}
-              type="number"
-              value={slippageTolerancePercentage}
-              onChange={(event) => {
-                if (!event.target.value.match(/^\d*[.,]?\d*$/)) {
-                  return
-                }
-                setSlippageTolerancePercentage(event.target.value)
+      {!hideSlippageTolerance && (
+        <Stack
+          p="4"
+          borderRadius="lg"
+          border="1px"
+          borderColor={useColorModeValue('gray.300', 'gray.700')}
+          spacing="4"
+        >
+          <Text fontSize="sm" fontWeight="500">
+            Transaction Settings
+          </Text>
+          <HStack>
+            <Text>Slippage tolerance</Text>
+            <HintButton
+              hint="Your transaction will revert if the price changes unfavorably by more than this percentage."
+              ariaLabel="Slippage Tolerance Tooltip"
+              outlineQuestionIcon
+            />
+          </HStack>
+          <HStack>
+            <Button
+              variant={slippageTolerancePercentage ? 'ghost' : 'solid'}
+              size="sm"
+              onClick={() => {
+                setSlippageTolerancePercentage('')
               }}
-              onBlur={(event) => {
-                if (event.target.value) {
-                  const slippage = new Dec(event.target.value).toDecimalPlaces(
-                    2
-                  )
-                  if (slippage.lessThanOrEqualTo(50)) {
-                    setSlippageTolerancePercentage(slippage.toString())
-                  } else {
-                    setSlippageTolerancePercentage('')
+            >
+              Auto
+            </Button>
+            <InputGroup size="sm">
+              {slippageFrontrun && (
+                <InputLeftElement>
+                  <WarningTwoIcon color={slippageInvalid ? 'red' : 'orange'} />
+                </InputLeftElement>
+              )}
+              <Input
+                placeholder="0.5"
+                textAlign="right"
+                variant="outline"
+                sx={{ paddingInlineEnd: '28px' }}
+                borderColor={inputBorderColor}
+                _hover={{ borderColor: inputHoverBorderColor }}
+                type="number"
+                value={slippageTolerancePercentage}
+                onChange={(event) => {
+                  if (!event.target.value.match(/^\d*[.,]?\d*$/)) {
+                    return
                   }
-                }
-              }}
-            ></Input>
-            <InputRightElement>
-              <Text>%</Text>
-            </InputRightElement>
-          </InputGroup>
-        </HStack>
-        {slippageInvalid ? (
-          <Text color="red">Enter a valid slippage percentage</Text>
-        ) : (
-          slippageFrontrun && (
-            <Text color="orange">Your transaction may be frontrun</Text>
-          )
-        )}
-      </Stack>
+                  setSlippageTolerancePercentage(event.target.value)
+                }}
+                onBlur={(event) => {
+                  if (event.target.value) {
+                    const slippage = new Dec(
+                      event.target.value
+                    ).toDecimalPlaces(2)
+                    if (slippage.lessThanOrEqualTo(50)) {
+                      setSlippageTolerancePercentage(slippage.toString())
+                    } else {
+                      setSlippageTolerancePercentage('')
+                    }
+                  }
+                }}
+              ></Input>
+              <InputRightElement>
+                <Text>%</Text>
+              </InputRightElement>
+            </InputGroup>
+          </HStack>
+          {slippageInvalid ? (
+            <Text color="red">Enter a valid slippage percentage</Text>
+          ) : (
+            slippageFrontrun && (
+              <Text color="orange">Your transaction may be frontrun</Text>
+            )
+          )}
+        </Stack>
+      )}
       <Stack
         p="4"
         borderRadius="lg"

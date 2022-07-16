@@ -1,6 +1,6 @@
 import { Box, Button, useDisclosure } from '@chakra-ui/react'
-import { Dec, proto } from '@merlionzone/merlionjs'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Dec } from '@merlionzone/merlionjs'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebounce, useDeepCompareEffect } from 'react-use'
 
 import { AmountInput } from '@/components/AmountInput'
@@ -10,54 +10,38 @@ import {
   errors,
   useAccountCollateral,
   useAllCollateralParams,
-  useAllCollateralPools,
   useBalance,
   useChainStatus,
+  useCollateralParams,
+  useCollateralPool,
   useDenomsMetadataMap,
   useDisplayPrice,
-  useTotalCollateral,
 } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useSwapMintSettings } from '@/hooks/useSetting'
 import { useToast } from '@/hooks/useToast'
 import { InputKind } from '@/pages/backing/swap-mint/estimateSwapMint'
-import { borrowOrRepay } from '@/pages/collateral/borrowOrRepay'
-import { depositOrRedeem } from '@/pages/collateral/depositOrRedeem'
+import { borrowOrRepay } from '@/pages/collateral/borrow-repay/borrowOrRepay'
 import { calculateActualLtv, calculateDebt } from '@/pages/collateral/estimate'
 
-export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
+import { ConfirmModal } from './ConfirmModal'
+
+export default function BorrowRepay({
+  isBorrow,
+  collateralDenom,
+}: {
+  isBorrow: boolean
+  collateralDenom?: string
+}) {
   const account = useAccountAddress()
 
   const { data: chainStatus } = useChainStatus()
   const { data: allCollateralParams } = useAllCollateralParams()
-  const { data: allCollateralPools, mutate: mutateAllCollateralPools } =
-    useAllCollateralPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
-  const [collateralDenom, setCollateralDenom] = useState<string | undefined>(
-    undefined
-  )
-  const [collateralParams, setCollateralParams] = useState<
-    proto.maker.CollateralRiskParams | undefined
-  >(undefined)
-  const [collateralPool, setCollateralPool] = useState<
-    proto.maker.PoolCollateral | undefined
-  >(undefined)
-  useEffect(() => {
-    if (allCollateralParams?.length) {
-      setCollateralDenom(allCollateralParams[0].collateralDenom)
-    }
-  }, [allCollateralParams])
-  useEffect(() => {
-    const params = allCollateralParams?.find(
-      (params) => params.collateralDenom === collateralDenom
-    )
-    const pool = allCollateralPools?.find(
-      (params) => params.collateral?.denom === collateralDenom
-    )
-    setCollateralParams(params)
-    setCollateralPool(pool)
-  }, [collateralDenom, allCollateralParams, allCollateralPools])
+  const { params: collateralParams } = useCollateralParams(collateralDenom)
+  const { pool: collateralPool, mutate: mutateCollateralPool } =
+    useCollateralPool(collateralDenom)
 
   const { data: accountCollateral, mutate: mutateAccountCollateral } =
     useAccountCollateral(account?.mer(), collateralDenom)
@@ -66,12 +50,6 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
   const { data: lionPrice } = useDisplayPrice(config.denom)
   const { data: merPrice } = useDisplayPrice(config.merDenom)
 
-  const { balance: collateralBalance, mutate: mutateCollateralBalance } =
-    useBalance(account?.mer(), collateralDenom)
-  const { balance: lionBalance, mutate: mutateLionBalance } = useBalance(
-    account?.mer(),
-    config.denom
-  )
   const { balance: usmBalance, mutate: mutateUsmBalance } = useBalance(
     account?.mer(),
     config.merDenom
@@ -132,10 +110,9 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
   const [feeAmt, setFeeAmt] = useState('')
 
   const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
-  const [estimated, setEstimated] = useState(false)
 
   const { sendTx, isSendReady } = useSendCosmTx()
-  const { expertMode, slippageTolerance } = useSwapMintSettings()
+  const { expertMode } = useSwapMintSettings()
   const toast = useToast()
 
   // initial states
@@ -146,9 +123,7 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
 
     setUsmAmt('')
     setFeeAmt('')
-
-    setEstimated(false)
-  }, [isBorrow, setInitialTitle])
+  }, [isBorrow, setInitialTitle, collateralDenom])
 
   // check availability
   useDeepCompareEffect(() => {
@@ -193,17 +168,14 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
     setInitialTitle,
   ])
 
-  const onInput = useCallback(
-    (name: string, value: string) => {
-      switch (name) {
-        case config.merDenom:
-          setInputKind(InputKind.Usm)
-          setUsmAmt(value)
-          break
-      }
-    },
-    [collateralToken]
-  )
+  const onInput = useCallback((name: string, value: string) => {
+    switch (name) {
+      case config.merDenom:
+        setInputKind(InputKind.Usm)
+        setUsmAmt(value)
+        break
+    }
+  }, [])
 
   // estimate borrow/repay
   useDebounce(
@@ -217,6 +189,12 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
       setInputKind(InputKind.None)
 
       const usmAmount = new Dec(usmAmt).mulPow(config.merDenomDecimals).toInt()
+      if (!usmAmount.greaterThan(0)) {
+        setSendEnabled(false)
+        setInitialTitle()
+        return
+      }
+
       if (isBorrow) {
         // estimate borrow
         const feeRatio = Dec.fromProto(collateralParams.mintFee)
@@ -244,6 +222,7 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
           return
         }
 
+        setFeeAmt(feeAmount.divPow(config.merDenomDecimals).toString())
         setSendEnabled(true)
         setInitialTitle()
       } else {
@@ -272,11 +251,12 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
       collateralParams,
       collateralPool,
       debt,
-      interestPerMinute,
+      disabled,
+      feeAmt,
       inputKind,
+      interestPerMinute,
       isBorrow,
       maxLoan,
-      disabled,
       setInitialTitle,
       usmAmt,
       usmBalance,
@@ -285,18 +265,17 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
 
   const onReceipt = useCallback(() => {
     setUsmAmt('')
+    setFeeAmt('')
     setSendEnabled(false)
 
-    mutateAllCollateralPools()
+    mutateCollateralPool()
     mutateAccountCollateral()
-    mutateCollateralBalance()
-    mutateLionBalance()
     mutateUsmBalance()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // on borrow/repay tx submit
-  const onBorrowRepaySubmit = useCallback(() => {
+  const onSubmit = useCallback(() => {
     if (!account || !collateralDenom) {
       return
     }
@@ -338,11 +317,22 @@ export default function BorrowRepay({ isBorrow }: { isBorrow: boolean }) {
         isLoading={!isSendReady}
         loadingText="Waiting for completed"
         onClick={() => {
-          expertMode ? onBorrowRepaySubmit() : onConfirmModalOpen()
+          expertMode ? onSubmit() : onConfirmModalOpen()
         }}
       >
         {sendTitle}
       </Button>
+
+      <ConfirmModal
+        isBorrow={isBorrow}
+        usmToken={usmToken}
+        usmAmt={usmAmt}
+        feeAmt={feeAmt}
+        interestFee={collateralParams?.interestFee || ''}
+        isOpen={isConfirmModalOpen}
+        onClose={onConfirmModalClose}
+        onSubmit={onSubmit}
+      />
     </Box>
   )
 }

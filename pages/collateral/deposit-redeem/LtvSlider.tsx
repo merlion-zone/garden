@@ -56,9 +56,12 @@ export const LtvSlider = ({
     accountCollateral?.lionCollateralized?.amount
   ).divPow(config.denomDecimals)
 
-  const collateral = new Dec(accountCollateral?.collateral?.amount)
-    .divPow(collateralToken.metadata?.displayExponent || 0)
-    .add(collateralAmt)
+  let collateral = new Dec(accountCollateral?.collateral?.amount).divPow(
+    collateralToken.metadata?.displayExponent || 0
+  )
+  collateral = isDeposit
+    ? collateral.add(collateralAmt)
+    : collateral.sub(collateralAmt)
 
   const min = basicLtv.mul(100).toNumber()
   const max = maxLtv.mul(100).toNumber()
@@ -118,16 +121,19 @@ export const LtvSlider = ({
         .mul(collateral.mul(collateralPrice || 0))
         .div(lionPrice || 1)
 
-      if (
-        !collateral.greaterThan(0) ||
-        (isDeposit ? value < currentValue : value > currentValue)
-      ) {
+      if (isDeposit ? value < currentValue : value > currentValue) {
         setSliderValue(currentValue)
         onInput(config.denom, '')
         return
       }
 
+      if (value < min) {
+        value = min
+      } else if (value > max) {
+        value = max
+      }
       setSliderValue(value)
+
       let lionAmt = lionCollateralizedNew.sub(lionCollateralized)
       if (isDeposit ? lionAmt.lessThan(0) : lionAmt.greaterThan(0)) {
         lionAmt = new Dec(0)
@@ -143,7 +149,9 @@ export const LtvSlider = ({
       isDeposit,
       lionCollateralized,
       lionPrice,
+      max,
       maxLtv,
+      min,
       onInput,
     ]
   )
@@ -162,13 +170,15 @@ export const LtvSlider = ({
     fontSize: 'xs',
   }
 
+  const trackColor = useColorModeValue('gray.200', 'gray.700')
+
   return (
     <Box pt={8} pb={4} px={4}>
       <Slider
         aria-label="ltv-slider"
         focusThumbOnChange={false}
-        min={min}
-        max={max}
+        min={min - 0.5}
+        max={max + 0.5}
         step={step}
         value={sliderValue}
         onChange={(val) => onSliderValue(val)}
@@ -206,18 +216,16 @@ export const LtvSlider = ({
         >
           {sliderValue}%
         </SliderMark>
-        <SliderTrack>
-          <SliderFilledTrack bg="brand.300" />
-        </SliderTrack>
+        <SliderTrack></SliderTrack>
         <SliderMark value={sliderAnchorValue} mt="-7px" ml="-7px">
-          <Box bg="brand.300" w="14px" h="14px" borderRadius="50%"></Box>
+          <Box bg={trackColor} w="14px" h="14px" borderRadius="50%"></Box>
         </SliderMark>
         <SliderThumb />
       </Slider>
 
       <HStack justify="center" mt="-1.5">
         <Text fontSize="xs" opacity={isDisabled ? 0.6 : undefined}>
-          Collateral Ratio
+          LTV
         </Text>
       </HStack>
 

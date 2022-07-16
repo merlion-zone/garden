@@ -1,5 +1,6 @@
-import { Config, config as defaultConfig, envConfig } from '@/config/config'
 import Decimal from 'decimal.js'
+
+import { Config, config as defaultConfig, envConfig } from '@/config/config'
 
 function hydrateConfigFromEnv(config: Config): Config {
   const truthyValues = ['true', '1', 't']

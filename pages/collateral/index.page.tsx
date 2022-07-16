@@ -20,6 +20,7 @@ import {
 import { Dec, proto } from '@merlionzone/merlionjs'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { WithHint } from '@/components/Hint'
 import { DecDisplay } from '@/components/NumberDisplay'
 import config from '@/config'
 import { useAccountAddress } from '@/hooks'
@@ -33,8 +34,8 @@ import {
   useTotalCollateral,
 } from '@/hooks/query'
 import { Settings } from '@/pages/backing/swap-mint/Settings'
-import BorrowRepay from '@/pages/collateral/BorrowRepay'
-import DepositRedeem from '@/pages/collateral/DepositRedeem'
+import BorrowRepay from '@/pages/collateral/borrow-repay/BorrowRepay'
+import DepositRedeem from '@/pages/collateral/deposit-redeem/DepositRedeem'
 import { calculateActualLtv, calculateDebt } from '@/pages/collateral/estimate'
 import { formatNumberSuitable } from '@/utils'
 
@@ -123,7 +124,7 @@ export default function Collateral() {
   }, [collateralParams, debt, interestPerMinute, maxLoan])
 
   const healthFactor = useMemo(() => {
-    if (!debt.greaterThan(0)) {
+    if (!debt.divPow(config.merDenomDecimals).greaterThan(0)) {
       return undefined
     }
     return new Dec(accountCollateral?.collateral?.amount)
@@ -142,6 +143,14 @@ export default function Collateral() {
   ])
 
   const centerTitle = useBreakpointValue({ base: false, md: true })
+
+  const collateralRatioHint = (
+    <Text fontSize="sm">
+      The maximum USM loan ratio (called loan-to-value, or LTV) depends on the
+      BasicLTV and PremiumLTV for this collateral pool, and the additional
+      LION-boosting catalytic added by you.
+    </Text>
+  )
 
   return (
     <Container centerContent>
@@ -175,7 +184,7 @@ export default function Collateral() {
             <Portal>
               <PopoverContent>
                 <PopoverBody>
-                  <Settings />
+                  <Settings hideSlippageTolerance />
                 </PopoverBody>
               </PopoverContent>
             </Portal>
@@ -254,74 +263,84 @@ export default function Collateral() {
                   {collateralToken.metadata?.symbol} Collateral Pool
                 </Text>
                 <Stack fontSize="sm" spacing="8" ps="4">
+                  <WithHint hint={collateralRatioHint}>
+                    <Stack>
+                      <HStack justify="space-between">
+                        <Text>Basic LTV:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.basicLoanToValue}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                      <HStack justify="space-between">
+                        <Text>Premium LTV:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.loanToValue}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                      <HStack justify="space-between">
+                        <Text>Catalytic LION Ratio:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.catalyticLionRatio}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                    </Stack>
+                  </WithHint>
                   <Stack>
-                    <HStack justify="space-between">
-                      <Text>Basic Collateral Ratio:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.basicLoanToValue}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
-                    <HStack justify="space-between">
-                      <Text>Premium Collateral Ratio:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.loanToValue}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
-                    <HStack justify="space-between">
-                      <Text>Catalytic LION Ratio:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.catalyticLionRatio}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
+                    <WithHint hint="The fee is added to your debt every time you borrow USM.">
+                      <HStack justify="space-between">
+                        <Text>Borrow Fee:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.mintFee}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                    </WithHint>
+                    <WithHint hint="The annualized percent that your debt will increase each year.">
+                      <HStack justify="space-between">
+                        <Text>Interest APY:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.interestFee}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                    </WithHint>
                   </Stack>
                   <Stack>
-                    <HStack justify="space-between">
-                      <Text>Borrow Fee:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.mintFee}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
-                    <HStack justify="space-between">
-                      <Text>Interest APY:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.interestFee}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
-                  </Stack>
-                  <Stack>
-                    <HStack justify="space-between">
-                      <Text>Liquidation Fee:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.liquidationFee}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
-                    <HStack justify="space-between">
-                      <Text>Liquidation Threshold:</Text>
-                      <Text>
-                        <DecDisplay
-                          value={collateralParams?.liquidationThreshold}
-                          percentage
-                        />
-                      </Text>
-                    </HStack>
+                    <WithHint hint="The discount a liquidator gets when buying collateral flagged for liquidation.">
+                      <HStack justify="space-between">
+                        <Text>Liquidation Fee:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.liquidationFee}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                    </WithHint>
+                    <WithHint hint="The maximum threshold of debt that will be flagged for liquidation.">
+                      <HStack justify="space-between">
+                        <Text>Liquidation Threshold:</Text>
+                        <Text>
+                          <DecDisplay
+                            value={collateralParams?.liquidationThreshold}
+                            percentage
+                          />
+                        </Text>
+                      </HStack>
+                    </WithHint>
                   </Stack>
                 </Stack>
               </Stack>
@@ -335,7 +354,10 @@ export default function Collateral() {
 
               <Divider />
 
-              <BorrowRepay isBorrow={isDepositBorrow} />
+              <BorrowRepay
+                isBorrow={isDepositBorrow}
+                collateralDenom={collateralDenom}
+              />
             </Stack>
           </SimpleGrid>
         </Stack>
