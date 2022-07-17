@@ -1,4 +1,4 @@
-import { Dec, Int, proto } from '@merlionzone/merlionjs'
+import { Dec, proto } from '@merlionzone/merlionjs'
 
 import { AmountMetadata } from '@/components/AmountInput'
 import config from '@/config'
@@ -25,7 +25,7 @@ export function calculateActualLtv({
 }): {
   catalyticRatio: Dec
   ltv: Dec
-  maxLoan: Int
+  maxLoan: Dec
   error?: boolean
 } {
   const maxLtv = Dec.fromProto(collateralParams?.loanToValue || '')
@@ -51,7 +51,7 @@ export function calculateActualLtv({
       return {
         catalyticRatio: new Dec(0),
         ltv: new Dec(0),
-        maxLoan: new Int(0),
+        maxLoan: new Dec(0),
         error: true,
       }
     }
@@ -78,7 +78,6 @@ export function calculateActualLtv({
     .mul(collateralPrice || 0)
     .mul(ltv)
     .mulPow(config.merDenomDecimals)
-    .toInt()
 
   return {
     catalyticRatio,
@@ -96,9 +95,9 @@ export function calculateDebt({
   accountCollateral?: proto.maker.AccountCollateral
   latestBlockHeight?: number
 }): {
-  debt: Int
-  interest: Int
-  interestPerMinute: Int
+  debt: Dec
+  interest: Dec
+  interestPerMinute: Dec
 } {
   const period =
     (latestBlockHeight || 0) -
@@ -115,12 +114,11 @@ export function calculateDebt({
     .mul(Dec.fromProto(collateralParams?.interestFee || ''))
     .mul(BlocksPerMinute)
     .div(BlocksPerYear)
-    .toInt()
 
-  const interest = interestOfPeriod
-    .add(accountCollateral?.lastInterest!.amount || 0)
-    .toInt()
-  const debt = principal.add(interest).toInt()
+  const interest = interestOfPeriod.add(
+    accountCollateral?.lastInterest!.amount || 0
+  )
+  const debt = principal.add(interest)
 
   return {
     debt,

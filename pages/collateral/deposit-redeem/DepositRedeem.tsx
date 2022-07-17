@@ -121,12 +121,11 @@ export default function DepositRedeem({
 
   const [collateralAmt, setCollateralAmt] = useState('')
   const [lionAmt, setLionAmt] = useState('')
-  const [feeAmt, setFeeAmt] = useState('')
 
   const [inputKind, setInputKind] = useState<InputKind>(InputKind.None)
 
   const { sendTx, isSendReady } = useSendCosmTx()
-  const { expertMode, slippageTolerance } = useSwapMintSettings()
+  const { expertMode } = useSwapMintSettings()
   const toast = useToast()
 
   // initial states
@@ -137,7 +136,6 @@ export default function DepositRedeem({
 
     setCollateralAmt('')
     setLionAmt('')
-    setFeeAmt('')
   }, [isDeposit, setInitialTitle])
 
   // check availability
@@ -153,7 +151,13 @@ export default function DepositRedeem({
     if (isDeposit) {
     } else {
       // check redeem
-      if (!maxLoan.greaterThan(0) || debt.greaterThanOrEqualTo(maxLoan)) {
+      const noCollateral =
+        !new Dec(accountCollateral?.collateral?.amount).greaterThan(0) &&
+        !new Dec(accountCollateral?.lionCollateralized?.amount).greaterThan(0)
+      if (
+        noCollateral ||
+        (debt.greaterThan(0) && debt.greaterThanOrEqualTo(maxLoan))
+      ) {
         setDisabled(true)
         setSendEnabled(false)
         setSendTitle(errors.noCollateralRedeemable)
@@ -165,6 +169,7 @@ export default function DepositRedeem({
   }, [
     collateralDenom,
     collateralParams,
+    accountCollateral,
     debt,
     isDeposit,
     maxLoan,
@@ -345,6 +350,7 @@ export default function DepositRedeem({
         hoverBorder
         onInput={onInput}
         isDisabled={disabled || disabled}
+        noMaxButton={!isDeposit}
       ></AmountInput>
 
       <LtvSlider
@@ -392,7 +398,6 @@ export default function DepositRedeem({
         lionToken={lionToken}
         collateralAmt={collateralAmt}
         lionAmt={lionAmt}
-        feeAmt={feeAmt}
         isOpen={isConfirmModalOpen}
         onClose={onConfirmModalClose}
         onSubmit={onSubmit}

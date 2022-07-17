@@ -236,7 +236,7 @@ export default function BorrowRepay({
         setSendEnabled(true)
         setInitialTitle()
         if (usmAmount.greaterThan(debt.add(interestPerMinute))) {
-          let repayMax = new Dec(debt.add(interestPerMinute))
+          let repayMax = debt.add(interestPerMinute)
           if (repayMax.greaterThan(usmBalance || 0)) {
             repayMax = new Dec(usmBalance)
           }

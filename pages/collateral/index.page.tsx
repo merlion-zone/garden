@@ -17,8 +17,8 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Dec, proto } from '@merlionzone/merlionjs'
-import React, { useEffect, useMemo, useState } from 'react'
+import { Dec } from '@merlionzone/merlionjs'
+import React, { useMemo, useState } from 'react'
 
 import { WithHint } from '@/components/Hint'
 import { DecDisplay } from '@/components/NumberDisplay'
@@ -26,12 +26,10 @@ import config from '@/config'
 import { useAccountAddress } from '@/hooks'
 import {
   useAccountCollateral,
-  useAllCollateralParams,
-  useAllCollateralPools,
   useChainStatus,
+  useCollateralParams,
   useDenomsMetadataMap,
   useDisplayPrice,
-  useTotalCollateral,
 } from '@/hooks/query'
 import { Settings } from '@/pages/backing/swap-mint/Settings'
 import BorrowRepay from '@/pages/collateral/borrow-repay/BorrowRepay'
@@ -43,39 +41,21 @@ export default function Collateral() {
   const account = useAccountAddress()
 
   const { data: chainStatus } = useChainStatus()
-  const { data: totalCollateral, mutate: mutateTotalCollateral } =
-    useTotalCollateral()
-  const { data: allCollateralParams } = useAllCollateralParams()
-  const { data: allCollateralPools, mutate: mutateAllCollateralPools } =
-    useAllCollateralPools()
   const { data: denomsMetadataMap } = useDenomsMetadataMap()
 
   const [collateralDenom, setCollateralDenom] = useState<string | undefined>(
     undefined
   )
-  const [collateralParams, setCollateralParams] = useState<
-    proto.maker.CollateralRiskParams | undefined
-  >(undefined)
-  const [collateralPool, setCollateralPool] = useState<
-    proto.maker.PoolCollateral | undefined
-  >(undefined)
-  useEffect(() => {
-    const params = allCollateralParams?.find(
-      (params) => params.collateralDenom === collateralDenom
-    )
-    const pool = allCollateralPools?.find(
-      (params) => params.collateral?.denom === collateralDenom
-    )
-    setCollateralParams(params)
-    setCollateralPool(pool)
-  }, [collateralDenom, allCollateralParams, allCollateralPools])
 
-  const { data: accountCollateral, mutate: mutateAccountCollateral } =
-    useAccountCollateral(account?.mer(), collateralDenom)
+  const { params: collateralParams } = useCollateralParams(collateralDenom)
+
+  const { data: accountCollateral } = useAccountCollateral(
+    account?.mer(),
+    collateralDenom
+  )
 
   const { data: collateralPrice } = useDisplayPrice(collateralDenom)
   const { data: lionPrice } = useDisplayPrice(config.denom)
-  const { data: merPrice } = useDisplayPrice(config.merDenom)
 
   const collateralToken = useMemo(() => {
     return {
@@ -133,7 +113,6 @@ export default function Collateral() {
       .mul(Dec.fromProto(collateralParams?.liquidationThreshold || ''))
       .div(debt.divPow(config.merDenomDecimals))
       .toDecimalPlaces(2)
-      .toString()
   }, [
     accountCollateral,
     collateralParams,
@@ -141,6 +120,13 @@ export default function Collateral() {
     collateralToken,
     debt,
   ])
+
+  const healthFactorColor =
+    !healthFactor || healthFactor.greaterThan(1.5)
+      ? 'green.500'
+      : healthFactor.greaterThan(1)
+      ? 'orange'
+      : 'red.500'
 
   const centerTitle = useBreakpointValue({ base: false, md: true })
 
@@ -207,6 +193,7 @@ export default function Collateral() {
                       <Text>
                         {formatNumberSuitable(
                           accountCollateral?.collateral?.amount || 0,
+                          collateralToken.metadata?.displayExponent,
                           collateralToken.metadata?.displayExponent
                         )}
                         &nbsp;
@@ -227,19 +214,19 @@ export default function Collateral() {
                   </Stack>
                   <Stack>
                     <HStack justify="space-between">
-                      <Text>USM Debt:</Text>
+                      <Text>Debt:</Text>
                       <Text>
                         {formatNumberSuitable(
                           debt.toString(),
                           config.merDenomDecimals,
-                          2
+                          config.merDenomDecimals
                         )}
                         &nbsp;
                         {config.merDisplayDenom}
                       </Text>
                     </HStack>
                     <HStack justify="space-between">
-                      <Text>USM Loanable:</Text>
+                      <Text>Loanable:</Text>
                       <Text>
                         {formatNumberSuitable(
                           loanable.toString(),
@@ -250,17 +237,29 @@ export default function Collateral() {
                         {config.merDisplayDenom}
                       </Text>
                     </HStack>
-                    <HStack justify="space-between">
-                      <Text>Health Factor:</Text>
-                      <Text>{healthFactor ?? <>&infin;</>}</Text>
-                    </HStack>
+                    <WithHint hint="Safety of your deposited collateral against the borrowed USM. If the health factor goes below 1, the liquidation of your collateral might be triggered.">
+                      <HStack justify="space-between" h="7">
+                        <Text>Health Factor:</Text>
+                        <Text
+                          color={healthFactorColor}
+                          fontSize={!healthFactor ? 'lg' : undefined}
+                          fontWeight="bold"
+                        >
+                          {healthFactor ? (
+                            healthFactor.toString()
+                          ) : (
+                            <>&infin;</>
+                          )}
+                        </Text>
+                      </HStack>
+                    </WithHint>
                   </Stack>
                 </Stack>
               </Stack>
 
               <Stack>
                 <Text fontSize="lg">
-                  {collateralToken.metadata?.symbol} Collateral Pool
+                  {collateralToken.metadata?.symbol} Collateral Params
                 </Text>
                 <Stack fontSize="sm" spacing="8" ps="4">
                   <WithHint hint={collateralRatioHint}>

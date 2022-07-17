@@ -18,7 +18,6 @@ interface ConfirmModalProps {
   lionToken: AmountMetadata
   collateralAmt: string
   lionAmt: string
-  feeAmt: string
   isOpen: boolean
 
   onClose(): void
@@ -32,7 +31,6 @@ export const ConfirmModal = ({
   lionToken,
   collateralAmt,
   lionAmt,
-  feeAmt,
   isOpen,
   onClose,
   onSubmit,

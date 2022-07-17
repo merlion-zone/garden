@@ -3,7 +3,6 @@ import {
   Button,
   HStack,
   Slider,
-  SliderFilledTrack,
   SliderMark,
   SliderThumb,
   SliderTrack,

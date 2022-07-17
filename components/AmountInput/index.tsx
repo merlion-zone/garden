@@ -17,6 +17,7 @@ import { WithHint } from '@/components/Hint'
 import { AmountDisplay } from '@/components/NumberDisplay'
 import { useAccountAddress } from '@/hooks'
 import { DenomMetadata, useBalance } from '@/hooks/query'
+import { formatNumberSuitable } from '@/utils'
 
 export interface AmountMetadata {
   metadata?: DenomMetadata
@@ -170,11 +171,7 @@ export const AmountInput = ({
               </Text>
             )}
             <Text>
-              <AmountDisplay
-                value={amountValue}
-                prefix="$"
-                placeholder={false}
-              />
+              {amountValue && '$' + formatNumberSuitable(amountValue)}
             </Text>
           </HStack>
           <Text
@@ -190,10 +187,7 @@ export const AmountInput = ({
             }}
           >
             Balance:&nbsp;
-            <AmountDisplay
-              value={balance}
-              decimals={token.metadata?.displayExponent}
-            />
+            {formatNumberSuitable(balance, token.metadata?.displayExponent)}
             {!noMaxButton && balanceDisplay.greaterThan(0) && (
               <Button variant="ghost" size="xs">
                 Max

@@ -42,6 +42,8 @@ export const Settings = ({ hideSlippageTolerance }: SettingsProps) => {
     }
   }, [slippageTolerancePercentage])
 
+  const borderColor = useColorModeValue('gray.300', 'gray.700')
+
   const inputBorderColor = (useColorModeValue as any)(
     ...(!slippageTolerancePercentage
       ? ['gray.300', 'gray.600']
@@ -64,7 +66,7 @@ export const Settings = ({ hideSlippageTolerance }: SettingsProps) => {
           p="4"
           borderRadius="lg"
           border="1px"
-          borderColor={useColorModeValue('gray.300', 'gray.700')}
+          borderColor={borderColor}
           spacing="4"
         >
           <Text fontSize="sm" fontWeight="500">
