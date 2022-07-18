@@ -5,10 +5,15 @@ import {
   Flex,
   HStack,
   IconButton,
+  Link,
+  Show,
+  Spacer,
+  Text,
   useColorMode,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import NextLink from 'next/link'
 import { useCallback, useState } from 'react'
 // import { MdLanguage } from 'react-icons/md'
 import { FaMoon, FaSun } from 'react-icons/fa'
@@ -77,9 +82,18 @@ export const Toolbar = () => {
       bg="bg-canvas"
       boxShadow={useColorModeValue('sm', 'sm-dark')}
     >
-      <Flex justify="end" align="center">
+      <Flex align="center">
+        <Show above="md">
+          <Text>🎉🎉🎉 Testnet is live.</Text>
+        </Show>
+        <Spacer />
         <HStack spacing="4">
           <ButtonGroup variant="ghost" spacing="1">
+            <NextLink href="/faucet" passHref>
+              <Button as={Link} _hover={{ textDecoration: 'unset' }}>
+                Get LION
+              </Button>
+            </NextLink>
             {/*<IconButton*/}
             {/*  icon={<MdLanguage fontSize="1.25rem" />}*/}
             {/*  aria-label="Language"*/}
