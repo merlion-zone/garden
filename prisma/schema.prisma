@@ -11,3 +11,8 @@ model User {
   address   String   @unique
   updatedAt DateTime
 }
+
+model Ip {
+  address   String   @unique
+  updatedAt DateTime
+}
