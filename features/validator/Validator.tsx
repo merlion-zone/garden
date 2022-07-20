@@ -35,7 +35,7 @@ export const Validator: FC = () => {
           templateColumns={{ base: 'repeat(1, 1fr)', lg: 'repeat(5, 1fr)' }}
           gap="8"
         >
-          <GridItem colSpan={3}>
+          <GridItem colSpan={{ base: 1, lg: 3 }}>
             <Stack spacing="8">
               <Info validatorAddress={address} />
               <Commission validatorAddress={address} />
@@ -43,7 +43,7 @@ export const Validator: FC = () => {
               <Address />
             </Stack>
           </GridItem>
-          <GridItem colSpan={2}>
+          <GridItem colSpan={{ base: 1, lg: 2 }}>
             <Stack spacing="8">
               <Delegation validatorAddress={address} />
               <Rewards validatorAddress={address} />
