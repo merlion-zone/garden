@@ -12,6 +12,7 @@ import {
 import { AmountDisplay } from '@/components/NumberDisplay'
 import config from '@/config'
 import { useAccountAddress } from '@/hooks'
+import { useMerlionQuery } from '@/hooks/query'
 
 import { useValidators } from './hooks'
 
@@ -21,6 +22,7 @@ export function Stats() {
 
   const boxShadow = useColorModeValue('sm', 'sm-dark')
   const headingSize = useBreakpointValue({ base: 'sm', md: 'md' })
+  const { data: infoData } = useMerlionQuery('tendermint', 'abciInfo')
 
   const totalRewards = data
     .map(({ rewards }) => Number(rewards.amount))
@@ -41,7 +43,7 @@ export function Stats() {
           <Text fontSize="sm" color="muted">
             Height
           </Text>
-          <Heading size={headingSize}>10000</Heading>
+          <Heading size={headingSize}>{infoData?.lastBlockHeight}</Heading>
         </Stack>
       </Box>
       <Box
@@ -53,7 +55,7 @@ export function Stats() {
       >
         <Stack>
           <Text fontSize="sm" color="muted">
-            Bonded coins
+            Bonded Coins
           </Text>
           <HStack alignItems="baseline">
             <Heading size={headingSize}>
