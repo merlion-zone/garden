@@ -24,8 +24,8 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { TransactionToast } from '@/components/TransactionToast'
 import config from '@/config'
-import { useAccountAddress, useConnectWallet, useValidators } from '@/hooks'
-import { useQueryDelegation } from '@/hooks/query'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
+import { useQueryDelegation, useQueryValidators } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 import { formatCoin, parseCoin } from '@/utils'
@@ -44,7 +44,7 @@ export function RedelegateModal({
   ...props
 }: RedelegateModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { data } = useValidators()
+  const { data } = useQueryValidators('BOND_STATUS_BONDED')
   const { account, connected } = useConnectWallet()
   const address = useAccountAddress()
   const toast = useToast()

@@ -17,8 +17,8 @@ import { useMemo, useState } from 'react'
 
 import { WithdrawAllModal } from '@/components/TransactionModals'
 import { TransactionToast } from '@/components/TransactionToast'
-import { BondStatusString, useAccountAddress, useConnectWallet } from '@/hooks'
-import { useQueryDelegatorValidators } from '@/hooks/query'
+import { useAccountAddress, useConnectWallet } from '@/hooks'
+import { BondStatusString, useQueryDelegatorValidators } from '@/hooks/query'
 import { useSendCosmTx } from '@/hooks/useSendCosmTx'
 import { useToast } from '@/hooks/useToast'
 
