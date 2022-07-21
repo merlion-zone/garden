@@ -1,4 +1,5 @@
 import { Coin, Dec, Events } from '@merlionzone/merlionjs'
+import { Pagination } from '@merlionzone/merlionjs/dist/queryclient'
 import { DenomUnit, Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
 import { ProposalStatus } from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 import { useCallback, useMemo } from 'react'
@@ -505,6 +506,13 @@ export function useQueryDelegatorRewardsMultiple(params: [string, string][]) {
 
 export function useQueryValidatorMissCounters(params: [string][]) {
   return useMerlionQueryMultiple('oracle', 'missCounter', params)
+}
+
+export function useQueryValidatorDelegations(
+  address?: string,
+  pagination?: Pagination
+) {
+  return useMerlionQuery('staking', 'validatorDelegations', address, pagination)
 }
 
 export function useQueryDelegation(

@@ -7,7 +7,7 @@ import {
   Address,
   Commission,
   Delegation,
-  Delegators,
+  Delegations,
   Info,
   Rewards,
 } from './components'
@@ -39,7 +39,7 @@ export const Validator: FC = () => {
             <Stack spacing="8">
               <Info validatorAddress={address} />
               <Commission validatorAddress={address} />
-              <Delegators validatorAddress={address} />
+              <Delegations validatorAddress={address} />
               <Address />
             </Stack>
           </GridItem>

@@ -11,25 +11,19 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { typeUrls } from '@merlionzone/merlionjs'
 import { useMemo, useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
 
 import { WithdrawAllModal } from '@/components/TransactionModals'
-import { TransactionToast } from '@/components/TransactionToast'
-import { useAccountAddress, useConnectWallet, useMerlionClient } from '@/hooks'
+import { useAccountAddress } from '@/hooks'
 import { useQueryDelegatorValidators } from '@/hooks/query'
-import { useToast } from '@/hooks/useToast'
 
 import { Stats } from './Stats'
 import { ValidatorTable } from './Table'
 
 export const Staking = () => {
-  const toast = useToast()
-  const merlionClient = useMerlionClient()
-  const [keyword, setKeyword] = useState('')
-  const { connected } = useConnectWallet()
   const address = useAccountAddress()
+  const [keyword, setKeyword] = useState('')
   const { data } = useQueryDelegatorValidators(address?.mer())
   const validatorAddresses = useMemo(
     () => data?.validators.map(({ operatorAddress }) => operatorAddress) ?? [],
@@ -39,38 +33,6 @@ export const Staking = () => {
     () => data && data.validators.length > 0,
     [data]
   )
-
-  const onWithdraw = () => {
-    if (!connected) {
-      toast({
-        title: 'Please connect wallet first',
-        status: 'warning',
-      })
-      return
-    }
-
-    if (!hasValidators) return
-
-    const msgs = data!.validators.map(({ operatorAddress }) => ({
-      typeUrl: typeUrls.MsgWithdrawDelegatorReward,
-      value: {
-        delegatorAddress: address!.mer(),
-        validatorAddress: operatorAddress,
-      },
-    }))
-
-    const receiptPromise = merlionClient!.signAndBroadcast(address!.mer(), msgs)
-
-    toast({
-      render: ({ onClose }) => (
-        <TransactionToast
-          title="Withdraw all rewards"
-          receiptPromise={receiptPromise}
-          onClose={onClose}
-        />
-      ),
-    })
-  }
 
   return (
     <>

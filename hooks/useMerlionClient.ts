@@ -4,11 +4,9 @@ import {
   DistributionExtension,
   GasPrice,
   QueryClient,
-  StakingExtension,
   setupAuthExtension,
   setupBankExtension,
   setupDistributionExtension,
-  setupStakingExtension,
 } from '@cosmjs/stargate'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 import {
@@ -16,12 +14,14 @@ import {
   MakerExtension,
   MerlionClient,
   OracleExtension,
+  StakingExtension,
   TendermintExtension,
   TxExtension,
   VeExtension,
   setupGovExtension,
   setupMakerExtension,
   setupOracleExtension,
+  setupStakingExtension,
   setupTendermintExtension,
   setupTxExtension,
   setupVeExtension,
