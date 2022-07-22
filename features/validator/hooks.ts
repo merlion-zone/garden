@@ -1,20 +1,16 @@
 import { Dec } from '@merlionzone/merlionjs'
-import { useQuery } from 'react-query'
 
-import { useMerlionQueryClient } from '@/hooks'
+import {
+  useQueryDelegation,
+  useQueryValidator,
+  useQueryValidatorDelegations,
+} from '@/hooks/query'
 import { getTime } from '@/pages/proposal/utils'
 
 export function useValidator(address?: string) {
-  const queryClient = useMerlionQueryClient()
+  const result = useQueryValidator(address)
 
-  return useQuery(
-    ['validator', address],
-    async () => {
-      const { validator } = await queryClient!.staking.validator(address!)
-      return validator
-    },
-    { enabled: !!queryClient && !!address }
-  )
+  return { ...result, data: result.data?.validator }
 }
 
 export function useCommission(address?: string) {
@@ -48,34 +44,13 @@ export function useCommission(address?: string) {
 }
 
 export function useDelegations(address?: string) {
-  const queryClient = useMerlionQueryClient()
+  const result = useQueryValidatorDelegations(address)
 
-  return useQuery(
-    ['validator', 'delegations', address],
-    async () => {
-      const { delegationResponses } =
-        await queryClient!.staking.validatorDelegations(address!)
-      return delegationResponses
-    },
-    { enabled: !!queryClient && !!address }
-  )
+  return { ...result, data: result.data?.delegationResponses }
 }
 
-export function useDelegation(
-  delegator?: string | null,
-  validator?: string | null
-) {
-  const queryClient = useMerlionQueryClient()
+export function useDelegation(delegator?: string, validator?: string) {
+  const result = useQueryDelegation(delegator, validator)
 
-  return useQuery(
-    ['delegation', delegator, validator],
-    async () => {
-      const { delegationResponse } = await queryClient!.staking.delegation(
-        delegator!,
-        validator!
-      )
-      return delegationResponse
-    },
-    { enabled: !!queryClient && !!delegator && !!validator }
-  )
+  return { ...result, data: result.data?.delegationResponse }
 }

@@ -5,11 +5,7 @@ import { useCallback, useMemo } from 'react'
 import useSWR, { Fetcher } from 'swr'
 
 import config from '@/config'
-import {
-  BondStatusString,
-  QueryExtensions,
-  useMerlionQueryClient,
-} from '@/hooks'
+import { QueryExtensions, useMerlionQueryClient } from '@/hooks'
 import { formatNumber } from '@/utils'
 
 export function useMerlionQuery<
@@ -482,16 +478,31 @@ export function useQueryPool() {
   return useMerlionQuery('staking', 'pool')
 }
 
+export type BondStatusString =
+  | ''
+  | 'BOND_STATUS_UNBONDED'
+  | 'BOND_STATUS_UNBONDING'
+  | 'BOND_STATUS_BONDED'
+  | 'UNRECOGNIZED'
+
 export function useQueryValidators(status: BondStatusString) {
   // @ts-ignore
   return useMerlionQuery('staking', 'validators', status)
+}
+
+export function useQueryValidator(address?: string) {
+  return useMerlionQuery('staking', 'validator', address)
+}
+
+export function useQueryValidatorDelegations(address?: string) {
+  return useMerlionQuery('staking', 'validatorDelegations', address)
 }
 
 export function useQueryDelegatorValidators(address?: string) {
   return useMerlionQuery('staking', 'delegatorValidators', address)
 }
 
-export function useQueryValidatorRewardsMultiple(params: [string][]) {
+export function useQueryValidatorRewardsMultiple(params?: [string][]) {
   return useMerlionQueryMultiple(
     'distribution',
     'validatorOutstandingRewards',
@@ -503,7 +514,7 @@ export function useQueryDelegatorRewardsMultiple(params: [string, string][]) {
   return useMerlionQueryMultiple('distribution', 'delegationRewards', params)
 }
 
-export function useQueryValidatorMissCounters(params: [string][]) {
+export function useQueryValidatorMissCounters(params?: [string][]) {
   return useMerlionQueryMultiple('oracle', 'missCounter', params)
 }
 
@@ -528,11 +539,11 @@ export function useQueryProposals(
   depositor: string,
   voter: string,
   pagination: {
-    key?: Uint8Array | undefined
-    offset?: string | number | undefined
-    limit?: string | number | undefined
-    countTotal?: boolean | undefined
-    reverse?: boolean | undefined
+    key?: Uint8Array
+    offset?: string | number
+    limit?: string | number
+    countTotal?: boolean
+    reverse?: boolean
   } = {}
 ) {
   return useMerlionQuery(

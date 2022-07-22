@@ -1,10 +1,15 @@
 import { Dec } from '@merlionzone/merlionjs'
 import { useMemo } from 'react'
-import { useQueries, useQuery } from 'react-query'
 
-import config from '@/config'
 import { LION } from '@/constants'
-import { BondStatusString, useMerlionQueryClient, useValidators } from '@/hooks'
+import {
+  BondStatusString,
+  useOracleParams,
+  useQueryPool,
+  useQueryValidatorMissCounters,
+  useQueryValidatorRewardsMultiple,
+  useQueryValidators,
+} from '@/hooks/query'
 
 export interface Validator {
   operatorAddress: string
@@ -25,45 +30,22 @@ export interface Validator {
 }
 
 export function useValidatorsData(status: BondStatusString) {
-  const queryClient = useMerlionQueryClient()
+  const { data: poolData } = useQueryPool()
+  const isPoolLoading = !poolData
 
-  const { data: poolData, isLoading: isPoolLoading } = useQuery(
-    ['pool'],
-    async () => queryClient?.staking.pool(),
-    {
-      enabled: !!queryClient,
-    }
+  const { data: oracleParamsData } = useOracleParams()
+  const isOracleParamsLoading = !oracleParamsData
+
+  const { data: validatorsData } = useQueryValidators(status)
+  const isValidatorsLoading = !validatorsData
+
+  const missCounters = useQueryValidatorMissCounters(
+    validatorsData?.validators.map(({ operatorAddress }) => [operatorAddress])
   )
-  const { data: oracleParamsData, isLoading: isOracleParamsLoading } = useQuery(
-    ['oracleParams'],
-    async () => queryClient!.oracle.params(),
-    {
-      enabled: !!queryClient,
-    }
+
+  const validatorRewards = useQueryValidatorRewardsMultiple(
+    validatorsData?.validators.map(({ operatorAddress }) => [operatorAddress])
   )
-  const { data: validatorsData, isLoading: isValidatorsLoading } =
-    useValidators(status)
-
-  const missCounters = useQueries({
-    queries:
-      validatorsData?.validators.map(({ operatorAddress }) => ({
-        queryKey: ['missCounter', operatorAddress],
-        queryFn: async () => queryClient!.oracle.missCounter(operatorAddress),
-        enabled: !!queryClient,
-      })) ?? [],
-  })
-
-  const validatorRewards = useQueries({
-    queries:
-      validatorsData?.validators.map(({ operatorAddress }) => ({
-        queryKey: ['validatorRewards', operatorAddress],
-        queryFn: async () =>
-          queryClient!.distribution.validatorOutstandingRewards(
-            operatorAddress
-          ),
-        enabled: !!queryClient,
-      })) ?? [],
-  })
 
   const data: Validator[] = useMemo(() => {
     const bondedTokens = poolData?.pool?.bondedTokens
@@ -80,7 +62,7 @@ export function useValidatorsData(status: BondStatusString) {
               .toNumber()
           : null
 
-        const missCounter = missCounters[index].data
+        const missCounter = missCounters.data?.[index]
         const uptime =
           slashWindow !== undefined && missCounter !== undefined
             ? 1 -
@@ -89,7 +71,7 @@ export function useValidatorsData(status: BondStatusString) {
                 .toNumber()
             : null
 
-        const rewardsAmount = validatorRewards[index].data?.rewards?.rewards
+        const rewardsAmount = validatorRewards.data?.[index]?.rewards?.rewards
           .map(({ amount, denom }) => ({
             amount: Dec.fromProto(amount),
             denom,

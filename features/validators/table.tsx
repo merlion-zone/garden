@@ -35,7 +35,7 @@ import { FaBoxOpen, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { FiSearch } from 'react-icons/fi'
 
 import { DecDisplay } from '@/components/NumberDisplay'
-import { BondStatusString } from '@/hooks'
+import { BondStatusString } from '@/hooks/query'
 
 import { Validator, useValidatorsData } from './hooks'
 
@@ -126,7 +126,9 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
         cell: ({ getValue, row }) => (
           <Skeleton
             isLoaded={
-              !missCounters[row.index]?.isLoading && !isOracleParamsLoading
+              missCounters.data?.[row.index] !== undefined &&
+              missCounters.data?.[row.index] !== null &&
+              !isOracleParamsLoading
             }
           >
             <Text color="muted" textAlign="end">
@@ -140,7 +142,7 @@ export function ValidatorTable({ status }: ValidatorTableProps) {
         cell: ({ getValue, row }) => (
           <Skeleton
             isLoaded={
-              !isValidatorsLoading && !validatorRewards[row.index]?.isLoading
+              !!validatorRewards.data?.[row.index] && !isValidatorsLoading
             }
           >
             <Text color="muted" textAlign="end">
