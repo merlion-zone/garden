@@ -1,9 +1,8 @@
 import { Window as KeplrWindow } from '@keplr-wallet/types'
-
-export {}
+import { MetaMaskInpageProvider } from '@metamask/providers'
 
 declare global {
   interface Window extends KeplrWindow {
-    ethereum: any
+    ethereum?: MetaMaskInpageProvider
   }
 }
