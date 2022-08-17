@@ -1,12 +1,5 @@
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Button,
-  HStack,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,7 +8,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useRef } from 'react'
 
 import { switchEthereumChain, useConnectWallet } from '@/hooks'
 

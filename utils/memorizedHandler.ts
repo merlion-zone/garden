@@ -1,6 +1,6 @@
 const memorizedHandlers = new Map<
   string,
-  { memorized: Function; handler: Function }
+  { memorized: (...args: any[]) => void; handler: Function }
 >()
 
 export function setMemorizedHandler(event: string, handler: Function) {
@@ -17,6 +17,8 @@ export function setMemorizedHandler(event: string, handler: Function) {
   }
 }
 
-export function getMemorizedHandler(event: string): Function | undefined {
+export function getMemorizedHandler(
+  event: string
+): ((...args: any[]) => void) | undefined {
   return memorizedHandlers.get(event)?.memorized
 }

@@ -1,9 +1,11 @@
 import {
+  Avatar,
   Box,
   Button,
   ButtonGroup,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Link,
   Show,
@@ -25,6 +27,7 @@ import { KeplrIcon } from '@/components/Icons/KeplrIcon'
 import { MetaMaskIcon } from '@/components/Icons/MetaMaskIcon'
 import { WrongNetworkAlert } from '@/components/WrongNetworkAlert'
 import { useConnectWallet } from '@/hooks'
+import { SUPPORTED_NETWORKS } from '@/pages/bridge/networks'
 import { shortenAddress } from '@/utils'
 
 export const Toolbar = () => {
@@ -45,7 +48,7 @@ export const Toolbar = () => {
     onClose: onWrongNetworkClose,
   } = useDisclosure()
 
-  const { walletType, connected, account, onConnect, onDisconnect } =
+  const { walletType, connected, account, onConnect, onDisconnect, chainID } =
     useConnectWallet()
   useEffectOnce(() => {
     onConnect(null)
@@ -73,6 +76,8 @@ export const Toolbar = () => {
     setIsConnectWalletBack(false)
     setTimeout(onAccountModalOpen, 200)
   }, [onAccountModalOpen, onConnectWalletClose])
+
+  const NetworkIcon = SUPPORTED_NETWORKS.find((n) => n.id === chainID)?.icon
 
   return (
     <Box
@@ -112,21 +117,29 @@ export const Toolbar = () => {
               />
             )}
           </ButtonGroup>
-          <ButtonGroup variant="ghost">
+          <HStack spacing="4">
             {connected === null ? (
               <Button variant="solid" onClick={onConnectWalletOpen}>
                 Connect
               </Button>
             ) : connected ? (
-              <Button
-                leftIcon={
-                  walletType === 'metamask' ? <MetaMaskIcon /> : <KeplrIcon />
-                }
-                variant="outline"
-                onClick={onAccountModalOpen}
-              >
-                {walletType === 'metamask' ? ethAddr : merAddr}
-              </Button>
+              <>
+                <Avatar
+                  size="sm"
+                  fontSize="2xl"
+                  bg="transparent"
+                  icon={<Icon as={NetworkIcon} />}
+                />
+                <Button
+                  leftIcon={
+                    walletType === 'metamask' ? <MetaMaskIcon /> : <KeplrIcon />
+                  }
+                  variant="outline"
+                  onClick={onAccountModalOpen}
+                >
+                  {walletType === 'metamask' ? ethAddr : merAddr}
+                </Button>
+              </>
             ) : (
               <Button
                 variant="solid"
@@ -136,7 +149,7 @@ export const Toolbar = () => {
                 Wrong network
               </Button>
             )}
-          </ButtonGroup>
+          </HStack>
         </HStack>
       </Flex>
 

@@ -1,19 +1,22 @@
 import { useCallbackRef } from '@chakra-ui/hooks'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Web3Provider } from '@ethersproject/providers'
-import { Address, EIP712Signer, Web3EIP712Signer } from '@merlionzone/merlionjs'
+import {
+  Address,
+  ChainId,
+  EIP712Signer,
+  Web3EIP712Signer,
+} from '@merlionzone/merlionjs'
 import detectEthereumProvider from '@metamask/detect-provider'
+import { MetaMaskInpageProvider } from '@metamask/providers'
 import { ethers } from 'ethers'
 import { atom, useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import { useCallback, useEffect, useRef } from 'react'
 
 import config from '@/config'
-import {
-  addEthereumChainParams,
-  keplrChainInfo,
-  switchEthereumChainParams,
-} from '@/config/chainInfo'
+import { addEthereumChainParams, keplrChainInfo } from '@/config/chainInfo'
+import { SUPPORTED_NETWORKS } from '@/pages/bridge/networks'
 import { promiseOnce } from '@/utils'
 import {
   getMemorizedHandler,
@@ -32,11 +35,6 @@ const chainIDAtom = atom<number | null>(null)
 const signerAtom = atom<OfflineSigner | EIP712Signer | null>(null)
 const accountAtom = atom<string | null>(null)
 
-let connSignal = 0
-const incConnSignal = () => {
-  ++connSignal
-}
-
 const isSetupAvailableAtom = atom<boolean>(true)
 
 export function useConnectWallet(): {
@@ -48,7 +46,7 @@ export function useConnectWallet(): {
   chainID: number | null
   signer: OfflineSigner | EIP712Signer | null
   account: string | null
-  onConnect: (walletType: WalletType | null) => void
+  onConnect: (walletType: WalletType | null, chainID?: ChainId) => void
   onDisconnect: () => void
 } {
   const [walletType, setWalletType] = useAtom(walletTypeAtom)
@@ -67,7 +65,10 @@ export function useConnectWallet(): {
       // window.location.reload()
 
       const chainID = Number(chainIDStr)
-      setConnected(chainID === config.getChainID().eip155)
+      const network = SUPPORTED_NETWORKS.find(
+        (network) => network.id === chainID
+      )
+      setConnected(!!network)
       setChainID(chainID)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,48 +110,10 @@ export function useConnectWallet(): {
     setMemorizedHandler('keplr_keystorechange', handleKeplrAccountsChanged)
   }, [handleKeplrAccountsChanged])
 
-  const addOrRemoveListeners = useCallback(
-    (on: boolean, walletType?: WalletType) => {
-      const handleEthereumChainChanged = getMemorizedHandler('chainChanged')
-      const handleEthereumAccountsChanged =
-        getMemorizedHandler('accountsChanged')
-      const handleKeplrAccountsChanged = getMemorizedHandler(
-        'keplr_keystorechange'
-      )
-
-      if (!on) {
-        window.ethereum?.removeListener(
-          'chainChanged',
-          handleEthereumChainChanged
-        )
-        window.ethereum?.removeListener(
-          'accountsChanged',
-          handleEthereumAccountsChanged
-        )
-        window.removeEventListener(
-          'keplr_keystorechange',
-          handleKeplrAccountsChanged as any
-        )
-        return
-      }
-
-      if (walletType === 'metamask') {
-        window.ethereum?.on('chainChanged', handleEthereumChainChanged)
-        window.ethereum?.on('accountsChanged', handleEthereumAccountsChanged)
-      } else if (walletType === 'keplr') {
-        window.addEventListener(
-          'keplr_keystorechange',
-          handleKeplrAccountsChanged as any
-        )
-      }
-    },
-    []
-  )
-
   const disconnect = useCallback(
     (willConnect: boolean) => {
       if (!willConnect) {
-        addOrRemoveListeners(false)
+        removeListeners()
         setWalletType(false)
       }
       setWeb3Provider(null)
@@ -165,13 +128,11 @@ export function useConnectWallet(): {
       setChainID,
       setSigner,
       setAccount,
-      addOrRemoveListeners,
       setWalletType,
     ]
   )
 
   const onDisconnect = useCallbackRef(() => {
-    incConnSignal()
     disconnect(false)
   })
 
@@ -179,18 +140,13 @@ export function useConnectWallet(): {
   const promiseResolverQueueRef = useRef<(Function | undefined)[]>([])
 
   const connect = useCallback(
-    (newWalletType: WalletType | null) => {
+    (newWalletType: WalletType | null, chainID = config.getChainID()) => {
       if (typeof window === 'undefined') {
         return
       }
 
-      addOrRemoveListeners(false)
+      removeListeners()
       disconnect(true)
-      incConnSignal()
-      const thisConnSignal = connSignal
-      const cancelled = () => {
-        return connSignal !== thisConnSignal
-      }
 
       if (!newWalletType && walletType) {
         newWalletType = walletType
@@ -202,105 +158,13 @@ export function useConnectWallet(): {
         setWalletType(newWalletType)
       }
 
-      const setupMetaMask = async () => {
-        const ethProvider = await detectEthereumProvider()
-        if (!ethProvider) {
-          console.error('No ethereum wallet detected')
-          return
-        }
-        if (ethProvider !== window.ethereum) {
-          console.error('Do you have multiple ethereum wallets installed?')
-          return
-        }
-
-        const chainID = Number(
-          await window.ethereum.request({ method: 'eth_chainId' })
-        )
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const signer = new Web3EIP712Signer(provider) // TODO
-
-        if (cancelled()) return
-        if (chainID !== config.getChainID().eip155) {
-          await switchEthereumChain()
-        }
-
-        if (cancelled()) return
-        const onConnected = (account: string) => {
-          addOrRemoveListeners(true, 'metamask')
-          setWeb3Provider(provider)
-          setConnected(chainID === config.getChainID().eip155)
-          setChainID(chainID)
-          setSigner(signer)
-          setAccount(account)
-        }
-
-        try {
-          const accounts = await window.ethereum.request({
-            method: 'eth_accounts',
-          })
-          if (cancelled()) return
-          if (accounts.length) {
-            // account connected
-            onConnected(accounts[0])
-            return
-          }
-        } catch (err) {
-          console.error(err)
-        }
-
-        // request account connection
-        try {
-          const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts',
-          })
-          if (cancelled()) return
-          if (accounts.length) {
-            onConnected(accounts[0])
-          }
-        } catch (err) {
-          if ((err as any).code === 4001) {
-            // EIP-1193 userRejectedRequest error
-            // If this happens, the user rejected the connection request.
-            console.warn('Please connect to MetaMask')
-          } else {
-            console.error(err)
-          }
-        }
-      }
-
-      const setupKeplr = async () => {
-        if (!window.keplr) {
-          console.error('No keplr wallet detected')
-          return
-        }
-
-        if (cancelled()) return
-        // https://docs.keplr.app/api/suggest-chain.html
-        await window.keplr.experimentalSuggestChain(keplrChainInfo)
-        if (cancelled()) return
-        // https://docs.keplr.app/api/cosmjs.html
-        await window.keplr.enable(config.chainID)
-
-        const signer = window.getOfflineSigner!(config.chainID)
-        const accounts = await signer.getAccounts()
-
-        if (cancelled()) return
-        addOrRemoveListeners(true, 'keplr')
-        setConnected(true)
-        setChainID(config.getChainID().eip155)
-        setSigner(signer)
-        if (accounts.length) {
-          setAccount(accounts[0].address)
-        }
-      }
-
-      let setup: () => Promise<void>
+      let setup: (...args: any[]) => Promise<Connection>
       switch (newWalletType) {
         case 'metamask':
-          setup = setupMetaMask
+          setup = connectMetaMask
           break
         case 'keplr':
-          setup = setupKeplr
+          setup = connectKeplr
           break
         default:
           throw new Error(`Wallet type ${newWalletType} not supported`)
@@ -309,21 +173,34 @@ export function useConnectWallet(): {
       promiseOnce(
         [isSetupAvailable, setIsSetupAvailable],
         promiseResolverQueueRef,
-        setup()
-      ).catch(console.error)
+        setup(chainID)
+      )
+        .then(({ providerOrSigner, chainId, account }) => {
+          addListeners(newWalletType!)
+          if (newWalletType === 'metamask') {
+            setWeb3Provider(providerOrSigner as any)
+          }
+          const network = SUPPORTED_NETWORKS.find(
+            (network) => network.id === chainId
+          )
+          setConnected(!!account && !!network)
+          setChainID(chainId)
+          setSigner(providerOrSigner as any)
+          setAccount(account ?? null)
+        })
+        .catch(console.error)
     },
     [
-      addOrRemoveListeners,
       disconnect,
-      walletType,
+      isSetupAvailable,
+      setAccount,
+      setChainID,
+      setConnected,
+      setIsSetupAvailable,
+      setSigner,
       setWalletType,
       setWeb3Provider,
-      setConnected,
-      setChainID,
-      setSigner,
-      setAccount,
-      isSetupAvailable,
-      setIsSetupAvailable,
+      walletType,
     ]
   )
 
@@ -341,20 +218,25 @@ export function useConnectWallet(): {
   }
 }
 
-export async function switchEthereumChain() {
+export async function switchEthereumChain(
+  chainID: number | string = config.getChainID().eip155
+) {
   if (typeof window === 'undefined' || !window.ethereum) {
     return
   }
   try {
-    await window.ethereum.request({
+    await window.ethereum.request?.({
       method: 'wallet_switchEthereumChain',
-      params: [switchEthereumChainParams],
+      params: [{ chainId: ethers.utils.hexlify(Number(chainID)) }],
     })
   } catch (switchError) {
-    if ((switchError as any).code === 4902) {
+    if (
+      (switchError as any).code === 4902 &&
+      Number(chainID) === config.getChainID().eip155
+    ) {
       // the chain has not been added to MetaMask
       try {
-        await window.ethereum.request({
+        await window.ethereum.request?.({
           method: 'wallet_addEthereumChain',
           params: [addEthereumChainParams],
         })
@@ -370,4 +252,86 @@ export async function switchEthereumChain() {
 export function useAccountAddress(): Address | undefined {
   const { account } = useConnectWallet()
   return account ? new Address(account) : undefined
+}
+
+interface Connection {
+  providerOrSigner: EIP712Signer | OfflineSigner
+  account?: string
+  chainId: number
+}
+
+async function connectMetaMask(chainId: ChainId): Promise<Connection> {
+  const provider: MetaMaskInpageProvider = (await detectEthereumProvider({
+    mustBeMetaMask: true,
+  })) as any
+
+  const accounts = await provider.request<string[]>({
+    method: 'eth_requestAccounts',
+  })
+  const currentChainId = await provider.request<string>({
+    method: 'eth_chainId',
+  })
+
+  if (Number(currentChainId) !== chainId.eip155) {
+    await switchEthereumChain(chainId.eip155)
+  }
+
+  return {
+    providerOrSigner: new Web3EIP712Signer(
+      new ethers.providers.Web3Provider(provider as any)
+    ),
+    account: accounts?.[0],
+    chainId: chainId.eip155,
+  }
+}
+
+async function connectKeplr(): Promise<Connection> {
+  if (!window.keplr) {
+    throw new Error('No keplr wallet detected')
+  }
+  // https://docs.keplr.app/api/suggest-chain.html
+  await window.keplr.experimentalSuggestChain(keplrChainInfo)
+  // https://docs.keplr.app/api/cosmjs.html
+  await window.keplr.enable(config.chainID)
+
+  const signer = window.getOfflineSigner!(config.chainID)
+  const accounts = await signer.getAccounts()
+
+  return {
+    providerOrSigner: signer,
+    account: accounts[0].address,
+    chainId: config.getChainID().eip155,
+  }
+}
+
+function addListeners(walletType: WalletType) {
+  const handleEthereumChainChanged = getMemorizedHandler('chainChanged')
+  const handleEthereumAccountsChanged = getMemorizedHandler('accountsChanged')
+  const handleKeplrAccountsChanged = getMemorizedHandler('keplr_keystorechange')
+
+  if (walletType === 'metamask') {
+    window.ethereum?.on('chainChanged', handleEthereumChainChanged!)
+    window.ethereum?.on('accountsChanged', handleEthereumAccountsChanged!)
+  } else if (walletType === 'keplr') {
+    window.addEventListener(
+      'keplr_keystorechange',
+      handleKeplrAccountsChanged as any
+    )
+  }
+}
+
+function removeListeners() {
+  const handleEthereumChainChanged = getMemorizedHandler('chainChanged')
+  const handleEthereumAccountsChanged = getMemorizedHandler('accountsChanged')
+  const handleKeplrAccountsChanged = getMemorizedHandler('keplr_keystorechange')
+
+  window.ethereum?.removeListener('chainChanged', handleEthereumChainChanged!)
+  window.ethereum?.removeListener(
+    'accountsChanged',
+    handleEthereumAccountsChanged!
+  )
+  window.removeEventListener(
+    'keplr_keystorechange',
+    handleKeplrAccountsChanged as any
+  )
 }
